@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qiukai.mapper.CartMapper">
+
+    <resultMap id="cartResultMap" type="com.qiukai.entity.Cart">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="merchantId" column="merchant_id"/>
+        <result property="dishId" column="dish_id"/>
+        <result property="dishName" column="dish_name"/>
+        <result property="dishImage" column="dish_image"/>
+        <result property="basePrice" column="base_price"/>
+        <result property="unitPrice" column="unit_price"/>
+        <result property="qty" column="qty"/>
+        <result property="optionsText" column="options_text"/>
+        <result property="optionsSnapshot" column="options_snapshot"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectByUserAndMerchant" resultMap="cartResultMap">
+        SELECT id, user_id, merchant_id, dish_id, dish_name, dish_image, base_price, unit_price,
+               qty, options_text, options_snapshot, create_time, update_time
+        FROM cart WHERE user_id = #{userId} AND merchant_id = #{merchantId}
+        ORDER BY create_time ASC
+    </select>
+
+    <select id="selectByUserId" resultMap="cartResultMap">
+        SELECT id, user_id, merchant_id, dish_id, dish_name, dish_image, base_price, unit_price,
+               qty, options_text, options_snapshot, create_time, update_time
+        FROM cart WHERE user_id = #{userId} ORDER BY create_time ASC
+    </select>
+
+    <select id="selectExact" resultMap="cartResultMap">
+        SELECT id, user_id, merchant_id, dish_id, dish_name, dish_image, base_price, unit_price,
+               qty, options_text, options_snapshot, create_time, update_time
+        FROM cart
+        WHERE user_id = #{userId} AND merchant_id = #{merchantId} AND dish_id = #{dishId}
+        <choose>
+            <when test="optionsSnapshot != null">AND options_snapshot = #{optionsSnapshot}</when>
+            <otherwise>AND options_snapshot IS NULL</otherwise>
+        </choose>
+        LIMIT 1
+    </select>
+
+    <insert id="insert" parameterType="com.qiukai.entity.Cart" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cart (user_id, merchant_id, dish_id, dish_name, dish_image, base_price, unit_price, qty, options_text, options_snapshot)
+        VALUES (#{userId}, #{merchantId}, #{dishId}, #{dishName}, #{dishImage}, #{basePrice}, #{unitPrice}, #{qty}, #{optionsText}, #{optionsSnapshot})
+    </insert>
+
+    <update id="updateQty">
+        UPDATE cart SET qty = #{qty} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM cart WHERE id = #{id} AND user_id = #{userId}
+    </delete>
+
+    <delete id="deleteByUserAndMerchant">
+        DELETE FROM cart WHERE user_id = #{userId} AND merchant_id = #{merchantId}
+    </delete>
+
+</mapper>

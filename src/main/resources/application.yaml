@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: kazi_takeaway_project
+
+  # 文件上传配置
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 10MB
+
+  # 数据库配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/kazi_takeaway_project?useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456huo
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  #mybatis相关配置
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath:mapper/*.xml

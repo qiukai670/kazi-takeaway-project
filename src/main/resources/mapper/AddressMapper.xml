@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qiukai.mapper.AddressMapper">
+
+    <resultMap id="addressResultMap" type="com.qiukai.entity.Address">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="name" column="name"/>
+        <result property="phone" column="phone"/>
+        <result property="region" column="region"/>
+        <result property="detail" column="detail"/>
+        <result property="tag" column="tag"/>
+        <result property="isDefault" column="is_default"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectByUserId" resultMap="addressResultMap">
+        SELECT id, user_id, name, phone, region, detail, tag, is_default, create_time, update_time
+        FROM address WHERE user_id = #{userId} ORDER BY is_default DESC, create_time DESC
+    </select>
+
+    <select id="selectById" resultMap="addressResultMap">
+        SELECT id, user_id, name, phone, region, detail, tag, is_default, create_time, update_time
+        FROM address WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.qiukai.entity.Address" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO address (user_id, name, phone, region, detail, tag, is_default)
+        VALUES (#{userId}, #{name}, #{phone}, #{region}, #{detail}, #{tag}, #{isDefault})
+    </insert>
+
+    <update id="update" parameterType="com.qiukai.entity.Address">
+        UPDATE address
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="region != null">region = #{region},</if>
+            <if test="detail != null">detail = #{detail},</if>
+            <if test="tag != null">tag = #{tag},</if>
+            <if test="isDefault != null">is_default = #{isDefault},</if>
+        </set>
+        WHERE id = #{id} AND user_id = #{userId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM address WHERE id = #{id} AND user_id = #{userId}
+    </delete>
+
+    <update id="clearDefault">
+        UPDATE address SET is_default = 0 WHERE user_id = #{userId}
+    </update>
+
+</mapper>

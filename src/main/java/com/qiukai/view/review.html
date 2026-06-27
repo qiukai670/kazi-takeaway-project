@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>订单评价 — 咔滋外卖</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Boldonse&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #fcf7ee; --coffee: #7d2c0f; --orange: #ff8342; --brown-mid: #af4f28;
+    --beige: #f9eedc; --pale: #ffefd5; --coffee-dark: #664237; --green: #00704f; --mustard: #fed16a;
+  }
+  * { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Manrope','Noto Sans SC',sans-serif; background: var(--cream); color: var(--coffee); letter-spacing: -.01em; overflow-x: hidden; padding-bottom: 96px; }
+  .font-display { font-family: 'Boldonse','Noto Sans SC',sans-serif; font-weight: 400; letter-spacing: -.02em; line-height: 1.15; }
+  .font-cn-display { font-family: 'Noto Sans SC',sans-serif; font-weight: 900; letter-spacing: -.01em; line-height: 1.2; }
+  .nav-blur { background: rgba(252,247,238,.82); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(125,44,15,.08); }
+  .btn-primary { background: var(--orange); color: #fff; border-radius: 100px; padding: 14px 32px; font-weight: 700; transition: transform .25s cubic-bezier(.22,1,.36,1), filter .25s, box-shadow .25s; box-shadow: 0 6px 16px -4px rgba(255,131,66,.5); display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; }
+  .btn-primary:hover { transform: scale(1.02); filter: brightness(1.05); }
+  .btn-primary:active { transform: scale(.98); }
+  .btn-primary:disabled { opacity: .45; cursor: not-allowed; transform: none; filter: none; box-shadow: none; }
+  .btn-outline { border: 1.5px solid var(--coffee); color: var(--coffee); border-radius: 100px; padding: 12px 26px; font-weight: 600; transition: all .25s; display: inline-flex; align-items: center; gap: 6px; background: transparent; cursor: pointer; text-decoration: none; }
+  .btn-outline:hover { background: var(--coffee); color: #fff; }
+  .card-shadow { box-shadow: 0 1px 2px -1px rgba(0,0,0,.12), 0 4px 6px -2px rgba(0,0,0,.11), 0 16px 14px -3px rgba(0,0,0,.08); }
+  .pill-tag { background: var(--orange); color: var(--pale); border-radius: 100px; padding: 4px 12px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+  .pill-tag.mustard { background: var(--mustard); color: var(--coffee); }
+  .pill-tag.beige { background: var(--beige); color: var(--coffee); }
+
+  /* 星级评分组件 */
+  .star-rating { display: inline-flex; gap: 4px; cursor: pointer; user-select: none; touch-action: none; }
+  .star-cell { font-size: 28px; line-height: 1; color: #e0d3c0; transition: color .12s, transform .12s; }
+  .star-cell.filled { color: var(--orange); }
+  .star-cell:hover { transform: scale(1.12); }
+  .star-rating.sm .star-cell { font-size: 22px; }
+
+  /* 评价输入框 */
+  .rev-textarea { width: 100%; background: var(--cream); border: 1.5px solid var(--beige); border-radius: 14px; padding: 12px 14px; font-size: 14px; color: var(--coffee); transition: border-color .2s, box-shadow .2s; outline: none; resize: vertical; min-height: 72px; font-family: inherit; }
+  .rev-textarea:focus { border-color: var(--orange); box-shadow: 0 0 0 4px rgba(255,131,66,.12); background: #fff; }
+  .rev-textarea::placeholder { color: #c9a98a; }
+
+  /* 菜品评价卡 */
+  .dish-rev-card { background: #fff; border-radius: 20px; padding: 18px; border: 1px solid var(--beige); }
+  .dish-thumb { width: 60px; height: 60px; border-radius: 14px; object-fit: cover; flex-shrink: 0; background: var(--beige); }
+
+  /* 图片上传 */
+  .img-uploader { display: flex; gap: 10px; flex-wrap: wrap; }
+  .img-thumb { position: relative; width: 72px; height: 72px; border-radius: 12px; overflow: hidden; }
+  .img-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .img-thumb .img-del { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,.55); color: #fff; border: none; cursor: pointer; font-size: 13px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+  .img-add { width: 72px; height: 72px; border-radius: 12px; border: 1.5px dashed #d8c3a8; background: var(--cream); color: var(--brown-mid); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 11px; font-weight: 600; transition: all .2s; }
+  .img-add:hover { border-color: var(--orange); color: var(--orange); }
+  .img-add svg { width: 22px; height: 22px; }
+
+  /* 表情选择 */
+  .emoji-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .emoji-btn { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--beige); background: #fff; font-size: 18px; cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; }
+  .emoji-btn:hover { background: var(--pale); transform: scale(1.12); }
+
+  /* 底部固定栏 */
+  .submit-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 90; background: rgba(252,247,238,.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--beige); padding: 12px 16px; }
+  .submit-bar-inner { max-width: 640px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+  /* 模态框 */
+  .modal-mask { position: fixed; inset: 0; background: rgba(125,44,15,.45); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal-mask.show { display: flex; }
+  .modal-box { background: #fff; border-radius: 28px; padding: 32px 28px 28px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 24px 60px -12px rgba(0,0,0,.3); transform: scale(.94); transition: transform .3s cubic-bezier(.22,1,.36,1); }
+  .modal-mask.show .modal-box { transform: scale(1); }
+  .success-icon { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, var(--green), #009970); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+
+  /* 骨架屏 */
+  .skel { background: linear-gradient(90deg, var(--beige) 25%, var(--pale) 50%, var(--beige) 75%); background-size: 200% 100%; animation: skel 1.4s infinite; border-radius: 12px; }
+  @keyframes skel { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  /* 区块标题 */
+  .section-title { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .section-title .num { width: 28px; height: 28px; border-radius: 50%; background: var(--orange); color: #fff; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .required-dot { color: #e74c3c; margin-left: 2px; }
+
+  ::selection { background: var(--orange); color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- ===== 顶部导航 ===== -->
+<header class="nav-blur fixed top-0 left-0 right-0 z-50">
+  <nav class="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
+    <a href="index.html" class="font-display text-2xl tracking-tight" style="color: var(--coffee);">咔滋<span class="text-[10px] align-top ml-1" style="color:var(--orange);">外卖</span></a>
+    <div class="flex items-center gap-3">
+      <a href="profile.html" class="btn-outline text-sm py-2.5 px-5">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        返回订单
+      </a>
+    </div>
+  </nav>
+</header>
+
+<main class="pt-24">
+  <div class="max-w-2xl mx-auto px-4 lg:px-6" id="reviewRoot">
+
+    <!-- 加载骨架 -->
+    <div id="loadingView">
+      <div class="skel h-24 mb-4"></div>
+      <div class="skel h-12 mb-3"></div>
+      <div class="skel h-40 mb-3"></div>
+      <div class="skel h-40 mb-3"></div>
+      <p class="text-center text-sm mt-6" style="color: var(--brown-mid);">正在加载订单信息...</p>
+    </div>
+
+    <!-- 错误状态 -->
+    <div id="errorView" class="hidden text-center py-16">
+      <div class="text-5xl mb-4">😕</div>
+      <p id="errorMsg" class="font-cn-display text-lg mb-4" style="color: var(--coffee);">加载失败</p>
+      <button class="btn-outline text-sm" onclick="init()">重新加载</button>
+    </div>
+
+    <!-- 评价表单 -->
+    <div id="formView" class="hidden">
+
+      <!-- 订单信息 -->
+      <section class="bg-white rounded-[24px] p-5 mb-5 card-shadow">
+        <div class="flex items-center justify-between mb-3">
+          <span class="pill-tag mustard" id="modeBadge">评价订单</span>
+          <span class="text-xs" style="color: var(--brown-mid);" id="orderTime">-</span>
+        </div>
+        <h1 class="font-cn-display text-2xl mb-1" id="merchantName" style="color: var(--coffee);">-</h1>
+        <p class="text-sm" style="color: var(--brown-mid);">订单号：<span id="orderNo">-</span></p>
+      </section>
+
+      <!-- 菜品评价区 -->
+      <section class="mb-5" id="dishSection">
+        <div class="section-title">
+          <span class="num">1</span>
+          <h2 class="font-cn-display text-lg" style="color: var(--coffee);">菜品评价</h2>
+          <span class="text-xs" style="color: var(--brown-mid);">为每道菜打分</span>
+        </div>
+        <div id="dishList" class="space-y-3"></div>
+        <div id="dishEmpty" class="hidden text-center py-6 text-sm" style="color: var(--brown-mid);">该订单暂无菜品明细，可直接评价商家服务</div>
+      </section>
+
+      <!-- 商家评价区 -->
+      <section class="bg-white rounded-[24px] p-5 card-shadow">
+        <div class="section-title">
+          <span class="num">2</span>
+          <h2 class="font-cn-display text-lg" style="color: var(--coffee);">商家评价</h2>
+        </div>
+
+        <div class="mb-5">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-bold" style="color: var(--coffee);">整体服务<span class="required-dot">*</span></span>
+            <span class="text-xs" id="serviceHint" style="color: var(--brown-mid);">请打分</span>
+          </div>
+          <div id="serviceRating" class="star-rating" role="slider" aria-label="整体服务评分" tabindex="0"></div>
+        </div>
+
+        <div class="mb-5">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-bold" style="color: var(--coffee);">配送速度</span>
+            <span class="text-xs" id="deliveryHint" style="color: var(--brown-mid);">选填</span>
+          </div>
+          <div id="deliveryRating" class="star-rating" role="slider" aria-label="配送速度评分" tabindex="0"></div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-bold" style="color: var(--coffee);">评价内容</span>
+            <span class="text-xs" style="color: var(--brown-mid);"><span id="contentCount">0</span>/500</span>
+          </div>
+          <div class="emoji-row mb-2" id="emojiRow"></div>
+          <textarea id="merchantContent" class="rev-textarea" maxlength="500" placeholder="说说这次的用餐体验吧～（可点击上方表情快速输入）"></textarea>
+        </div>
+      </section>
+
+      <p class="text-center text-xs mt-4" style="color: var(--brown-mid);" id="draftHint"></p>
+    </div>
+
+  </div>
+</main>
+
+<!-- 底部固定提交栏 -->
+<div class="submit-bar hidden" id="submitBar">
+  <div class="submit-bar-inner">
+    <span class="text-xs hidden sm:block" style="color: var(--brown-mid);">服务评分为必填项</span>
+    <button id="submitBtn" class="btn-primary w-full sm:w-auto justify-center" disabled>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <span id="submitLabel">提交评价</span>
+    </button>
+  </div>
+</div>
+
+<!-- 成功模态 -->
+<div class="modal-mask" id="successModal">
+  <div class="modal-box">
+    <div class="success-icon">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h3 class="font-cn-display text-2xl mb-2" style="color: var(--coffee);">评价提交成功</h3>
+    <p class="text-sm mb-6" style="color: var(--brown-mid);">感谢你的反馈，期待下次为你服务～</p>
+    <div class="flex flex-col gap-3">
+      <a href="profile.html?tab=comments" class="btn-primary w-full justify-center">查看我的评价</a>
+      <a href="profile.html?tab=orders" class="btn-outline w-full justify-center">返回订单列表</a>
+    </div>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script>
+/* ====================================================================
+   评价页逻辑
+   模式：?orderId=X 新建 / ?reviewId=X 编辑
+   ==================================================================== */
+const EMOJIS = ['😊','😋','👍','❤️','🔥','⭐','😍','🤤','😐','😑'];
+const RATING_LABELS = { 1: '很差', 2: '较差', 3: '一般', 4: '满意', 5: '超赞' };
+
+let mode = 'new';            // 'new' | 'edit'
+let orderId = null;
+let reviewId = null;
+let orderInfo = null;        // 订单信息（含 items）
+let state = {
+  serviceRating: 0,
+  deliveryRating: 0,
+  content: '',
+  dishes: []                 // [{ dishId, dishName, dishImage, qty, optionsText, rating, content, images:[] }]
+};
+let serviceStars, deliveryStars;
+let draftTimer = null;
+let submitting = false;
+
+function draftKey() { return 'review_draft_' + orderId; }
+
+/* ---------- 星级组件 ---------- */
+function createStarRating(container, opts) {
+  const { value = 0, onChange } = opts;
+  let current = value, hover = 0;
+  const cells = [];
+  container.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    const s = document.createElement('span');
+    s.className = 'star-cell';
+    s.textContent = '★';
+    s.dataset.val = i;
+    s.setAttribute('role', 'button');
+    s.setAttribute('aria-label', i + '星');
+    container.appendChild(s);
+    cells.push(s);
+    s.addEventListener('mouseenter', () => { hover = i; render(); });
+    s.addEventListener('mouseleave', () => { hover = 0; render(); });
+    s.addEventListener('click', () => { current = i; onChange && onChange(current); render(); });
+  }
+  function render() {
+    const v = hover || current;
+    cells.forEach((c, idx) => c.classList.toggle('filled', idx < v));
+  }
+  function valFromX(clientX) {
+    const rect = container.getBoundingClientRect();
+    const ratio = (clientX - rect.left) / rect.width;
+    return Math.max(1, Math.min(5, Math.ceil(ratio * 5)));
+  }
+  container.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    try { container.setPointerCapture(e.pointerId); } catch (_) {}
+    const v = valFromX(e.clientX);
+    hover = v; render();
+  });
+  container.addEventListener('pointermove', e => {
+    if (e.pointerType === 'touch' || (e.pointerType === 'mouse' && e.buttons === 1)) {
+      const v = valFromX(e.clientX);
+      hover = v; render();
+      if (e.pointerType === 'touch') { current = v; onChange && onChange(current); }
+    }
+  });
+  container.addEventListener('pointerup', e => {
+    const v = valFromX(e.clientX);
+    current = v; onChange && onChange(current); hover = 0; render();
+  });
+  container.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { current = Math.min(5, current + 1); onChange && onChange(current); render(); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { current = Math.max(1, current - 1); onChange && onChange(current); render(); }
+  });
+  render();
+  return { set(v) { current = v; hover = 0; render(); }, get() { return current; } };
+}
+
+/* ---------- 表情 ---------- */
+function renderEmojiRow() {
+  const row = document.getElementById('emojiRow');
+  row.innerHTML = '';
+  EMOJIS.forEach(em => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'emoji-btn';
+    b.textContent = em;
+    b.addEventListener('click', () => {
+      const ta = document.getElementById('merchantContent');
+      ta.value += em;
+      ta.dispatchEvent(new Event('input'));
+      ta.focus();
+    });
+    row.appendChild(b);
+  });
+}
+
+/* ---------- 菜品渲染 ---------- */
+function renderDishes() {
+  const list = document.getElementById('dishList');
+  const empty = document.getElementById('dishEmpty');
+  if (!state.dishes.length) {
+    list.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  list.innerHTML = '';
+  state.dishes.forEach((d, idx) => {
+    const card = document.createElement('div');
+    card.className = 'dish-rev-card';
+    const img = d.dishImage
+      ? `<img src="${escAttr(d.dishImage)}" class="dish-thumb" alt="${escAttr(d.dishName)}" onerror="this.onerror=null;this.style.visibility='hidden'">`
+      : `<div class="dish-thumb flex items-center justify-center" style="font-size:22px;">🍽️</div>`;
+    const meta = [d.qty ? 'x' + d.qty : '', d.optionsText].filter(Boolean).join(' · ');
+    card.innerHTML = `
+      <div class="flex items-start gap-3 mb-3">
+        ${img}
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-sm truncate" style="color: var(--coffee);">${escHtml(d.dishName)}</p>
+          ${meta ? `<p class="text-xs mt-0.5" style="color: var(--brown-mid);">${escHtml(meta)}</p>` : ''}
+        </div>
+        <span class="text-xs" style="color: var(--brown-mid);" data-hint="${idx}">请打分</span>
+      </div>
+      <div class="star-rating sm mb-3" data-dish-rating="${idx}" role="slider" aria-label="${escAttr(d.dishName)}评分" tabindex="0"></div>
+      <textarea class="rev-textarea mb-3" data-dish-content="${idx}" maxlength="500" placeholder="这道菜怎么样？（选填）">${escHtml(d.content || '')}</textarea>
+      <div class="img-uploader" data-dish-imgs="${idx}"></div>
+    `;
+    list.appendChild(card);
+
+    // 星级
+    const starEl = card.querySelector('[data-dish-rating]');
+    createStarRating(starEl, {
+      value: d.rating || 0,
+      onChange: v => {
+        d.rating = v;
+        card.querySelector(`[data-hint="${idx}"]`).textContent = RATING_LABELS[v] || '';
+        scheduleDraft();
+      }
+    });
+    if (d.rating) card.querySelector(`[data-hint="${idx}"]`).textContent = RATING_LABELS[d.rating] || '';
+
+    // 文字
+    const ta = card.querySelector('[data-dish-content]');
+    ta.addEventListener('input', () => { d.content = ta.value; scheduleDraft(); });
+
+    // 图片
+    renderDishImages(idx);
+  });
+}
+
+function renderDishImages(idx) {
+  const d = state.dishes[idx];
+  const box = document.querySelector(`[data-dish-imgs="${idx}"]`);
+  if (!box) return;
+  box.innerHTML = '';
+  d.images.forEach((src, i) => {
+    const t = document.createElement('div');
+    t.className = 'img-thumb';
+    t.innerHTML = `<img src="${escAttr(src)}" alt="实拍"><button type="button" class="img-del" aria-label="删除图片">×</button>`;
+    t.querySelector('.img-del').addEventListener('click', () => {
+      d.images.splice(i, 1);
+      renderDishImages(idx);
+      scheduleDraft();
+    });
+    box.appendChild(t);
+  });
+  if (d.images.length < 3) {
+    const add = document.createElement('button');
+    add.type = 'button';
+    add.className = 'img-add';
+    add.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>添加</span>`;
+    add.addEventListener('click', () => triggerUpload(idx));
+    box.appendChild(add);
+  }
+}
+
+function triggerUpload(idx) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.addEventListener('change', async () => {
+    const file = input.files[0];
+    if (!file) return;
+    const d = state.dishes[idx];
+    if (d.images.length >= 3) { API.util.toast('每道菜最多3张图片', 'error'); return; }
+    try {
+      API.util.toast('上传中...');
+      const path = await API.util.uploadImage(file);
+      d.images.push(path);
+      renderDishImages(idx);
+      scheduleDraft();
+    } catch (e) {
+      API.util.toast(e.message || '上传失败', 'error');
+    }
+  });
+  input.click();
+}
+
+/* ---------- 草稿 ---------- */
+function scheduleDraft() {
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(saveDraft, 600);
+}
+function saveDraft() {
+  if (mode !== 'new' || !orderId) return;
+  try {
+    const data = {
+      serviceRating: state.serviceRating,
+      deliveryRating: state.deliveryRating,
+      content: document.getElementById('merchantContent').value,
+      dishes: state.dishes.map(d => ({ dishId: d.dishId, rating: d.rating, content: d.content, images: d.images }))
+    };
+    localStorage.setItem(draftKey(), JSON.stringify(data));
+    document.getElementById('draftHint').textContent = '草稿已自动保存 ' + new Date().toLocaleTimeString('zh-CN', { hour12: false });
+  } catch (_) {}
+}
+function loadDraft() {
+  if (mode !== 'new') return false;
+  try {
+    const raw = localStorage.getItem(draftKey());
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (data.serviceRating) { state.serviceRating = data.serviceRating; serviceStars.set(data.serviceRating); }
+    if (data.deliveryRating) { state.deliveryRating = data.deliveryRating; deliveryStars.set(data.deliveryRating); }
+    if (data.content) { document.getElementById('merchantContent').value = data.content; state.content = data.content; }
+    if (data.dishes) {
+      data.dishes.forEach(dd => {
+        const d = state.dishes.find(x => x.dishId === dd.dishId || (x.dishId == null && x.dishName === dd.dishName));
+        if (d) { d.rating = dd.rating || 0; d.content = dd.content || ''; d.images = dd.images || []; }
+      });
+    }
+    updateContentCount();
+    return true;
+  } catch (_) { return false; }
+}
+function clearDraft() {
+  if (orderId) { try { localStorage.removeItem(draftKey()); } catch (_) {} }
+  document.getElementById('draftHint').textContent = '';
+}
+
+/* ---------- 状态联动 ---------- */
+function onServiceChange(v) {
+  state.serviceRating = v;
+  document.getElementById('serviceHint').textContent = RATING_LABELS[v] || '请打分';
+  document.getElementById('submitBtn').disabled = v === 0;
+  scheduleDraft();
+}
+function onDeliveryChange(v) {
+  state.deliveryRating = v;
+  document.getElementById('deliveryHint').textContent = v ? (RATING_LABELS[v] || '') : '选填';
+  scheduleDraft();
+}
+function updateContentCount() {
+  const v = document.getElementById('merchantContent').value;
+  state.content = v;
+  document.getElementById('contentCount').textContent = v.length;
+}
+
+/* ---------- 提交 ---------- */
+async function submit() {
+  if (submitting) return;
+  if (!state.serviceRating) { API.util.toast('请先为整体服务打分', 'error'); return; }
+  submitting = true;
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.querySelector('#submitLabel').textContent = '提交中...';
+  const body = {
+    orderId: orderId,
+    rating: state.serviceRating,
+    deliveryRating: state.deliveryRating || null,
+    content: document.getElementById('merchantContent').value.trim() || null,
+    items: state.dishes.map(d => ({
+      dishId: d.dishId,
+      dishName: d.dishName,
+      dishImage: d.dishImage,
+      rating: d.rating || 5,
+      content: (d.content || '').trim() || null,
+      images: d.images && d.images.length ? d.images : null
+    })).filter(d => d.rating || d.content || (d.images && d.images.length))
+  };
+  try {
+    if (mode === 'edit') {
+      await API.user.updateReview(reviewId, body);
+    } else {
+      await API.user.addReview(body);
+    }
+    clearDraft();
+    document.getElementById('successModal').classList.add('show');
+  } catch (e) {
+    API.util.toast(e.message || '提交失败', 'error');
+    btn.disabled = false;
+    btn.querySelector('#submitLabel').textContent = mode === 'edit' ? '保存修改' : '提交评价';
+    submitting = false;
+  }
+}
+
+/* ---------- 加载 ---------- */
+async function init() {
+  orderId = API.util.getParam('orderId');
+  reviewId = API.util.getParam('reviewId');
+  mode = reviewId ? 'edit' : 'new';
+  if (!orderId && !reviewId) { showError('缺少订单参数'); return; }
+
+  document.getElementById('loadingView').classList.remove('hidden');
+  document.getElementById('errorView').classList.add('hidden');
+  document.getElementById('formView').classList.add('hidden');
+  document.getElementById('submitBar').classList.add('hidden');
+
+  const loggedIn = await API.auth.requireLogin();
+  if (!loggedIn) return;
+
+  try {
+    if (mode === 'edit') {
+      const review = await API.user.getReview(reviewId);
+      orderId = review.orderId;
+      // 并行拉取订单详情（取下单时间与菜品快照）
+      let od = null;
+      try { od = await API.order.detail(orderId); } catch (_) {}
+      fillHeader(review.merchantName, review.orderNo, od ? od.order.createTime : review.createTime);
+      state.serviceRating = review.rating || 0;
+      state.deliveryRating = review.deliveryRating || 0;
+      state.content = review.content || '';
+      // 菜品：以订单 items 为准，回填已有评价
+      const orderItems = (od && od.items) ? od.items : [];
+      state.dishes = orderItems.map(it => {
+        const rv = (review.items || []).find(x => matchDish(x, it));
+        return {
+          dishId: it.dishId, dishName: it.dishName, dishImage: it.dishImage,
+          qty: it.qty, optionsText: it.optionsText,
+          rating: rv ? rv.rating : 0,
+          content: rv ? rv.content : '',
+          images: rv ? (rv.imageList || []) : []
+        };
+      });
+      document.getElementById('modeBadge').textContent = '修改评价';
+      document.getElementById('submitLabel').textContent = '保存修改';
+      document.getElementById('successModal').querySelector('h3').textContent = '评价修改成功';
+    } else {
+      const od = await API.order.detail(orderId);
+      orderInfo = od.order;
+      fillHeader(orderInfo.merchantName, orderInfo.orderNo, orderInfo.createTime);
+      state.dishes = (od.items || []).map(it => ({
+        dishId: it.dishId, dishName: it.dishName, dishImage: it.dishImage,
+        qty: it.qty, optionsText: it.optionsText,
+        rating: 0, content: '', images: []
+      }));
+    }
+    showForm();
+  } catch (e) {
+    showError(e.message || '加载订单信息失败');
+  }
+}
+
+function matchDish(rvItem, orderItem) {
+  if (rvItem.dishId != null && orderItem.dishId != null) return rvItem.dishId === orderItem.dishId;
+  return rvItem.dishName === orderItem.dishName;
+}
+
+function fillHeader(merchantName, orderNo, time) {
+  document.getElementById('merchantName').textContent = merchantName || '未知商家';
+  document.getElementById('orderNo').textContent = orderNo || '-';
+  document.getElementById('orderTime').textContent = (mode === 'edit' ? '评价时间：' : '下单时间：') + API.util.formatTime(time);
+}
+
+function showForm() {
+  document.getElementById('loadingView').classList.add('hidden');
+  document.getElementById('formView').classList.remove('hidden');
+  document.getElementById('submitBar').classList.remove('hidden');
+
+  serviceStars = createStarRating(document.getElementById('serviceRating'), { value: state.serviceRating, onChange: onServiceChange });
+  deliveryStars = createStarRating(document.getElementById('deliveryRating'), { value: state.deliveryRating, onChange: onDeliveryChange });
+  renderEmojiRow();
+  renderDishes();
+
+  const contentEl = document.getElementById('merchantContent');
+  contentEl.value = state.content || '';
+  contentEl.addEventListener('input', () => { updateContentCount(); scheduleDraft(); });
+  contentEl.addEventListener('blur', saveDraft);
+  updateContentCount();
+
+  if (state.serviceRating) { onServiceChange(state.serviceRating); }
+  if (state.deliveryRating) { onDeliveryChange(state.deliveryRating); }
+
+  // 新建模式回填草稿（覆盖空字段）
+  if (mode === 'new') {
+    loadDraft();
+    if (state.serviceRating) { serviceStars.set(state.serviceRating); onServiceChange(state.serviceRating); }
+    renderDishes();
+  }
+
+  document.getElementById('submitBtn').addEventListener('click', submit);
+
+  // 30 秒自动保存
+  setInterval(saveDraft, 30000);
+}
+
+function showError(msg) {
+  document.getElementById('loadingView').classList.add('hidden');
+  document.getElementById('errorView').classList.remove('hidden');
+  document.getElementById('errorMsg').textContent = msg || '加载失败';
+}
+
+/* ---------- 工具 ---------- */
+function escHtml(s) { return API.util.escapeHtml(s == null ? '' : s); }
+function escAttr(s) { return String(s == null ? '' : s).replace(/"/g, '&quot;'); }
+
+init();
+</script>
+</body>
+</html>

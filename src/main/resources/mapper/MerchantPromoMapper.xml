@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qiukai.mapper.MerchantPromoMapper">
+
+    <resultMap id="promoResultMap" type="com.qiukai.entity.MerchantPromo">
+        <id property="id" column="id"/>
+        <result property="merchantId" column="merchant_id"/>
+        <result property="type" column="type"/>
+        <result property="description" column="description"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="selectByMerchantId" resultMap="promoResultMap">
+        SELECT id, merchant_id, type, description, create_time
+        FROM merchant_promo WHERE merchant_id = #{merchantId}
+    </select>
+
+</mapper>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qiukai.mapper.DishMapper">
+
+    <resultMap id="dishResultMap" type="com.qiukai.entity.Dish">
+        <id property="id" column="id"/>
+        <result property="merchantId" column="merchant_id"/>
+        <result property="name" column="name"/>
+        <result property="price" column="price"/>
+        <result property="oldPrice" column="old_price"/>
+        <result property="image" column="image"/>
+        <result property="description" column="description"/>
+        <result property="category" column="category"/>
+        <result property="sales" column="sales"/>
+        <result property="isDiscount" column="is_discount"/>
+        <result property="isNew" column="is_new"/>
+        <result property="isPopular" column="is_popular"/>
+        <result property="onShelf" column="on_shelf"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="allColumns">
+        id, merchant_id, name, price, old_price, image, description, category, sales,
+        is_discount, is_new, is_popular, on_shelf, create_time, update_time
+    </sql>
+
+    <select id="selectById" resultMap="dishResultMap">
+        SELECT <include refid="allColumns"/> FROM dish WHERE id = #{id}
+    </select>
+
+    <!-- 上架菜品：折扣优先，再按销量降序 -->
+    <select id="selectOnShelfByMerchantId" resultMap="dishResultMap">
+        SELECT <include refid="allColumns"/> FROM dish
+        WHERE merchant_id = #{merchantId} AND on_shelf = 0
+        ORDER BY is_discount DESC, sales DESC
+    </select>
+
+    <select id="selectAllByMerchantId" resultMap="dishResultMap">
+        SELECT <include refid="allColumns"/> FROM dish
+        WHERE merchant_id = #{merchantId} ORDER BY is_discount DESC, sales DESC
+    </select>
+
+    <!-- 管理员查询全部菜品（跨商家，含下架），按商家ID、销量排序 -->
+    <select id="selectAllForAdmin" resultMap="dishResultMap">
+        SELECT <include refid="allColumns"/> FROM dish ORDER BY merchant_id ASC, is_discount DESC, sales DESC
+    </select>
+
+    <!-- 人气菜品（跨商家，仅上架且 is_popular=1） -->
+    <select id="selectPopular" resultMap="dishResultMap">
+        SELECT <include refid="allColumns"/> FROM dish
+        WHERE is_popular = 1 AND on_shelf = 0
+        ORDER BY sales DESC
+    </select>
+
+    <insert id="insert" parameterType="com.qiukai.entity.Dish" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dish (merchant_id, name, price, old_price, image, description, category, sales, is_discount, is_new, is_popular, on_shelf)
+        VALUES (#{merchantId}, #{name}, #{price}, #{oldPrice}, #{image}, #{description}, #{category}, #{sales}, #{isDiscount}, #{isNew}, #{isPopular}, #{onShelf})
+    </insert>
+
+    <update id="update" parameterType="com.qiukai.entity.Dish">
+        UPDATE dish
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="oldPrice != null">old_price = #{oldPrice},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="isDiscount != null">is_discount = #{isDiscount},</if>
+            <if test="isNew != null">is_new = #{isNew},</if>
+            <if test="isPopular != null">is_popular = #{isPopular},</if>
+            <if test="onShelf != null">on_shelf = #{onShelf},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM dish WHERE id = #{id}
+    </delete>
+
+    <update id="increaseSales">
+        UPDATE dish SET sales = sales + #{qty} WHERE id = #{id}
+    </update>
+
+</mapper>

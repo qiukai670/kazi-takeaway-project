@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qiukai.mapper.MerchantOpLogMapper">
+
+    <insert id="insert" parameterType="com.qiukai.entity.MerchantOpLog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO merchant_op_log (merchant_id, merchant_name, operator_id, operator_name, action, old_value, new_value)
+        VALUES (#{merchantId}, #{merchantName}, #{operatorId}, #{operatorName}, #{action}, #{oldValue}, #{newValue})
+    </insert>
+
+</mapper>

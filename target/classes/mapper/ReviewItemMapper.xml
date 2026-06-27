@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qiukai.mapper.ReviewItemMapper">
+
+    <resultMap id="itemResultMap" type="com.qiukai.entity.ReviewItem">
+        <id property="id" column="id"/>
+        <result property="reviewId" column="review_id"/>
+        <result property="dishId" column="dish_id"/>
+        <result property="dishName" column="dish_name"/>
+        <result property="dishImage" column="dish_image"/>
+        <result property="rating" column="rating"/>
+        <result property="content" column="content"/>
+        <result property="images" column="images"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="baseColumns">
+        id, review_id, dish_id, dish_name, dish_image, rating, content, images, create_time
+    </sql>
+
+    <insert id="insertBatch">
+        INSERT INTO review_item (review_id, dish_id, dish_name, dish_image, rating, content, images)
+        VALUES
+        <foreach collection="items" item="it" separator=",">
+            (#{it.reviewId}, #{it.dishId}, #{it.dishName}, #{it.dishImage}, #{it.rating}, #{it.content}, #{it.images})
+        </foreach>
+    </insert>
+
+    <select id="selectByReviewId" resultMap="itemResultMap">
+        SELECT <include refid="baseColumns"/>
+        FROM review_item WHERE review_id = #{reviewId} ORDER BY id ASC
+    </select>
+
+    <select id="selectByReviewIds" resultMap="itemResultMap">
+        SELECT <include refid="baseColumns"/>
+        FROM review_item WHERE review_id IN
+        <foreach collection="reviewIds" item="rid" open="(" separator="," close=")">
+            #{rid}
+        </foreach>
+        ORDER BY review_id ASC, id ASC
+    </select>
+
+    <delete id="deleteByReviewId">
+        DELETE FROM review_item WHERE review_id = #{reviewId}
+    </delete>
+
+</mapper>

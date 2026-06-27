@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qiukai.mapper.DishOptionMapper">
+
+    <resultMap id="optionResultMap" type="com.qiukai.entity.DishOption">
+        <id property="id" column="id"/>
+        <result property="dishId" column="dish_id"/>
+        <result property="name" column="name"/>
+        <result property="optionType" column="option_type"/>
+        <result property="sort" column="sort"/>
+    </resultMap>
+
+    <select id="selectByDishId" resultMap="optionResultMap">
+        SELECT id, dish_id, name, option_type, sort
+        FROM dish_option WHERE dish_id = #{dishId} ORDER BY sort ASC
+    </select>
+
+    <delete id="deleteByDishId">
+        DELETE FROM dish_option WHERE dish_id = #{dishId}
+    </delete>
+
+    <insert id="insert" parameterType="com.qiukai.entity.DishOption" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dish_option (dish_id, name, option_type, sort)
+        VALUES (#{dishId}, #{name}, #{optionType}, #{sort})
+    </insert>
+
+</mapper>

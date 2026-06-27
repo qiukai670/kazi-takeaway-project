@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>个人中心 — 咔滋外卖</title>
+<meta name="description" content="咔滋外卖个人中心，管理你的个人信息、订单、收货地址、银行卡和收藏商家。" />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Boldonse&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #fcf7ee;
+    --coffee: #7d2c0f;
+    --orange: #ff8342;
+    --brown-mid: #af4f28;
+    --beige: #f9eedc;
+    --pale: #ffefd5;
+    --coffee-dark: #664237;
+    --green: #00704f;
+    --mustard: #fed16a;
+  }
+
+  * { -webkit-font-smoothing: antialiased; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Manrope', 'Noto Sans SC', sans-serif;
+    background: var(--cream);
+    color: var(--coffee);
+    letter-spacing: -0.01em;
+    overflow-x: hidden;
+  }
+
+  .font-display { font-family: 'Boldonse', 'Noto Sans SC', sans-serif; font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; }
+  .font-cn-display { font-family: 'Noto Sans SC', sans-serif; font-weight: 900; letter-spacing: -0.01em; line-height: 1.2; }
+
+  /* 按钮 */
+  .btn-primary { background: var(--orange); color: #fff; border-radius: 100px; padding: 14px 28px; font-weight: 600; transition: transform .25s cubic-bezier(.22,1,.36,1), filter .25s, box-shadow .25s; box-shadow: 0 6px 16px -4px rgba(255,131,66,.5); display: inline-flex; align-items: center; gap: 8px; }
+  .btn-primary:hover { transform: scale(1.03); filter: brightness(1.05); }
+  .btn-primary:active { transform: scale(0.97); }
+  .btn-dark { background: var(--coffee-dark); color: #fff; border-radius: 100px; padding: 14px 28px; font-weight: 600; transition: transform .25s, filter .25s; }
+  .btn-dark:hover { transform: scale(1.03); filter: brightness(1.1); }
+  .btn-outline { border: 1.5px solid var(--coffee); color: var(--coffee); border-radius: 100px; padding: 12px 26px; font-weight: 600; transition: all .25s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-outline:hover { background: var(--coffee); color: #fff; }
+
+  /* 阴影 */
+  .card-shadow { box-shadow: 0 1px 2px -1px rgba(0,0,0,.12), 0 4px 6px -2px rgba(0,0,0,.11), 0 16px 14px -3px rgba(0,0,0,.08); }
+  .card-shadow-lg { box-shadow: 0 1px 3px -1px rgba(0,0,0,.10), 0 6px 12px -3px rgba(0,0,0,.10), 0 24px 32px -6px rgba(0,0,0,.10); }
+
+  /* 导航 */
+  .nav-blur { background: rgba(252, 247, 238, 0.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid rgba(125,44,15,.08); }
+  .nav-link { position: relative; transition: color .25s; }
+  .nav-link::after { content: ''; position: absolute; left: 50%; bottom: -6px; width: 0; height: 6px; background: var(--orange); border-radius: 100px; transform: translateX(-50%); transition: width .3s cubic-bezier(.22,1,.36,1); }
+  .nav-link:hover { color: var(--orange); }
+  .nav-link:hover::after { width: 100%; }
+
+  /* 标签胶囊 */
+  .pill-tag { background: var(--orange); color: var(--pale); border-radius: 100px; padding: 6px 14px; font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px; }
+  .pill-tag.dark { background: var(--coffee); }
+  .pill-tag.green { background: var(--green); }
+  .pill-tag.mustard { background: var(--mustard); color: var(--coffee); }
+  .pill-tag.beige { background: var(--beige); color: var(--coffee); text-transform: none; letter-spacing: 0; }
+
+  .eyebrow { color: var(--orange); font-size: 14px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
+  .star { color: var(--orange); }
+
+  /* 用户头部渐变背景 */
+  .user-header-bg {
+    background: linear-gradient(135deg, #ff8342 0%, #ff6a1f 45%, #af4f28 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .user-header-bg::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.12);
+  }
+  .user-header-bg::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 30%;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.08);
+  }
+
+  /* 头像容器 */
+  .avatar-wrap { position: relative; cursor: pointer; }
+  .avatar-wrap .avatar-mask {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,.5);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity .25s;
+    color: #fff;
+  }
+  .avatar-wrap:hover .avatar-mask { opacity: 1; }
+
+  /* 左侧菜单项 */
+  .menu-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    cursor: pointer;
+    color: var(--brown-mid);
+    font-weight: 600;
+    transition: all .25s;
+    border-left: 3px solid transparent;
+    position: relative;
+  }
+  .menu-item:hover { background: var(--beige); color: var(--coffee); }
+  .menu-item.active {
+    background: var(--pale);
+    color: var(--orange);
+    border-left-color: var(--orange);
+  }
+  .menu-item .menu-icon { font-size: 18px; width: 22px; text-align: center; }
+
+  /* 内容面板 */
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeIn .35s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* 输入框 */
+  .form-input {
+    width: 100%;
+    background: #fff;
+    border: 1.5px solid var(--beige);
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-size: 15px;
+    color: var(--coffee);
+    transition: border-color .2s, box-shadow .2s;
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--orange); box-shadow: 0 0 0 4px rgba(255,131,66,.12); }
+  .form-input::placeholder { color: #c9a98a; }
+  .form-input:read-only { background: var(--beige); color: var(--brown-mid); cursor: not-allowed; }
+  .form-label { display: block; font-size: 13px; font-weight: 700; color: var(--brown-mid); margin-bottom: 6px; letter-spacing: .02em; }
+
+  /* 订单状态标签 */
+  .status-tag { padding: 4px 10px; border-radius: 100px; font-size: 12px; font-weight: 700; }
+  .status-pending { background: #fff3cd; color: #b8860b; }
+  .status-shipping { background: #ffe4d6; color: var(--orange); }
+  .status-done { background: #e0f5ee; color: var(--green); }
+
+  /* 筛选标签栏 */
+  .filter-tab {
+    padding: 8px 18px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--brown-mid);
+    cursor: pointer;
+    transition: all .25s;
+    white-space: nowrap;
+  }
+  .filter-tab:hover { background: var(--beige); color: var(--coffee); }
+  .filter-tab.active { background: var(--orange); color: #fff; box-shadow: 0 4px 12px -3px rgba(255,131,66,.5); }
+
+  /* 银行卡样式 */
+  .bank-card {
+    border-radius: 20px;
+    padding: 22px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 12px 28px -8px rgba(0,0,0,.25);
+    transition: transform .3s;
+  }
+  .bank-card:hover { transform: translateY(-4px); }
+  .bank-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.12);
+  }
+  .bank-card::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -20px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.08);
+  }
+  .bank-chip {
+    width: 36px; height: 28px;
+    background: linear-gradient(135deg, #f9d77e, #c9a050);
+    border-radius: 6px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* 模态框 */
+  .modal-mask {
+    position: fixed; inset: 0;
+    background: rgba(125,44,15,.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 200;
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity .25s;
+  }
+  .modal-mask.show { display: flex; opacity: 1; }
+  .modal-box {
+    background: #fff;
+    border-radius: 24px;
+    padding: 28px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(20px) scale(.96);
+    transition: transform .3s cubic-bezier(.22,1,.36,1);
+    box-shadow: 0 24px 60px -12px rgba(0,0,0,.3);
+  }
+  .modal-mask.show .modal-box { transform: translateY(0) scale(1); }
+
+  /* 开关 */
+  .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch-slider {
+    position: absolute; cursor: pointer; inset: 0;
+    background: var(--beige);
+    border-radius: 100px;
+    transition: .3s;
+  }
+  .switch-slider::before {
+    content: ''; position: absolute;
+    height: 18px; width: 18px;
+    left: 3px; bottom: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: .3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,.2);
+  }
+  .switch input:checked + .switch-slider { background: var(--orange); }
+  .switch input:checked + .switch-slider::before { transform: translateX(20px); }
+
+  /* 心形收藏按钮 */
+  .fav-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.9);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all .25s;
+    backdrop-filter: blur(4px);
+  }
+  .fav-btn:hover { background: #fff; transform: scale(1.1); }
+  .fav-btn svg { transition: all .25s; }
+  .fav-btn.active svg { fill: var(--orange); stroke: var(--orange); }
+
+  /* 移动端菜单 */
+  .mobile-tabs { display: none; }
+  @media (max-width: 1023px) {
+    .sidebar { display: none; }
+    .mobile-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 0 12px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .mobile-tabs::-webkit-scrollbar { display: none; }
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed; left: 50%; bottom: 40px;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--coffee); color: var(--pale);
+    padding: 14px 26px; border-radius: 100px;
+    font-size: 14px; font-weight: 600;
+    box-shadow: 0 12px 32px -8px rgba(0,0,0,.3);
+    z-index: 9999; opacity: 0;
+    transition: all .35s cubic-bezier(.22,1,.36,1);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.success { background: var(--green); }
+  .toast.error { background: #c0392b; }
+
+  ::selection { background: var(--orange); color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- ===== 顶部导航 ===== -->
+<header class="nav-blur fixed top-0 left-0 right-0 z-50">
+  <nav class="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
+    <a href="index.html" class="font-display text-2xl tracking-tight" style="color: var(--coffee);">咔滋<span class="text-[10px] align-top ml-1" style="color:var(--orange);">外卖</span></a>
+
+    <div class="hidden lg:flex items-center gap-9 text-sm font-semibold" style="color: var(--brown-mid);">
+      <a href="index.html#merchants" class="nav-link">好评商家</a>
+      <a href="index.html#dishes" class="nav-link">人气菜品</a>
+      <a href="index.html#promise" class="nav-link">品质承诺</a>
+      <a href="index.html#review" class="nav-link">用户评价</a>
+      <a href="index.html#faq" class="nav-link">常见问题</a>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <a href="index.html" class="btn-outline text-sm py-2.5 px-5">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        返回首页
+      </a>
+    </div>
+  </nav>
+</header>
+
+<!-- ===== 主内容 ===== -->
+<main class="pt-24 pb-20">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8">
+
+    <!-- ===== 用户信息头部 ===== -->
+    <section class="user-header-bg rounded-[32px] p-8 lg:p-10 mb-8 card-shadow-lg relative">
+      <div class="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8">
+        <!-- 头像 -->
+        <div class="avatar-wrap flex-shrink-0" onclick="openAvatarModal()">
+          <div class="w-28 h-28 lg:w-32 lg:h-32 rounded-full overflow-hidden ring-4 ring-white/80 shadow-lg">
+            <img id="userAvatar" src="https://picsum.photos/seed/avatar99/200/200" alt="头像" class="w-full h-full object-cover">
+          </div>
+          <div class="avatar-mask w-28 h-28 lg:w-32 lg:h-32 rounded-full">
+            <div class="text-center">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mx-auto mb-1"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              <span class="text-xs font-semibold">更换</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 用户名信息 -->
+        <div class="flex-1 text-center sm:text-left text-white">
+          <div class="flex items-center justify-center sm:justify-start gap-3 flex-wrap mb-2">
+            <h1 id="displayName" class="font-cn-display text-3xl lg:text-4xl">加载中...</h1>
+            <span class="pill-tag mustard text-xs" id="memberPill">会员</span>
+          </div>
+          <p class="text-sm opacity-90 mb-1">用户名：<span id="displayUsername">-</span></p>
+          <p class="text-sm opacity-80" id="userMeta">注册时间：- · 手机号：-</p>
+        </div>
+
+        <!-- 统计信息 -->
+        <div class="flex gap-6 lg:gap-8 text-white text-center">
+          <div>
+            <div class="font-display text-3xl lg:text-4xl" id="statOrders">0</div>
+            <div class="text-xs opacity-85 mt-1">订单数</div>
+          </div>
+          <div class="w-px bg-white/30"></div>
+          <div>
+            <div class="font-display text-3xl lg:text-4xl" id="statFavs">0</div>
+            <div class="text-xs opacity-85 mt-1">收藏数</div>
+          </div>
+          <div class="w-px bg-white/30"></div>
+          <div>
+            <div class="font-display text-3xl lg:text-4xl" id="statPoints">0</div>
+            <div class="text-xs opacity-85 mt-1">积分</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 移动端标签栏 ===== -->
+    <div class="mobile-tabs mb-6">
+      <div class="filter-tab active" data-tab="profile">👤 个人信息</div>
+      <div class="filter-tab" data-tab="orders">📦 我的订单</div>
+      <div class="filter-tab" data-tab="address">📍 收货地址</div>
+      <div class="filter-tab" data-tab="bankcard">💳 银行卡</div>
+      <div class="filter-tab" data-tab="favorites">❤️ 我的收藏</div>
+      <div class="filter-tab" data-tab="comments">📝 我的评价</div>
+    </div>
+
+    <!-- ===== 主体布局：左侧菜单 + 右侧内容 ===== -->
+    <div class="grid lg:grid-cols-[220px_1fr] gap-8">
+
+      <!-- 左侧菜单 -->
+      <aside class="sidebar">
+        <div class="bg-white rounded-[24px] p-3 card-shadow sticky top-24">
+          <div class="menu-item active" data-tab="profile">
+            <span class="menu-icon">👤</span>
+            <span>个人信息</span>
+          </div>
+          <div class="menu-item" data-tab="orders">
+            <span class="menu-icon">📦</span>
+            <span>我的订单</span>
+          </div>
+          <div class="menu-item" data-tab="address">
+            <span class="menu-icon">📍</span>
+            <span>收货地址</span>
+          </div>
+          <div class="menu-item" data-tab="bankcard">
+            <span class="menu-icon">💳</span>
+            <span>银行卡管理</span>
+          </div>
+          <div class="menu-item" data-tab="favorites">
+            <span class="menu-icon">❤️</span>
+            <span>我的收藏</span>
+          </div>
+          <div class="menu-item" data-tab="comments">
+            <span class="menu-icon">📝</span>
+            <span>我的评价</span>
+          </div>
+          <div class="border-t my-2" style="border-color: var(--beige);"></div>
+          <a href="index.html" class="menu-item">
+            <span class="menu-icon">🏠</span>
+            <span>返回首页</span>
+          </a>
+        </div>
+      </aside>
+
+      <!-- 右侧内容区 -->
+      <div class="min-w-0">
+
+        <!-- ===== 个人信息面板 ===== -->
+        <section class="panel active" id="panel-profile">
+          <div class="bg-white rounded-[24px] p-6 lg:p-8 card-shadow">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="font-cn-display text-2xl" style="color: var(--coffee);">个人信息</h2>
+            </div>
+
+            <form id="profileForm" class="space-y-5 max-w-xl">
+              <!-- 头像 -->
+              <div class="flex items-center gap-4">
+                <div class="avatar-wrap flex-shrink-0" onclick="openAvatarModal()">
+                  <div class="w-20 h-20 rounded-full overflow-hidden ring-2 ring-white shadow">
+                    <img id="formAvatar" src="https://picsum.photos/seed/avatar99/200/200" alt="头像" class="w-full h-full object-cover">
+                  </div>
+                  <div class="avatar-mask w-20 h-20 rounded-full">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  </div>
+                </div>
+                <div>
+                  <p class="font-semibold" style="color: var(--coffee);">点击头像更换</p>
+                  <p class="text-xs" style="color: var(--brown-mid);">支持 JPG / PNG，建议 200×200</p>
+                  <button type="button" class="btn-outline text-xs py-2 px-4 mt-2" onclick="openAvatarModal()">更换头像</button>
+                </div>
+              </div>
+
+              <div>
+                <label class="form-label">用户名 <span style="color:var(--orange);">*</span></label>
+                <input type="text" class="form-input" id="inputUsername" value="" required>
+              </div>
+
+              <div>
+                <label class="form-label">昵称 <span style="color:var(--orange);">*</span></label>
+                <input type="text" class="form-input" id="inputNickname" value="" required>
+              </div>
+
+              <div>
+                <label class="form-label">手机号（只读）</label>
+                <input type="text" class="form-input" id="inputPhone" value="" readonly>
+              </div>
+
+              <div>
+                <label class="form-label">性别</label>
+                <div class="flex gap-3">
+                  <label class="flex items-center gap-2 cursor-pointer px-4 py-2.5 rounded-xl border-2 transition" style="border-color: var(--beige);" data-gender="male">
+                    <input type="radio" name="gender" value="male" class="hidden">
+                    <span class="text-sm font-semibold">👨 男</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer px-4 py-2.5 rounded-xl border-2 transition" style="border-color: var(--beige);" data-gender="female">
+                    <input type="radio" name="gender" value="female" class="hidden">
+                    <span class="text-sm font-semibold">👩 女</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer px-4 py-2.5 rounded-xl border-2 transition" style="border-color: var(--beige);" data-gender="secret">
+                    <input type="radio" name="gender" value="secret" class="hidden" checked>
+                    <span class="text-sm font-semibold">🔒 保密</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="pt-3 flex gap-3">
+                <button type="submit" class="btn-primary">保存修改</button>
+                <button type="reset" class="btn-outline">重置</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- ===== 我的订单面板 ===== -->
+        <section class="panel" id="panel-orders">
+          <div class="bg-white rounded-[24px] p-6 lg:p-8 card-shadow">
+            <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+              <h2 class="font-cn-display text-2xl" style="color: var(--coffee);">我的订单</h2>
+              <span class="text-sm" style="color: var(--brown-mid);">共 <span id="orderCount">0</span> 个订单</span>
+            </div>
+
+            <!-- 状态筛选 -->
+            <div class="flex gap-2 mb-6 overflow-x-auto pb-1" id="orderFilters">
+              <div class="filter-tab active" data-status="all">全部</div>
+              <div class="filter-tab" data-status="pending">待付款</div>
+              <div class="filter-tab" data-status="shipping">待收货</div>
+              <div class="filter-tab" data-status="done">已完成</div>
+            </div>
+
+            <!-- 订单列表 -->
+            <div id="orderList" class="space-y-4"></div>
+
+            <!-- 空状态 -->
+            <div id="orderEmpty" class="hidden text-center py-16">
+              <div class="text-6xl mb-4">📭</div>
+              <p class="font-cn-display text-xl mb-2" style="color: var(--coffee);">暂无相关订单</p>
+              <p class="text-sm mb-6" style="color: var(--brown-mid);">快去探索附近的好味道吧～</p>
+              <a href="index.html#merchants" class="btn-primary">去下单</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== 收货地址面板 ===== -->
+        <section class="panel" id="panel-address">
+          <div class="bg-white rounded-[24px] p-6 lg:p-8 card-shadow">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="font-cn-display text-2xl" style="color: var(--coffee);">收货地址</h2>
+              <button class="btn-primary text-sm py-2.5 px-5" onclick="openAddressModal()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                新增地址
+              </button>
+            </div>
+
+            <div id="addressList" class="space-y-3"></div>
+
+            <div id="addressEmpty" class="hidden text-center py-12">
+              <div class="text-5xl mb-3">📍</div>
+              <p class="text-sm" style="color: var(--brown-mid);">还没有收货地址，点击"新增地址"添加吧</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== 银行卡管理面板 ===== -->
+        <section class="panel" id="panel-bankcard">
+          <div class="bg-white rounded-[24px] p-6 lg:p-8 card-shadow">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="font-cn-display text-2xl" style="color: var(--coffee);">银行卡管理</h2>
+              <button class="btn-primary text-sm py-2.5 px-5" onclick="openBankModal()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                添加银行卡
+              </button>
+            </div>
+
+            <div id="bankList" class="grid sm:grid-cols-2 gap-5"></div>
+
+            <div id="bankEmpty" class="hidden text-center py-12">
+              <div class="text-5xl mb-3">💳</div>
+              <p class="text-sm" style="color: var(--brown-mid);">还没有绑定银行卡</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== 我的收藏面板 ===== -->
+        <section class="panel" id="panel-favorites">
+          <div class="bg-white rounded-[24px] p-6 lg:p-8 card-shadow">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="font-cn-display text-2xl" style="color: var(--coffee);">我的收藏</h2>
+              <span class="text-sm" style="color: var(--brown-mid);">共 <span id="favCount">0</span> 家商家</span>
+            </div>
+
+            <div id="favList" class="grid sm:grid-cols-2 gap-5"></div>
+
+            <div id="favEmpty" class="hidden text-center py-12">
+              <div class="text-5xl mb-3">💔</div>
+              <p class="font-cn-display text-lg mb-2" style="color: var(--coffee);">还没有收藏的商家</p>
+              <p class="text-sm mb-6" style="color: var(--brown-mid);">去发现更多好味道吧～</p>
+              <a href="index.html#merchants" class="btn-primary">去逛逛</a>
+            </div>
+          </div>
+        </section>
+
+       <!-- ===== 我的评价面板 ===== -->
+        <section class="panel" id="panel-comments">
+          <div class="bg-white rounded-[24px] p-6 lg:p-8 card-shadow">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="font-cn-display text-2xl" style="color: var(--coffee);">我的评价</h2>
+            </div>
+            <div id="reviewList" class="space-y-4"></div>
+            <div id="reviewEmpty" class="hidden text-center py-12">
+              <div class="text-5xl mb-3">📝</div>
+              <p class="text-sm" style="color: var(--brown-mid);">还没有写过评价</p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ===== 头像更换模态框 ===== -->
+<div class="modal-mask" id="avatarModal">
+  <div class="modal-box">
+    <h3 class="font-cn-display text-xl mb-4" style="color: var(--coffee);">更换头像</h3>
+    <div class="space-y-4">
+      <div>
+        <label class="form-label">上传本地图片</label>
+        <input type="file" id="avatarFile" accept="image/*" class="form-input" style="padding: 8px;">
+      </div>
+      <div>
+        <label class="form-label">或输入图片 URL</label>
+        <input type="text" id="avatarUrl" class="form-input" placeholder="https://...">
+      </div>
+      <div class="flex justify-center">
+        <img id="avatarPreview" src="https://picsum.photos/seed/avatar99/200/200" alt="预览" class="w-24 h-24 rounded-full object-cover ring-2" style="--tw-ring-color: var(--beige);">
+      </div>
+    </div>
+    <div class="flex gap-3 mt-6 justify-end">
+      <button class="btn-outline text-sm py-2.5 px-5" onclick="closeModal('avatarModal')">取消</button>
+      <button class="btn-primary text-sm py-2.5 px-5" id="saveAvatarBtn" onclick="saveAvatar()">确认更换</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 地址表单模态框 ===== -->
+<div class="modal-mask" id="addressModal">
+  <div class="modal-box">
+    <h3 class="font-cn-display text-xl mb-4" style="color: var(--coffee);" id="addressModalTitle">新增收货地址</h3>
+    <form id="addressForm" class="space-y-4">
+      <input type="hidden" id="addressId">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="form-label">收件人 <span style="color:var(--orange);">*</span></label>
+          <input type="text" class="form-input" id="addrName" required placeholder="请输入收件人姓名">
+        </div>
+        <div>
+          <label class="form-label">电话 <span style="color:var(--orange);">*</span></label>
+          <input type="text" class="form-input" id="addrPhone" required placeholder="11 位手机号" maxlength="11">
+        </div>
+      </div>
+      <div>
+        <label class="form-label">所在地区 <span style="color:var(--orange);">*</span></label>
+        <input type="text" class="form-input" id="addrRegion" required placeholder="如：北京市朝阳区">
+      </div>
+      <div>
+        <label class="form-label">详细地址 <span style="color:var(--orange);">*</span></label>
+        <textarea class="form-input" id="addrDetail" required rows="2" placeholder="街道、楼栋、门牌号"></textarea>
+      </div>
+      <div>
+        <label class="form-label">标签</label>
+        <div class="flex gap-2" id="addrTagPicker">
+          <button type="button" class="filter-tab active" data-tag="家">🏠 家</button>
+          <button type="button" class="filter-tab" data-tag="公司">🏢 公司</button>
+          <button type="button" class="filter-tab" data-tag="学校">🎓 学校</button>
+        </div>
+      </div>
+      <div class="flex items-center justify-between pt-2">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <span class="switch">
+            <input type="checkbox" id="addrDefault">
+            <span class="switch-slider"></span>
+          </span>
+          <span class="text-sm font-semibold" style="color: var(--coffee);">设为默认地址</span>
+        </label>
+      </div>
+      <div class="flex gap-3 pt-3 justify-end">
+        <button type="button" class="btn-outline text-sm py-2.5 px-5" onclick="closeModal('addressModal')">取消</button>
+        <button type="submit" class="btn-primary text-sm py-2.5 px-5">保存地址</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== 银行卡表单模态框 ===== -->
+<div class="modal-mask" id="bankModal">
+  <div class="modal-box">
+    <h3 class="font-cn-display text-xl mb-4" style="color: var(--coffee);">添加银行卡</h3>
+    <form id="bankForm" class="space-y-4">
+      <div>
+        <label class="form-label">持卡人姓名 <span style="color:var(--orange);">*</span></label>
+        <input type="text" class="form-input" id="bankHolder" required placeholder="请输入持卡人姓名">
+      </div>
+      <div>
+        <label class="form-label">卡号 <span style="color:var(--orange);">*</span></label>
+        <input type="text" class="form-input" id="bankNumber" required placeholder="16-19 位卡号" maxlength="19">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="form-label">所属银行 <span style="color:var(--orange);">*</span></label>
+          <select class="form-input" id="bankName" required>
+            <option value="">请选择银行</option>
+            <option value="工商银行">工商银行</option>
+            <option value="建设银行">建设银行</option>
+            <option value="农业银行">农业银行</option>
+            <option value="中国银行">中国银行</option>
+            <option value="招商银行">招商银行</option>
+            <option value="交通银行">交通银行</option>
+            <option value="邮储银行">邮储银行</option>
+            <option value="民生银行">民生银行</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">卡类型 <span style="color:var(--orange);">*</span></label>
+          <select class="form-input" id="bankType" required>
+            <option value="debit">储蓄卡</option>
+            <option value="credit">信用卡</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="form-label">有效期 <span style="color:var(--orange);">*</span></label>
+          <input type="text" class="form-input" id="bankExpire" required placeholder="MM/YY" maxlength="5">
+        </div>
+        <div>
+          <label class="form-label">CVV <span style="color:var(--orange);">*</span></label>
+          <input type="text" class="form-input" id="bankCvv" required placeholder="3 位安全码" maxlength="3">
+        </div>
+      </div>
+      <div class="flex items-center justify-between pt-2">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <span class="switch">
+            <input type="checkbox" id="bankDefault">
+            <span class="switch-slider"></span>
+          </span>
+          <span class="text-sm font-semibold" style="color: var(--coffee);">设为默认支付卡</span>
+        </label>
+      </div>
+      <div class="flex gap-3 pt-3 justify-end">
+        <button type="button" class="btn-outline text-sm py-2.5 px-5" onclick="closeModal('bankModal')">取消</button>
+        <button type="submit" class="btn-primary text-sm py-2.5 px-5">添加银行卡</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== 通用确认模态框 ===== -->
+<div class="modal-mask" id="confirmModal">
+  <div class="modal-box" style="max-width: 380px;">
+    <div class="text-center">
+      <div class="text-5xl mb-4" id="confirmIcon">⚠️</div>
+      <h3 class="font-cn-display text-xl mb-2" style="color: var(--coffee);" id="confirmTitle">确认操作</h3>
+      <p class="text-sm mb-6" style="color: var(--brown-mid);" id="confirmMsg">确定要执行此操作吗？</p>
+      <div class="flex gap-3 justify-center">
+        <button class="btn-outline text-sm py-2.5 px-6" onclick="closeModal('confirmModal')">取消</button>
+        <button class="btn-primary text-sm py-2.5 px-6" id="confirmOk" style="background: #c0392b; box-shadow: 0 6px 16px -4px rgba(192,57,43,.5);">确认</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 订单详情模态框 ===== -->
+<div class="modal-mask" id="orderDetailModal">
+  <div class="modal-box" style="max-width: 520px;">
+    <div id="orderDetailContent"></div>
+    <div class="flex gap-3 mt-6 justify-end">
+      <button class="btn-outline text-sm py-2.5 px-5" onclick="closeModal('orderDetailModal')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Toast 容器 ===== -->
+<div id="toastContainer"></div>
+
+<script src="api.js"></script>
+<script>
+  // ===== 全局状态 =====
+  let currentUser = null;
+  let orders = [];
+  let addresses = [];
+  let bankCards = [];
+  let favorites = [];
+  let reviews = [];
+  let currentOrderFilter = 'all';
+  let editingAddressId = null;
+  let currentAddrTag = '家';
+  let confirmCallback = null;
+  let selectedAvatarFile = null;
+  const AVATAR_ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  const AVATAR_MAX_SIZE = 5 * 1024 * 1024;
+
+  // ===== Toast 提示 =====
+  function showToast(msg, type = '') {
+    const t = document.createElement('div');
+    t.className = 'toast ' + type;
+    const icon = type === 'success' ? '✓ ' : (type === 'error' ? '✕ ' : '');
+    t.innerHTML = '<span>' + icon + msg + '</span>';
+    document.body.appendChild(t);
+    requestAnimationFrame(() => t.classList.add('show'));
+    setTimeout(() => {
+      t.classList.remove('show');
+      setTimeout(() => t.remove(), 400);
+    }, 2200);
+  }
+
+  // ===== 模态框控制 =====
+  function openModal(id) {
+    document.getElementById(id).classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  document.querySelectorAll('.modal-mask').forEach(mask => {
+    mask.addEventListener('click', (e) => {
+      if (e.target === mask) closeModal(mask.id);
+    });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-mask.show').forEach(m => closeModal(m.id));
+    }
+  });
+
+  // ===== 通用确认框 =====
+  function showConfirm(opts) {
+    document.getElementById('confirmTitle').textContent = opts.title || '确认操作';
+    document.getElementById('confirmMsg').textContent = opts.msg || '确定要执行此操作吗？';
+    document.getElementById('confirmIcon').textContent = opts.icon || '⚠️';
+    confirmCallback = opts.onOk || null;
+    const okBtn = document.getElementById('confirmOk');
+    if (opts.danger) {
+      okBtn.style.background = '#c0392b';
+      okBtn.style.boxShadow = '0 6px 16px -4px rgba(192,57,43,.5)';
+    } else {
+      okBtn.style.background = 'var(--orange)';
+      okBtn.style.boxShadow = '0 6px 16px -4px rgba(255,131,66,.5)';
+    }
+    openModal('confirmModal');
+  }
+  document.getElementById('confirmOk').addEventListener('click', () => {
+    closeModal('confirmModal');
+    if (confirmCallback) confirmCallback();
+    confirmCallback = null;
+  });
+
+  // ===== 标签切换（左侧菜单 + 移动端标签） =====
+  function switchTab(tab) {
+    document.querySelectorAll('.menu-item, .mobile-tabs .filter-tab').forEach(el => {
+      if (el.dataset.tab === tab) {
+        el.classList.add('active');
+      } else if (el.dataset.tab) {
+        el.classList.remove('active');
+      }
+    });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + tab).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  document.querySelectorAll('[data-tab]').forEach(el => {
+    el.addEventListener('click', () => switchTab(el.dataset.tab));
+  });
+
+  // ===== 工具函数 =====
+  function maskPhone(phone) {
+    if (!phone) return '';
+    const s = String(phone);
+    if (s.length < 7) return s;
+    return s.slice(0, 3) + '****' + s.slice(-4);
+  }
+  function genderText(g) {
+    return { 0: '保密', 1: '男', 2: '女' }[g] || '保密';
+  }
+  function genderToForm(g) {
+    return { 0: 'secret', 1: 'male', 2: 'female' }[g] || 'secret';
+  }
+  function formToGender(v) {
+    return { secret: 0, male: 1, female: 2 }[v] != null ? { secret: 0, male: 1, female: 2 }[v] : 0;
+  }
+  function statusText(s) {
+    return {
+      PENDING_PAY: '待付款',
+      PAID: '已支付',
+      PENDING_CONFIRM: '待确认',
+      CONFIRMED: '制作中',
+      DELIVERING: '配送中',
+      COMPLETED: '已完成',
+      CANCELLED: '已取消'
+    }[s] || s;
+  }
+  function statusClass(s) {
+    return {
+      PENDING_PAY: 'status-pending',
+      PAID: 'status-pending',
+      PENDING_CONFIRM: 'status-pending',
+      CONFIRMED: 'status-shipping',
+      DELIVERING: 'status-shipping',
+      COMPLETED: 'status-done',
+      CANCELLED: 'status-done'
+    }[s] || 'status-pending';
+  }
+  function tagText(t) {
+    return { home: '家', company: '公司', school: '学校' }[t] || t || '家';
+  }
+  function tagEmoji(t) {
+    const cn = tagText(t);
+    return { '家': '🏠', '公司': '🏢', '学校': '🎓' }[cn] || '📍';
+  }
+  function tagToApi(cn) {
+    return { '家': 'home', '公司': 'company', '学校': 'school' }[cn] || 'home';
+  }
+  function cardTypeText(t) {
+    return { debit: '储蓄卡', credit: '信用卡' }[t] || t || '储蓄卡';
+  }
+  function maskCard(num) {
+    const n = String(num || '').replace(/\s/g, '');
+    if (n.length < 4) return n;
+    return '**** **** **** ' + n.slice(-4);
+  }
+  const BANK_GRADIENTS = [
+    'linear-gradient(135deg, #c0392b 0%, #8e1c0e 100%)',
+    'linear-gradient(135deg, #c0392b 0%, #af4f28 50%, #ff8342 100%)',
+    'linear-gradient(135deg, #1e3a8a 0%, #0f1e5e 100%)',
+    'linear-gradient(135deg, #00704f 0%, #003d2e 100%)',
+    'linear-gradient(135deg, #664237 0%, #2c1810 100%)'
+  ];
+  function getGradient(index) {
+    return BANK_GRADIENTS[index % BANK_GRADIENTS.length];
+  }
+  function isDefaultVal(v) {
+    return v === 1 || v === true;
+  }
+
+  // ===== 用户信息渲染 =====
+  function renderUserInfo() {
+    if (!currentUser) return;
+    const u = currentUser;
+    const avatar = u.avatar || ('https://picsum.photos/seed/avatar' + (u.id || '99') + '/200/200');
+    document.getElementById('userAvatar').src = avatar;
+    document.getElementById('formAvatar').src = avatar;
+    document.getElementById('displayName').textContent = u.nickname || u.username || '用户';
+    document.getElementById('displayUsername').textContent = u.username || '-';
+    document.getElementById('memberPill').textContent = (u.memberLevel || '普通') + ' 会员';
+    document.getElementById('userMeta').textContent = '注册时间：' + API.util.formatTime(u.createTime) + ' · 手机号：' + maskPhone(u.phone);
+    document.getElementById('statOrders').textContent = orders.length;
+    document.getElementById('statFavs').textContent = favorites.length;
+    document.getElementById('statPoints').textContent = u.points || 0;
+    // 表单
+    document.getElementById('inputUsername').value = u.username || '';
+    document.getElementById('inputNickname').value = u.nickname || '';
+    document.getElementById('inputPhone').value = maskPhone(u.phone);
+    // 性别选中
+    selectGender(genderToForm(u.gender));
+  }
+  function selectGender(formValue) {
+    document.querySelectorAll('[data-gender]').forEach(l => {
+      l.style.borderColor = 'var(--beige)';
+      l.style.background = 'transparent';
+      l.querySelector('input').checked = false;
+    });
+    const target = document.querySelector('[data-gender="' + formValue + '"]');
+    if (target) {
+      target.style.borderColor = 'var(--orange)';
+      target.style.background = 'var(--pale)';
+      target.querySelector('input').checked = true;
+    }
+  }
+
+  // ===== 头像更换 =====
+  function openAvatarModal() {
+    selectedAvatarFile = null;
+    document.getElementById('avatarUrl').value = '';
+    document.getElementById('avatarFile').value = '';
+    document.getElementById('avatarPreview').src = (currentUser && currentUser.avatar) || 'https://picsum.photos/seed/avatar99/200/200';
+    openModal('avatarModal');
+  }
+  document.getElementById('avatarFile').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!AVATAR_ALLOWED_TYPES.includes(file.type)) {
+      showToast('仅支持 JPG / PNG / GIF / WebP 格式的图片', 'error');
+      e.target.value = '';
+      return;
+    }
+    if (file.size > AVATAR_MAX_SIZE) {
+      showToast('图片大小不能超过 5MB，当前 ' + (file.size / 1024 / 1024).toFixed(1) + 'MB', 'error');
+      e.target.value = '';
+      return;
+    }
+    selectedAvatarFile = file;
+    document.getElementById('avatarUrl').value = '';
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      document.getElementById('avatarPreview').src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('avatarUrl').addEventListener('input', (e) => {
+    const url = e.target.value.trim();
+    if (url) {
+      selectedAvatarFile = null;
+      document.getElementById('avatarFile').value = '';
+      document.getElementById('avatarPreview').src = url;
+    }
+  });
+  async function saveAvatar() {
+    const urlInput = document.getElementById('avatarUrl').value.trim();
+    const btn = document.getElementById('saveAvatarBtn');
+    const originalHtml = btn.innerHTML;
+
+    if (!selectedAvatarFile && !urlInput) {
+      showToast('请选择本地图片或输入图片 URL', 'error');
+      return;
+    }
+
+    btn.disabled = true;
+    try {
+      let avatarUrl;
+      if (selectedAvatarFile) {
+        btn.innerHTML = '<svg class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> 上传中...';
+        avatarUrl = await API.util.uploadImage(selectedAvatarFile);
+      } else {
+        avatarUrl = urlInput;
+      }
+
+      btn.innerHTML = '保存中...';
+      await API.user.updateAvatar(avatarUrl);
+      currentUser.avatar = avatarUrl;
+      document.getElementById('userAvatar').src = avatarUrl;
+      document.getElementById('formAvatar').src = avatarUrl;
+      closeModal('avatarModal');
+      showToast('头像更换成功', 'success');
+    } catch (e) {
+      showToast(e.message || '头像更换失败，请重试', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+  }
+
+  // ===== 个人信息表单 =====
+  document.querySelectorAll('[data-gender]').forEach(label => {
+    label.addEventListener('click', () => {
+      document.querySelectorAll('[data-gender]').forEach(l => {
+        l.style.borderColor = 'var(--beige)';
+        l.style.background = 'transparent';
+      });
+      label.style.borderColor = 'var(--orange)';
+      label.style.background = 'var(--pale)';
+      label.querySelector('input').checked = true;
+    });
+  });
+  // 重置时恢复当前用户数据
+  document.getElementById('profileForm').addEventListener('reset', () => {
+    setTimeout(() => {
+      if (currentUser) {
+        document.getElementById('inputUsername').value = currentUser.username || '';
+        document.getElementById('inputNickname').value = currentUser.nickname || '';
+        selectGender(genderToForm(currentUser.gender));
+      }
+    }, 0);
+  });
+  document.getElementById('profileForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('inputUsername').value.trim();
+    const nickname = document.getElementById('inputNickname').value.trim();
+    if (!username) { showToast('请输入用户名', 'error'); return; }
+    if (!nickname) { showToast('请输入昵称', 'error'); return; }
+    if (username.length < 3) { showToast('用户名至少 3 个字符', 'error'); return; }
+    const gender = formToGender(document.querySelector('input[name="gender"]:checked').value);
+    try {
+      await API.user.updateProfile({ username, nickname, gender, avatar: currentUser.avatar });
+      currentUser.username = username;
+      currentUser.nickname = nickname;
+      currentUser.gender = gender;
+      document.getElementById('displayUsername').textContent = username;
+      document.getElementById('displayName').textContent = nickname;
+      showToast('个人信息保存成功', 'success');
+    } catch (e) {
+      showToast(e.message || '保存失败', 'error');
+    }
+  });
+
+  // ===== 订单渲染 =====
+  const ORDER_FILTER_MAP = {
+    all: null,
+    pending: 'PENDING_PAY',
+    shipping: 'DELIVERING',
+    done: 'COMPLETED'
+  };
+  function renderOrders() {
+    const list = document.getElementById('orderList');
+    const empty = document.getElementById('orderEmpty');
+    const targetStatus = ORDER_FILTER_MAP[currentOrderFilter];
+    const filtered = targetStatus ? orders.filter(o => o.status === targetStatus) : orders;
+    document.getElementById('orderCount').textContent = filtered.length;
+    if (filtered.length === 0) {
+      list.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    // 构建 orderId → review 映射，用于判断是否已评价及编辑链接
+    const reviewedByOrderId = {};
+    (reviews || []).forEach(r => { reviewedByOrderId[r.orderId] = r; });
+    list.innerHTML = filtered.map(o => {
+      const oid = o.id;
+      const orderNo = API.util.escapeHtml(o.orderNo || oid);
+      const shop = API.util.escapeHtml(o.merchantName || '未知商家');
+      const amount = API.util.money(o.totalAmount);
+      const time = API.util.formatTime(o.createTime);
+      const st = o.status;
+      const note = o.note ? API.util.escapeHtml(o.note) : '';
+      const logo = o.merchantLogo || `https://picsum.photos/seed/logo${oid}/120/120`;
+      let actions = '';
+      if (st === 'PENDING_PAY') {
+        actions += `<button class="btn-primary text-xs py-2 px-4" onclick="payOrder('${oid}')">去支付</button>`;
+      }
+      if (st === 'DELIVERING') {
+        actions += `<button class="btn-primary text-xs py-2 px-4" onclick="confirmReceive('${oid}')">确认收货</button>`;
+      }
+      if (st === 'COMPLETED') {
+        actions += `<a href="shop.html?id=${o.merchantId || ''}" class="btn-outline text-xs py-2 px-4">再次购买</a>`;
+        const rv = reviewedByOrderId[oid];
+        if (rv) {
+          actions += `<button class="btn-outline text-xs py-2 px-4" onclick="switchTab('comments')">查看评价</button>`;
+          if (isWithin24h(rv.createTime)) {
+            actions += `<a href="review.html?reviewId=${rv.id}" class="btn-primary text-xs py-2 px-4">修改评价</a>`;
+          }
+        } else {
+          actions += `<a href="review.html?orderId=${oid}" class="btn-primary text-xs py-2 px-4">评价</a>`;
+        }
+      }
+      actions += `<button class="btn-outline text-xs py-2 px-4" onclick="viewOrderDetail('${oid}')">查看详情</button>`;
+      return `
+      <div class="border rounded-[20px] p-5 hover:shadow-md transition" style="border-color: var(--beige);">
+        <div class="flex items-start gap-4">
+          <img src="${logo}" alt="${shop} logo" class="w-16 h-16 rounded-2xl object-cover flex-shrink-0" onerror="this.onerror=null;this.src='https://picsum.photos/seed/logofb${oid}/120/120'">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <h3 class="font-cn-display text-lg truncate" style="color: var(--coffee);">${shop}</h3>
+              <span class="status-tag ${statusClass(st)} flex-shrink-0">${statusText(st)}</span>
+            </div>
+            <p class="text-sm mb-2 truncate" style="color: var(--brown-mid);">${note || '订单金额明细见详情'}</p>
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="text-xs" style="color: var(--brown-mid);">
+                <span>下单时间：${time}</span>
+                <span class="mx-2">·</span>
+                <span>订单号：${orderNo}</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="font-display text-xl" style="color: var(--orange);">¥${amount}</span>
+                <div class="flex gap-2">${actions}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  document.querySelectorAll('#orderFilters .filter-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('#orderFilters .filter-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentOrderFilter = tab.dataset.status;
+      renderOrders();
+    });
+  });
+  function payOrder(id) {
+    showConfirm({
+      title: '确认支付',
+      msg: '确定要立即支付该订单吗？',
+      icon: '💳',
+      onOk: async () => {
+        try {
+          await API.order.pay(id, 'BALANCE');
+          const o = orders.find(x => String(x.id) === String(id));
+          if (o) o.status = 'PAID';
+          renderOrders();
+          showToast('支付成功，商家已接单', 'success');
+        } catch (e) {
+          showToast(e.message || '支付失败', 'error');
+        }
+      }
+    });
+  }
+  function confirmReceive(id) {
+    showConfirm({
+      title: '确认收货',
+      msg: '确认已收到餐品吗？',
+      icon: '📦',
+      onOk: async () => {
+        try {
+          await API.order.confirmReceipt(id);
+          const o = orders.find(x => String(x.id) === String(id));
+          if (o) o.status = 'COMPLETED';
+          renderOrders();
+          showToast('收货成功，订单已完成', 'success');
+        } catch (e) {
+          showToast(e.message || '操作失败', 'error');
+        }
+      }
+    });
+  }
+  function payMethodText(m) {
+    return { BALANCE: '余额支付', WECHAT: '微信支付', ALIPAY: '支付宝', CARD: '银行卡' }[m] || m || '-';
+  }
+  async function viewOrderDetail(id) {
+    showToast('正在加载订单详情...');
+    try {
+      const detail = await API.order.detail(id);
+      const o = detail.order || {};
+      const items = detail.items || [];
+      const logo = o.merchantLogo || `https://picsum.photos/seed/logo${id}/120/120`;
+      const shop = API.util.escapeHtml(o.merchantName || '未知商家');
+      const orderNo = API.util.escapeHtml(o.orderNo || id);
+      const amount = API.util.money(o.totalAmount);
+      const subtotal = API.util.money(o.subtotal);
+      const discount = API.util.money(o.discount);
+      const deliveryFee = API.util.money(o.deliveryFee);
+      const time = API.util.formatTime(o.createTime);
+      const payTime = API.util.formatTime(o.payTime);
+      const st = o.status;
+      const note = o.note ? API.util.escapeHtml(o.note) : '无';
+      const payMethod = API.util.escapeHtml(payMethodText(o.payMethod));
+      const addr = o.addressSnapshot ? API.util.escapeHtml(o.addressSnapshot) : '无';
+
+      const itemsHtml = items.length ? items.map(it => {
+        const name = API.util.escapeHtml(it.dishName || '菜品');
+        const img = it.dishImage || `https://picsum.photos/seed/dish${it.dishId}/80/80`;
+        const opt = it.optionsText ? API.util.escapeHtml(it.optionsText) : '';
+        const qty = it.qty || 1;
+        const price = API.util.money(it.unitPrice);
+        const sub = API.util.money(it.subtotal);
+        return `
+        <div class="flex items-center gap-3 py-3 border-b" style="border-color: var(--beige);">
+          <img src="${img}" alt="${name}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0" onerror="this.onerror=null;this.src='https://picsum.photos/seed/dishfb${it.dishId}/80/80'">
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-sm truncate" style="color: var(--coffee);">${name}</p>
+            ${opt ? `<p class="text-xs truncate" style="color: var(--brown-mid);">${opt}</p>` : ''}
+          </div>
+          <div class="text-right flex-shrink-0">
+            <p class="text-xs" style="color: var(--brown-mid);">¥${price} × ${qty}</p>
+            <p class="font-semibold text-sm" style="color: var(--coffee);">¥${sub}</p>
+          </div>
+        </div>`;
+      }).join('') : `<p class="text-sm py-4 text-center" style="color: var(--brown-mid);">暂无菜品明细</p>`;
+
+      document.getElementById('orderDetailContent').innerHTML = `
+        <div class="flex items-center gap-4 mb-5 pb-5 border-b" style="border-color: var(--beige);">
+          <img src="${logo}" alt="${shop} logo" class="w-16 h-16 rounded-2xl object-cover flex-shrink-0" onerror="this.onerror=null;this.src='https://picsum.photos/seed/logofb${id}/120/120'">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <h3 class="font-cn-display text-xl truncate" style="color: var(--coffee);">${shop}</h3>
+              <span class="status-tag ${statusClass(st)} flex-shrink-0">${statusText(st)}</span>
+            </div>
+            <p class="text-xs" style="color: var(--brown-mid);">订单号：${orderNo} · 下单时间：${time}</p>
+          </div>
+        </div>
+        <div class="mb-5">
+          <p class="text-xs font-bold uppercase tracking-wider mb-2" style="color: var(--brown-mid);">菜品明细</p>
+          ${itemsHtml}
+        </div>
+        <div class="space-y-2 mb-5 text-sm">
+          <p class="text-xs font-bold uppercase tracking-wider mb-2" style="color: var(--brown-mid);">金额明细</p>
+          <div class="flex justify-between" style="color: var(--brown-mid);"><span>商品小计</span><span>¥${subtotal}</span></div>
+          <div class="flex justify-between" style="color: var(--brown-mid);"><span>优惠减免</span><span>-¥${discount}</span></div>
+          <div class="flex justify-between" style="color: var(--brown-mid);"><span>配送费</span><span>¥${deliveryFee}</span></div>
+          <div class="flex justify-between font-semibold pt-2 border-t" style="border-color: var(--beige); color: var(--coffee);">
+            <span>实付金额</span><span class="font-display text-xl" style="color: var(--orange);">¥${amount}</span>
+          </div>
+        </div>
+        <div class="space-y-2 text-sm">
+          <p class="text-xs font-bold uppercase tracking-wider mb-2" style="color: var(--brown-mid);">订单信息</p>
+          <div class="flex justify-between gap-3" style="color: var(--brown-mid);"><span class="flex-shrink-0">收货地址</span><span class="text-right" style="color: var(--coffee);">${addr}</span></div>
+          <div class="flex justify-between gap-3" style="color: var(--brown-mid);"><span class="flex-shrink-0">支付方式</span><span style="color: var(--coffee);">${payMethod}</span></div>
+          ${payTime ? `<div class="flex justify-between gap-3" style="color: var(--brown-mid);"><span class="flex-shrink-0">支付时间</span><span style="color: var(--coffee);">${payTime}</span></div>` : ''}
+          <div class="flex justify-between gap-3" style="color: var(--brown-mid);"><span class="flex-shrink-0">订单留言</span><span class="text-right" style="color: var(--coffee);">${note}</span></div>
+        </div>`;
+      openModal('orderDetailModal');
+    } catch (e) {
+      showToast(e.message || '加载详情失败', 'error');
+    }
+  }
+
+  // ===== 地址渲染 =====
+  function renderAddresses() {
+    const list = document.getElementById('addressList');
+    const empty = document.getElementById('addressEmpty');
+    if (addresses.length === 0) {
+      list.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    list.innerHTML = addresses.map(a => {
+      const tag = tagText(a.tag);
+      const emoji = tagEmoji(a.tag);
+      const isDefault = isDefaultVal(a.isDefault);
+      return `
+      <div class="border rounded-[20px] p-5 hover:shadow-md transition flex items-start gap-4" style="border-color: var(--beige);">
+        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background: var(--pale);">
+          <span class="text-lg">${emoji}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap mb-1">
+            <span class="font-bold" style="color: var(--coffee);">${API.util.escapeHtml(a.name)}</span>
+            <span class="text-sm" style="color: var(--brown-mid);">${API.util.escapeHtml(a.phone)}</span>
+            <span class="pill-tag beige text-[11px]" style="padding: 2px 8px;">${tag}</span>
+            ${isDefault ? '<span class="status-tag status-done" style="padding: 2px 8px;">默认</span>' : ''}
+          </div>
+          <p class="text-sm" style="color: var(--brown-mid);">${API.util.escapeHtml(a.region)} ${API.util.escapeHtml(a.detail)}</p>
+        </div>
+        <div class="flex gap-2 flex-shrink-0">
+          <button class="btn-outline text-xs py-1.5 px-3" onclick="editAddress(${a.id})">编辑</button>
+          ${!isDefault ? `<button class="btn-outline text-xs py-1.5 px-3" onclick="setDefaultAddress(${a.id})">设为默认</button>` : ''}
+          <button class="btn-outline text-xs py-1.5 px-3" style="border-color: #c0392b; color: #c0392b;" onclick="deleteAddress(${a.id})">删除</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  function openAddressModal() {
+    editingAddressId = null;
+    document.getElementById('addressModalTitle').textContent = '新增收货地址';
+    document.getElementById('addressForm').reset();
+    document.getElementById('addressId').value = '';
+    currentAddrTag = '家';
+    document.querySelectorAll('#addrTagPicker .filter-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.tag === '家');
+    });
+    openModal('addressModal');
+  }
+  function editAddress(id) {
+    const a = addresses.find(x => String(x.id) === String(id));
+    if (!a) return;
+    editingAddressId = id;
+    document.getElementById('addressModalTitle').textContent = '编辑收货地址';
+    document.getElementById('addressId').value = a.id;
+    document.getElementById('addrName').value = a.name || '';
+    document.getElementById('addrPhone').value = a.phone || '';
+    document.getElementById('addrRegion').value = a.region || '';
+    document.getElementById('addrDetail').value = a.detail || '';
+    document.getElementById('addrDefault').checked = isDefaultVal(a.isDefault);
+    currentAddrTag = tagText(a.tag);
+    document.querySelectorAll('#addrTagPicker .filter-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.tag === currentAddrTag);
+    });
+    openModal('addressModal');
+  }
+  document.querySelectorAll('#addrTagPicker .filter-tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('#addrTagPicker .filter-tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      currentAddrTag = t.dataset.tag;
+    });
+  });
+  document.getElementById('addressForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('addrName').value.trim();
+    const phone = document.getElementById('addrPhone').value.trim();
+    const region = document.getElementById('addrRegion').value.trim();
+    const detail = document.getElementById('addrDetail').value.trim();
+    const isDefault = document.getElementById('addrDefault').checked ? 1 : 0;
+    if (!/^1[3-9]\d{9}$/.test(phone)) { showToast('请输入正确的 11 位手机号', 'error'); return; }
+    if (name.length < 2) { showToast('收件人姓名至少 2 个字', 'error'); return; }
+    const payload = { name, phone, region, detail, tag: tagToApi(currentAddrTag), isDefault };
+    try {
+      if (editingAddressId) {
+        await API.user.updateAddress(editingAddressId, payload);
+        showToast('地址更新成功', 'success');
+      } else {
+        await API.user.addAddress(payload);
+        showToast('地址添加成功', 'success');
+      }
+      closeModal('addressModal');
+      addresses = await API.user.listAddresses();
+      renderAddresses();
+    } catch (e) {
+      showToast(e.message || '操作失败', 'error');
+    }
+  });
+  async function setDefaultAddress(id) {
+    const a = addresses.find(x => String(x.id) === String(id));
+    if (!a) return;
+    try {
+      await API.user.updateAddress(id, {
+        name: a.name, phone: a.phone, region: a.region, detail: a.detail,
+        tag: a.tag, isDefault: 1
+      });
+      addresses = await API.user.listAddresses();
+      renderAddresses();
+      showToast('已设为默认地址', 'success');
+    } catch (e) {
+      showToast(e.message || '操作失败', 'error');
+    }
+  }
+  function deleteAddress(id) {
+    showConfirm({
+      title: '删除地址',
+      msg: '确定要删除该收货地址吗？删除后不可恢复。',
+      icon: '🗑️',
+      danger: true,
+      onOk: async () => {
+        try {
+          await API.user.deleteAddress(id);
+          addresses = await API.user.listAddresses();
+          renderAddresses();
+          showToast('地址已删除', 'success');
+        } catch (e) {
+          showToast(e.message || '删除失败', 'error');
+        }
+      }
+    });
+  }
+
+  // ===== 银行卡渲染 =====
+  function renderBanks() {
+    const list = document.getElementById('bankList');
+    const empty = document.getElementById('bankEmpty');
+    if (bankCards.length === 0) {
+      list.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    list.innerHTML = bankCards.map((b, i) => {
+      const isDefault = isDefaultVal(b.isDefault);
+      const gradient = b.gradient || getGradient(i);
+      return `
+      <div class="bank-card" style="background: ${gradient};">
+        <div class="relative z-10">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <div class="text-xs opacity-80 mb-1">${cardTypeText(b.cardType)}</div>
+              <div class="font-cn-display text-lg">${API.util.escapeHtml(b.bankName)}</div>
+            </div>
+            ${isDefault ? '<span class="pill-tag mustard text-[10px]" style="padding: 3px 10px;">默认</span>' : ''}
+          </div>
+          <div class="bank-chip mb-4"></div>
+          <div class="font-display text-lg tracking-wider">${maskCard(b.cardNumber)}</div>
+        </div>
+        <div class="relative z-10 flex items-end justify-between mt-4">
+          <div>
+            <div class="text-xs opacity-70">持卡人</div>
+            <div class="text-sm font-semibold">${API.util.escapeHtml(b.holder)}</div>
+          </div>
+          <div>
+            <div class="text-xs opacity-70">有效期</div>
+            <div class="text-sm font-semibold">${API.util.escapeHtml(b.expireDate)}</div>
+          </div>
+        </div>
+        <div class="relative z-10 flex gap-2 mt-4 pt-3 border-t border-white/20">
+          ${!isDefault ? `<button class="text-xs font-semibold opacity-90 hover:opacity-100 transition" onclick="setDefaultBank(${b.id})">设为默认</button>` : '<span class="text-xs opacity-60">默认支付卡</span>'}
+          <button class="text-xs font-semibold opacity-90 hover:opacity-100 transition ml-auto" onclick="unbindBank(${b.id})">解绑</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('bankForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const holder = document.getElementById('bankHolder').value.trim();
+    const number = document.getElementById('bankNumber').value.trim();
+    const bank = document.getElementById('bankName').value;
+    const cardType = document.getElementById('bankType').value;
+    const expire = document.getElementById('bankExpire').value.trim();
+    const cvv = document.getElementById('bankCvv').value.trim();
+    const isDefault = document.getElementById('bankDefault').checked ? 1 : 0;
+    if (!holder) { showToast('请输入持卡人姓名', 'error'); return; }
+    if (number.length < 16) { showToast('卡号至少 16 位', 'error'); return; }
+    if (!bank) { showToast('请选择银行', 'error'); return; }
+    if (!/^\d{2}\/\d{2}$/.test(expire)) { showToast('有效期格式应为 MM/YY', 'error'); return; }
+    if (cvv.length !== 3) { showToast('CVV 应为 3 位', 'error'); return; }
+    try {
+      await API.user.bindBankCard({ holder, cardNumber: number, bankName: bank, cardType, expireDate: expire, cvv, isDefault });
+      closeModal('bankModal');
+      document.getElementById('bankForm').reset();
+      bankCards = await API.user.listBankCards();
+      renderBanks();
+      showToast('银行卡添加成功', 'success');
+    } catch (e) {
+      showToast(e.message || '添加失败', 'error');
+    }
+  });
+  function openBankModal() {
+    document.getElementById('bankForm').reset();
+    openModal('bankModal');
+  }
+  async function setDefaultBank(id) {
+    try {
+      await API.user.setDefaultBankCard(id);
+      bankCards = await API.user.listBankCards();
+      renderBanks();
+      showToast('已设为默认支付卡', 'success');
+    } catch (e) {
+      showToast(e.message || '操作失败', 'error');
+    }
+  }
+  function unbindBank(id) {
+    const b = bankCards.find(x => String(x.id) === String(id));
+    showConfirm({
+      title: '解绑银行卡',
+      msg: `确定要解绑 ${b ? b.bankName : ''} 尾号 ${b ? String(b.cardNumber).slice(-4) : ''} 的银行卡吗？`,
+      icon: '💳',
+      danger: true,
+      onOk: async () => {
+        try {
+          await API.user.unbindBankCard(id);
+          bankCards = await API.user.listBankCards();
+          renderBanks();
+          showToast('银行卡已解绑', 'success');
+        } catch (e) {
+          showToast(e.message || '解绑失败', 'error');
+        }
+      }
+    });
+  }
+
+  // ===== 收藏渲染 =====
+  function renderFavorites() {
+    const list = document.getElementById('favList');
+    const empty = document.getElementById('favEmpty');
+    document.getElementById('favCount').textContent = favorites.length;
+    document.getElementById('statFavs').textContent = favorites.length;
+    if (favorites.length === 0) {
+      list.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    list.innerHTML = favorites.map(f => {
+      const id = f.id;
+      const name = API.util.escapeHtml(f.name);
+      const cover = f.cover || `https://picsum.photos/seed/fav${id}/640/400`;
+      const logo = f.logo || `https://picsum.photos/seed/logo${id}/100/100`;
+      const rating = f.rating || '5.0';
+      const category = API.util.escapeHtml(f.category || '');
+      const sales = f.sales || 0;
+      const distance = API.util.escapeHtml(f.distance || '');
+      const delivery = API.util.escapeHtml(f.deliveryTime || '');
+      const minOrder = f.minOrder || 0;
+      const deliveryFee = f.deliveryFee || 0;
+      return `
+      <a href="shop.html?id=${id}" class="block bg-white rounded-[24px] overflow-hidden card-shadow lift-card transition group">
+        <div class="relative aspect-[16/10] overflow-hidden" style="background: var(--beige);">
+          <img src="${cover}" alt="${name}" loading="lazy" decoding="async" class="pc-img w-full h-full object-cover" onerror="this.onerror=null;this.src='https://picsum.photos/seed/favfb${id}/640/400'">
+          <button class="fav-btn active absolute top-3 right-3" onclick="event.preventDefault(); event.stopPropagation(); toggleFav(${id})" aria-label="取消收藏">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+          <span class="absolute top-3 left-3 pill-tag mustard text-[11px]">★ ${rating}</span>
+        </div>
+        <div class="p-5">
+          <div class="flex items-center gap-3 mb-2">
+            <img src="${logo}" alt="${name} logo" loading="lazy" decoding="async" class="w-12 h-12 rounded-2xl object-cover ring-2 ring-white shadow" onerror="this.onerror=null;this.src='https://picsum.photos/seed/logofb${id}/100/100'">
+            <div class="flex-1 min-w-0">
+              <h3 class="font-cn-display text-lg truncate" style="color: var(--coffee);">${name}</h3>
+              <p class="text-xs" style="color: var(--brown-mid);">¥¥ · ${category} · ${distance}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 text-xs mb-3" style="color: var(--brown-mid);">
+            <span class="star font-bold">★ ${rating}</span>
+            <span>·</span>
+            <span>月售 ${sales}</span>
+            <span>·</span>
+            <span>${delivery}</span>
+          </div>
+          <div class="flex items-center justify-between pt-3 border-t" style="border-color: var(--beige);">
+            <span class="text-xs font-semibold" style="color: var(--brown-mid);">起送 ¥${minOrder} · ${Number(deliveryFee) === 0 ? '免配送费' : '配送 ¥' + deliveryFee}</span>
+            <span class="btn-primary text-xs py-1.5 px-4">进店</span>
+          </div>
+        </div>
+      </a>`;
+    }).join('');
+  }
+  function toggleFav(id) {
+    const f = favorites.find(x => String(x.id) === String(id));
+    showConfirm({
+      title: '取消收藏',
+      msg: `确定要取消收藏「${f ? f.name : ''}」吗？`,
+      icon: '💔',
+      danger: true,
+      onOk: async () => {
+        try {
+          await API.user.removeFavorite(id);
+          favorites = favorites.filter(x => String(x.id) !== String(id));
+          // 同步更新 localStorage 缓存，确保 shop.html 收藏状态一致
+          try {
+            const cached = JSON.parse(localStorage.getItem('kazi_fav_merchants') || '[]');
+            const updated = cached.filter(fid => String(fid) !== String(id));
+            localStorage.setItem('kazi_fav_merchants', JSON.stringify(updated));
+          } catch (_) {}
+          renderFavorites();
+          showToast('已取消收藏', 'success');
+        } catch (e) {
+          showToast(e.message || '操作失败', 'error');
+        }
+      }
+    });
+  }
+
+  // ===== 评价渲染 =====
+  function renderReviews() {
+    const list = document.getElementById('reviewList');
+    const empty = document.getElementById('reviewEmpty');
+    if (!reviews || reviews.length === 0) {
+      list.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    list.innerHTML = reviews.map(r => {
+      const name = API.util.escapeHtml(r.merchantName || '商家');
+      const orderNo = API.util.escapeHtml(r.orderNo || '');
+      const time = API.util.formatTime(r.createTime);
+      const rating = r.rating || 0;
+      const delivery = r.deliveryRating || 0;
+      const content = API.util.escapeHtml(r.content || '');
+      const serviceStars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+      const deliveryStars = delivery ? ('★'.repeat(delivery) + '☆'.repeat(5 - delivery)) : '';
+      const canEdit = isWithin24h(r.createTime);
+      // 菜品明细
+      const itemsHtml = (r.items && r.items.length) ? r.items.map(it => {
+        const itRating = it.rating || 0;
+        const itStars = '★'.repeat(itRating) + '☆'.repeat(5 - itRating);
+        const itName = API.util.escapeHtml(it.dishName || '菜品');
+        const itContent = API.util.escapeHtml(it.content || '');
+        const imgs = (it.imageList || []).map(src =>
+          `<img src="${API.util.escapeHtml(src)}" alt="实拍" class="w-14 h-14 rounded-lg object-cover" onerror="this.onerror=null;this.style.display='none'">`
+        ).join('');
+        return `
+        <div class="flex items-start gap-3 py-2" style="border-top: 1px dashed var(--beige);">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-sm font-bold" style="color: var(--coffee);">${itName}</span>
+              <span class="star text-xs">${itStars}</span>
+            </div>
+            ${itContent ? `<p class="text-xs" style="color: var(--brown-mid);">${itContent}</p>` : ''}
+          </div>
+          <div class="flex gap-1 flex-shrink-0">${imgs}</div>
+        </div>`;
+      }).join('') : '';
+      return `
+      <div class="bg-white rounded-[20px] p-5 card-shadow">
+        <div class="flex items-start justify-between gap-2 mb-3">
+          <div>
+            <h3 class="font-cn-display text-lg" style="color: var(--coffee);">${name}</h3>
+            <p class="text-xs mt-1" style="color: var(--brown-mid);">订单号：${orderNo} · 评价时间：${time}</p>
+          </div>
+          <div class="flex gap-2 flex-shrink-0">
+            ${canEdit ? `<a href="review.html?reviewId=${r.id}" class="btn-outline text-xs py-1.5 px-3">修改</a>
+            <button class="btn-outline text-xs py-1.5 px-3" style="border-color:#c0392b;color:#c0392b;" onclick="deleteReview(${r.id})">删除</button>` : `<span class="text-xs" style="color: #c9a98a;">超过24h不可修改</span>`}
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-4 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold" style="color: var(--brown-mid);">服务</span>
+            <span class="star text-sm">${serviceStars}</span>
+          </div>
+          ${deliveryStars ? `<div class="flex items-center gap-2">
+            <span class="text-xs font-bold" style="color: var(--brown-mid);">配送</span>
+            <span class="star text-sm">${deliveryStars}</span>
+          </div>` : ''}
+        </div>
+        ${content ? `<p class="text-sm mb-2" style="color: var(--coffee);">${content}</p>` : ''}
+        ${itemsHtml ? `<div class="mt-1">${itemsHtml}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  /** 24 小时内可编辑/删除；兼容 LocalDateTime 数组序列化 */
+  function isWithin24h(createTime) {
+    if (!createTime) return false;
+    let dt;
+    if (Array.isArray(createTime)) {
+      const [y, m, d, h = 0, mi = 0, s = 0] = createTime;
+      dt = new Date(y, m - 1, d, h, mi, s);
+    } else {
+      dt = new Date(String(createTime).replace(' ', 'T'));
+    }
+    if (isNaN(dt.getTime())) return false;
+    return Date.now() - dt.getTime() < 24 * 60 * 60 * 1000;
+  }
+
+  async function deleteReview(id) {
+    showConfirm({
+      title: '删除评价',
+      msg: '删除后该订单可重新评价，此操作不可撤销，确认删除？',
+      icon: '🗑️',
+      danger: true,
+      onOk: async () => {
+        try {
+          await API.user.deleteReview(id);
+          reviews = reviews.filter(r => r.id !== id);
+          renderReviews();
+          renderOrders();
+          showToast('评价已删除', 'success');
+        } catch (e) {
+          showToast(e.message || '删除失败', 'error');
+        }
+      }
+    });
+  }
+
+  // ===== 输入格式化 =====
+  document.getElementById('bankNumber').addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 19);
+  });
+  document.getElementById('bankExpire').addEventListener('input', (e) => {
+    let v = e.target.value.replace(/\D/g, '').slice(0, 4);
+    if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
+    e.target.value = v;
+  });
+  document.getElementById('bankCvv').addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 3);
+  });
+  document.getElementById('addrPhone').addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 11);
+  });
+
+  // ===== 初始化 =====
+  async function init() {
+    // 检查登录
+    currentUser = await API.auth.currentUser();
+    if (!currentUser) {
+      location.href = 'login.html?redirect=profile.html';
+      return;
+    }
+    // 并行加载所有数据
+    const [ordersData, addressesData, bankCardsData, favoritesData, reviewsData] = await Promise.all([
+      API.order.list().catch(e => { console.warn('订单加载失败', e); return []; }),
+      API.user.listAddresses().catch(e => { console.warn('地址加载失败', e); return []; }),
+      API.user.listBankCards().catch(e => { console.warn('银行卡加载失败', e); return []; }),
+      API.user.listFavorites().catch(e => { console.warn('收藏加载失败', e); return []; }),
+      API.user.listMyReviews().catch(e => { console.warn('评价加载失败', e); return []; })
+    ]);
+    orders = ordersData || [];
+    addresses = addressesData || [];
+    bankCards = bankCardsData || [];
+    favorites = favoritesData || [];
+    // 同步收藏列表到 localStorage 缓存，确保 shop.html 收藏按钮状态一致
+    try { localStorage.setItem('kazi_fav_merchants', JSON.stringify(favorites.map(f => f.id))); } catch (_) {}
+    reviews = reviewsData || [];
+
+    renderUserInfo();
+    renderOrders();
+    renderAddresses();
+    renderBanks();
+    renderFavorites();
+    renderReviews();
+
+    // 默认显示个人信息面板，支持 ?tab= 深链直达（如评价成功页跳转）
+    const deepTab = API.util.getParam('tab');
+    switchTab(deepTab || 'profile');
+  }
+
+  init();
+</script>
+
+</body>
+</html>

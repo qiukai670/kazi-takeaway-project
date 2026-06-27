@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qiukai.mapper.ReviewMapper">
+
+    <resultMap id="reviewResultMap" type="com.qiukai.entity.Review">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="merchantId" column="merchant_id"/>
+        <result property="rating" column="rating"/>
+        <result property="deliveryRating" column="delivery_rating"/>
+        <result property="content" column="content"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="merchantName" column="merchant_name"/>
+        <result property="orderNo" column="order_no"/>
+    </resultMap>
+
+    <sql id="baseColumns">
+        r.id, r.user_id, r.order_id, r.merchant_id, r.rating, r.delivery_rating,
+        r.content, r.create_time, r.update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.qiukai.entity.Review" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO review (user_id, order_id, merchant_id, rating, delivery_rating, content)
+        VALUES (#{userId}, #{orderId}, #{merchantId}, #{rating}, #{deliveryRating}, #{content})
+    </insert>
+
+    <update id="update" parameterType="com.qiukai.entity.Review">
+        UPDATE review
+        SET rating = #{rating},
+            delivery_rating = #{deliveryRating},
+            content = #{content},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM review WHERE id = #{id}
+    </delete>
+
+    <!-- 去重检查：不 JOIN，保持独立 -->
+    <select id="selectByOrderId" resultMap="reviewResultMap">
+        SELECT <include refid="baseColumns"/>
+        FROM review r WHERE r.order_id = #{orderId}
+    </select>
+
+    <select id="selectById" resultMap="reviewResultMap">
+        SELECT <include refid="baseColumns"/>, o.merchant_name, o.order_no
+        FROM review r
+        INNER JOIN orders o ON o.id = r.order_id
+        WHERE r.id = #{id}
+    </select>
+
+    <select id="selectByMerchantId" resultMap="reviewResultMap">
+        SELECT <include refid="baseColumns"/>
+        FROM review r WHERE r.merchant_id = #{merchantId} ORDER BY r.create_time DESC
+    </select>
+
+    <select id="selectByUserId" resultMap="reviewResultMap">
+        SELECT <include refid="baseColumns"/>, o.merchant_name, o.order_no
+        FROM review r
+        INNER JOIN orders o ON o.id = r.order_id
+        WHERE r.user_id = #{userId} ORDER BY r.create_time DESC
+    </select>
+
+</mapper>

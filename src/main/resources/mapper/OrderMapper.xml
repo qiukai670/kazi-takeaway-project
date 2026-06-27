@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qiukai.mapper.OrderMapper">
+
+    <resultMap id="orderResultMap" type="com.qiukai.entity.Order">
+        <id property="id" column="id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="userId" column="user_id"/>
+        <result property="merchantId" column="merchant_id"/>
+        <result property="merchantName" column="merchant_name"/>
+        <result property="subtotal" column="subtotal"/>
+        <result property="discount" column="discount"/>
+        <result property="deliveryFee" column="delivery_fee"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="status" column="status"/>
+        <result property="note" column="note"/>
+        <result property="payMethod" column="pay_method"/>
+        <result property="addressSnapshot" column="address_snapshot"/>
+        <result property="payTime" column="pay_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="username" column="username"/>
+        <result property="merchantLogo" column="merchant_logo"/>
+    </resultMap>
+
+    <sql id="allColumns">
+        id, order_no, user_id, merchant_id, merchant_name, subtotal, discount, delivery_fee,
+        total_amount, status, note, pay_method, address_snapshot, pay_time, create_time, update_time
+    </sql>
+
+    <sql id="allColumnsRich">
+        o.id, o.order_no, o.user_id, o.merchant_id, o.merchant_name, o.subtotal, o.discount, o.delivery_fee,
+        o.total_amount, o.status, o.note, o.pay_method, o.address_snapshot, o.pay_time, o.create_time, o.update_time,
+        u.username AS username, m.logo AS merchant_logo
+    </sql>
+
+    <insert id="insert" parameterType="com.qiukai.entity.Order" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO orders (order_no, user_id, merchant_id, merchant_name, subtotal, discount, delivery_fee,
+                            total_amount, status, note, pay_method, address_snapshot)
+        VALUES (#{orderNo}, #{userId}, #{merchantId}, #{merchantName}, #{subtotal}, #{discount}, #{deliveryFee},
+                #{totalAmount}, #{status}, #{note}, #{payMethod}, #{addressSnapshot})
+    </insert>
+
+    <select id="selectById" resultMap="orderResultMap">
+        SELECT <include refid="allColumnsRich"/>
+        FROM orders o
+        LEFT JOIN user u ON o.user_id = u.id
+        LEFT JOIN merchant m ON o.merchant_id = m.id
+        WHERE o.id = #{id}
+    </select>
+
+    <select id="selectByOrderNo" resultMap="orderResultMap">
+        SELECT <include refid="allColumns"/> FROM orders WHERE order_no = #{orderNo}
+    </select>
+
+    <select id="selectByUserId" resultMap="orderResultMap">
+        SELECT <include refid="allColumnsRich"/>
+        FROM orders o
+        LEFT JOIN user u ON o.user_id = u.id
+        LEFT JOIN merchant m ON o.merchant_id = m.id
+        WHERE o.user_id = #{userId}
+        <if test="status != null and status != ''">AND o.status = #{status}</if>
+        ORDER BY o.create_time DESC
+    </select>
+
+    <select id="selectByMerchantId" resultMap="orderResultMap">
+        SELECT <include refid="allColumns"/> FROM orders
+        WHERE merchant_id = #{merchantId}
+        <if test="status != null and status != ''">AND status = #{status}</if>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectAll" resultMap="orderResultMap">
+        SELECT <include refid="allColumnsRich"/>
+        FROM orders o
+        LEFT JOIN user u ON o.user_id = u.id
+        LEFT JOIN merchant m ON o.merchant_id = m.id
+        <where>
+            <if test="status != null and status != ''">AND o.status = #{status}</if>
+        </where>
+        ORDER BY o.create_time DESC
+    </select>
+
+    <update id="updateStatus">
+        UPDATE orders SET status = #{status} WHERE id = #{id}
+    </update>
+
+    <update id="updateNote">
+        UPDATE orders SET note = #{note} WHERE id = #{id}
+    </update>
+
+    <update id="updatePay">
+        UPDATE orders SET status = #{status}, pay_method = #{payMethod}, pay_time = NOW() WHERE id = #{id}
+    </update>
+
+</mapper>

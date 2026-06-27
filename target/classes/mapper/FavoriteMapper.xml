@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qiukai.mapper.FavoriteMapper">
+
+    <resultMap id="merchantResultMap" type="com.qiukai.entity.Merchant">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="logo" column="logo"/>
+        <result property="cover" column="cover"/>
+        <result property="category" column="category"/>
+        <result property="priceLevel" column="price_level"/>
+        <result property="rating" column="rating"/>
+        <result property="sales" column="sales"/>
+        <result property="deliveryTime" column="delivery_time"/>
+        <result property="distance" column="distance"/>
+        <result property="minOrder" column="min_order"/>
+        <result property="deliveryFee" column="delivery_fee"/>
+        <result property="badge" column="badge"/>
+        <result property="tags" column="tags"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <select id="selectFavoriteMerchants" resultMap="merchantResultMap">
+        SELECT m.id, m.name, m.logo, m.cover, m.category, m.price_level, m.rating, m.sales,
+               m.delivery_time, m.distance, m.min_order, m.delivery_fee, m.badge, m.tags, m.status
+        FROM favorite f
+        INNER JOIN merchant m ON f.merchant_id = m.id
+        WHERE f.user_id = #{userId}
+        ORDER BY f.create_time DESC
+    </select>
+
+    <select id="countByUserAndMerchant" resultType="int">
+        SELECT COUNT(*) FROM favorite WHERE user_id = #{userId} AND merchant_id = #{merchantId}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO favorite (user_id, merchant_id) VALUES (#{userId}, #{merchantId})
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM favorite WHERE user_id = #{userId} AND merchant_id = #{merchantId}
+    </delete>
+
+</mapper>

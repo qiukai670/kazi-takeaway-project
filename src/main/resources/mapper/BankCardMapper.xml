@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qiukai.mapper.BankCardMapper">
+
+    <resultMap id="bankCardResultMap" type="com.qiukai.entity.BankCard">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="holder" column="holder"/>
+        <result property="cardNumber" column="card_number"/>
+        <result property="bankName" column="bank_name"/>
+        <result property="cardType" column="card_type"/>
+        <result property="expireDate" column="expire_date"/>
+        <result property="cvv" column="cvv"/>
+        <result property="isDefault" column="is_default"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectByUserId" resultMap="bankCardResultMap">
+        SELECT id, user_id, holder, card_number, bank_name, card_type, expire_date, cvv, is_default, create_time, update_time
+        FROM bank_card WHERE user_id = #{userId} ORDER BY is_default DESC, create_time DESC
+    </select>
+
+    <select id="selectById" resultMap="bankCardResultMap">
+        SELECT id, user_id, holder, card_number, bank_name, card_type, expire_date, cvv, is_default, create_time, update_time
+        FROM bank_card WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.qiukai.entity.BankCard" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO bank_card (user_id, holder, card_number, bank_name, card_type, expire_date, cvv, is_default)
+        VALUES (#{userId}, #{holder}, #{cardNumber}, #{bankName}, #{cardType}, #{expireDate}, #{cvv}, #{isDefault})
+    </insert>
+
+    <delete id="deleteById">
+        DELETE FROM bank_card WHERE id = #{id} AND user_id = #{userId}
+    </delete>
+
+    <update id="clearDefault">
+        UPDATE bank_card SET is_default = 0 WHERE user_id = #{userId}
+    </update>
+
+    <update id="setDefault">
+        UPDATE bank_card SET is_default = 1 WHERE id = #{id} AND user_id = #{userId}
+    </update>
+
+</mapper>

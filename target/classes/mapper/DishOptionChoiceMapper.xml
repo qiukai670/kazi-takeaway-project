@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qiukai.mapper.DishOptionChoiceMapper">
+
+    <resultMap id="choiceResultMap" type="com.qiukai.entity.DishOptionChoice">
+        <id property="id" column="id"/>
+        <result property="optionId" column="option_id"/>
+        <result property="name" column="name"/>
+        <result property="priceAdd" column="price_add"/>
+        <result property="sort" column="sort"/>
+    </resultMap>
+
+    <select id="selectByOptionIds" resultMap="choiceResultMap">
+        SELECT id, option_id, name, price_add, sort
+        FROM dish_option_choice
+        WHERE option_id IN
+        <foreach collection="optionIds" item="oid" open="(" separator="," close=")">
+            #{oid}
+        </foreach>
+        ORDER BY option_id, sort ASC
+    </select>
+
+    <select id="selectByIds" resultMap="choiceResultMap">
+        SELECT id, option_id, name, price_add, sort
+        FROM dish_option_choice
+        WHERE id IN
+        <foreach collection="ids" item="cid" open="(" separator="," close=")">
+            #{cid}
+        </foreach>
+    </select>
+
+    <delete id="deleteByOptionIds">
+        DELETE FROM dish_option_choice WHERE option_id IN
+        <foreach collection="optionIds" item="oid" open="(" separator="," close=")">
+            #{oid}
+        </foreach>
+    </delete>
+
+    <insert id="insertBatch">
+        INSERT INTO dish_option_choice (option_id, name, price_add, sort) VALUES
+        <foreach collection="list" item="c" separator=",">
+            (#{c.optionId}, #{c.name}, #{c.priceAdd}, #{c.sort})
+        </foreach>
+    </insert>
+
+</mapper>

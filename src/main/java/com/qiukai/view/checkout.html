@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>订单结算 — 咔滋外卖</title>
+<meta name="description" content="咔滋外卖订单结算页，确认菜品、享受满减优惠、一键支付，30 分钟极速送达。" />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Boldonse&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #fcf7ee;
+    --coffee: #7d2c0f;
+    --orange: #ff8342;
+    --brown-mid: #af4f28;
+    --beige: #f9eedc;
+    --pale: #ffefd5;
+    --coffee-dark: #664237;
+    --green: #00704f;
+    --mustard: #fed16a;
+  }
+
+  * { -webkit-font-smoothing: antialiased; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Manrope', 'Noto Sans SC', sans-serif;
+    background: var(--cream);
+    color: var(--coffee);
+    letter-spacing: -0.01em;
+    overflow-x: hidden;
+  }
+
+  .font-display { font-family: 'Boldonse', 'Noto Sans SC', sans-serif; font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; }
+  .font-cn-display { font-family: 'Noto Sans SC', sans-serif; font-weight: 900; letter-spacing: -0.01em; line-height: 1.2; }
+
+  /* 按钮 */
+  .btn-primary { background: var(--orange); color: #fff; border-radius: 100px; padding: 14px 28px; font-weight: 600; transition: transform .25s cubic-bezier(.22,1,.36,1), filter .25s, box-shadow .25s; box-shadow: 0 6px 16px -4px rgba(255,131,66,.5); display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-primary:hover { transform: scale(1.03); filter: brightness(1.05); }
+  .btn-primary:active { transform: scale(0.97); }
+  .btn-primary:disabled { background: #d8c4b0; box-shadow: none; cursor: not-allowed; transform: none; filter: none; }
+  .btn-dark { background: var(--coffee-dark); color: #fff; border-radius: 100px; padding: 14px 28px; font-weight: 600; transition: transform .25s, filter .25s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-dark:hover { transform: scale(1.03); filter: brightness(1.1); }
+  .btn-outline { border: 1.5px solid var(--coffee); color: var(--coffee); border-radius: 100px; padding: 12px 26px; font-weight: 600; transition: all .25s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #fff; }
+  .btn-outline:hover { background: var(--coffee); color: #fff; }
+
+  /* 阴影 */
+  .card-shadow { box-shadow: 0 1px 2px -1px rgba(0,0,0,.12), 0 4px 6px -2px rgba(0,0,0,.11), 0 16px 14px -3px rgba(0,0,0,.08); }
+  .card-shadow-lg { box-shadow: 0 1px 3px -1px rgba(0,0,0,.10), 0 6px 12px -3px rgba(0,0,0,.10), 0 24px 32px -6px rgba(0,0,0,.10); }
+
+  /* 导航 */
+  .nav-blur { background: rgba(252, 247, 238, 0.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid rgba(125,44,15,.08); }
+  .nav-link { position: relative; transition: color .25s; }
+  .nav-link::after { content: ''; position: absolute; left: 50%; bottom: -6px; width: 0; height: 6px; background: var(--orange); border-radius: 100px; transform: translateX(-50%); transition: width .3s cubic-bezier(.22,1,.36,1); }
+  .nav-link:hover { color: var(--orange); }
+  .nav-link:hover::after { width: 100%; }
+
+  /* 标签 */
+  .pill-tag { background: var(--orange); color: var(--pale); border-radius: 100px; padding: 6px 14px; font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px; }
+  .pill-tag.dark { background: var(--coffee); }
+  .pill-tag.green { background: var(--green); }
+  .pill-tag.mustard { background: var(--mustard); color: var(--coffee); }
+  .pill-tag.beige { background: var(--beige); color: var(--coffee); text-transform: none; letter-spacing: 0; }
+
+  .eyebrow { color: var(--orange); font-size: 14px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
+  .star { color: var(--orange); }
+
+  /* 数量步进器 */
+  .qty-btn { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; transition: all .2s; border: none; cursor: pointer; line-height: 1; }
+  .qty-btn.minus { background: var(--beige); color: var(--coffee); }
+  .qty-btn.minus:hover { background: var(--coffee); color: #fff; }
+  .qty-btn.plus { background: var(--orange); color: #fff; box-shadow: 0 4px 10px -3px rgba(255,131,66,.5); }
+  .qty-btn.plus:hover { filter: brightness(1.08); transform: scale(1.08); }
+  .qty-btn:disabled { background: #ece3d4; color: #c9a98a; cursor: not-allowed; box-shadow: none; transform: none; filter: none; }
+  .qty-num { min-width: 28px; text-align: center; font-weight: 700; font-size: 16px; color: var(--coffee); }
+
+  /* 满减规则条 */
+  .promo-rule { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 100px; font-size: 12px; font-weight: 600; background: var(--beige); color: var(--brown-mid); }
+  .promo-rule.active { background: var(--mustard); color: var(--coffee); }
+
+  /* 支付方式选项 */
+  .pay-option { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 16px; border: 2px solid var(--beige); background: #fff; cursor: pointer; transition: all .25s; }
+  .pay-option:hover { border-color: var(--orange); transform: translateY(-2px); box-shadow: 0 8px 18px -8px rgba(255,131,66,.3); }
+  .pay-option.selected { border-color: var(--orange); background: var(--pale); }
+  .pay-option .pay-radio { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--beige); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+  .pay-option.selected .pay-radio { border-color: var(--orange); background: var(--orange); }
+  .pay-option.selected .pay-radio::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #fff; }
+  .pay-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+
+  /* 模态框 */
+  .modal-mask { position: fixed; inset: 0; background: rgba(125,44,15,.45); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s; }
+  .modal-mask.open { opacity: 1; visibility: visible; }
+  .modal-box { background: #fff; border-radius: 28px; width: 100%; max-width: 440px; padding: 28px; transform: translateY(24px) scale(.96); transition: transform .35s cubic-bezier(.22,1,.36,1); box-shadow: 0 30px 60px -20px rgba(0,0,0,.4); }
+  .modal-mask.open .modal-box { transform: translateY(0) scale(1); }
+
+  /* 成功勾选动画 */
+  .success-circle { width: 80px; height: 80px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; margin: 0 auto; animation: popIn .5s cubic-bezier(.22,1.4,.36,1); }
+  @keyframes popIn { 0% { transform: scale(0); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+  .success-check { width: 40px; height: 40px; }
+  .success-check path { stroke: #fff; stroke-width: 4; fill: none; stroke-dasharray: 50; stroke-dashoffset: 50; animation: drawCheck .5s .2s ease forwards; }
+  @keyframes drawCheck { to { stroke-dashoffset: 0; } }
+
+  /* 移动端底部结算栏 */
+  .mobile-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 40; background: #fff; border-top: 1px solid var(--beige); box-shadow: 0 -8px 24px -8px rgba(0,0,0,.12); padding: 12px 16px; display: flex; align-items: center; gap: 14px; transform: translateY(100%); transition: transform .35s cubic-bezier(.22,1,.36,1); }
+  .mobile-bar.show { transform: translateY(0); }
+
+  /* 空购物车状态 */
+  .empty-state { text-align: center; padding: 60px 20px; }
+
+  /* 表单输入 */
+  .form-input {
+    width: 100%;
+    background: #fff;
+    border: 1.5px solid var(--beige);
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-size: 15px;
+    color: var(--coffee);
+    transition: border-color .2s, box-shadow .2s;
+    outline: none;
+    font-family: inherit;
+  }
+  .form-input:focus { border-color: var(--orange); box-shadow: 0 0 0 4px rgba(255,131,66,.12); }
+  .form-input::placeholder { color: #c9a98a; }
+  .form-label { display: block; font-size: 13px; font-weight: 700; color: var(--brown-mid); margin-bottom: 6px; letter-spacing: .02em; }
+
+  /* 开关 */
+  .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch-slider { position: absolute; cursor: pointer; inset: 0; background: var(--beige); border-radius: 100px; transition: .3s; }
+  .switch-slider::before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: .3s; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
+  .switch input:checked + .switch-slider { background: var(--orange); }
+  .switch input:checked + .switch-slider::before { transform: translateX(20px); }
+
+  /* 地址选择项 */
+  .addr-item { border: 2px solid var(--beige); border-radius: 18px; padding: 16px; cursor: pointer; transition: all .25s; display: flex; align-items: flex-start; gap: 12px; background: #fff; }
+  .addr-item:hover { border-color: var(--brown-mid); transform: translateY(-1px); box-shadow: 0 6px 16px -6px rgba(0,0,0,.12); }
+  .addr-item.selected { border-color: var(--orange); background: var(--pale); }
+
+  /* 地址预览卡 */
+  .addr-preview { display: flex; align-items: flex-start; gap: 14px; padding: 14px; border-radius: 18px; cursor: pointer; transition: background .2s; }
+  .addr-preview:hover { background: rgba(255,131,66,.06); }
+
+  ::selection { background: var(--orange); color: #fff; }
+
+  /* 滚动条美化 */
+  .note-area::-webkit-scrollbar { width: 6px; }
+  .note-area::-webkit-scrollbar-thumb { background: var(--beige); border-radius: 100px; }
+  .addr-scroll::-webkit-scrollbar { width: 5px; }
+  .addr-scroll::-webkit-scrollbar-thumb { background: var(--beige); border-radius: 100px; }
+
+  @media (max-width: 1023px) {
+    body { padding-bottom: 90px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== 导航 ===== -->
+<header class="nav-blur fixed top-0 left-0 right-0 z-50">
+  <nav class="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
+    <a href="index.html" class="font-display text-2xl tracking-tight" style="color: var(--coffee);">咔滋<span class="text-[10px] align-top ml-1" style="color:var(--orange);">外卖</span></a>
+
+    <a href="#" id="backToShopNav" class="btn-outline text-sm py-2.5 px-5">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      返回商家
+    </a>
+  </nav>
+</header>
+
+<!-- ===== 主体 ===== -->
+<main class="pt-28 lg:pt-32 pb-10">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8">
+
+    <!-- 面包屑 / 标题 -->
+    <div class="mb-8">
+      <p class="eyebrow mb-3">CHECKOUT</p>
+      <h1 class="font-cn-display text-3xl sm:text-4xl lg:text-5xl" style="color: var(--coffee);">订单结算</h1>
+      <p class="text-sm sm:text-base mt-2" style="color: var(--brown-mid);">确认菜品与优惠，一键下单，30 分钟极速送达。</p>
+    </div>
+
+    <div class="grid lg:grid-cols-[1fr_380px] gap-6 lg:gap-8 items-start">
+
+      <!-- ===== 左栏：商家信息 + 菜品列表 + 留言 ===== -->
+      <div class="space-y-6">
+
+        <!-- 商家信息卡 -->
+        <section class="bg-white rounded-[28px] card-shadow overflow-hidden">
+          <div class="p-6 sm:p-7 flex items-center gap-4 sm:gap-5">
+            <img id="merchantLogo" src="" alt="商家logo" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover ring-2 ring-white card-shadow flex-shrink-0">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1 flex-wrap">
+                <h2 id="merchantName" class="font-cn-display text-xl sm:text-2xl" style="color: var(--coffee);">加载中...</h2>
+                <span class="pill-tag dark text-[10px]">品牌</span>
+              </div>
+              <div class="flex items-center gap-3 text-xs sm:text-sm flex-wrap" style="color: var(--brown-mid);">
+                <span id="merchantRating" class="star font-bold">★ —</span>
+                <span>·</span>
+                <span id="merchantSales">月售 —</span>
+                <span>·</span>
+                <span id="merchantMeta">—</span>
+              </div>
+            </div>
+          </div>
+          <!-- 配送信息条 -->
+          <div class="px-6 sm:px-7 py-4 flex items-center gap-4 sm:gap-6 flex-wrap border-t" style="border-color: var(--beige); background: var(--pale);">
+            <div class="flex items-center gap-2 text-sm font-semibold" style="color: var(--coffee);">
+              <span>🛵</span>
+              <span>预计送达</span>
+              <span class="font-cn-display" style="color: var(--orange);" id="etaText">25 分钟</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm font-semibold" style="color: var(--coffee);">
+              <span>💰</span>
+              <span>配送费</span>
+              <span style="color: var(--orange);" id="deliveryFeeText">¥3</span>
+            </div>
+          </div>
+          <!-- 收货地址预览卡 -->
+          <div class="px-6 sm:px-7 py-4 border-t" style="border-color: var(--beige);">
+            <div id="addressPreview" class="addr-preview" onclick="openAddressModal()">
+              <div class="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0" style="background: var(--pale);">
+                <span class="text-xl">📍</span>
+              </div>
+              <div class="flex-1 min-w-0" id="addressPreviewBody">
+                <p class="text-sm font-semibold mb-1" style="color: var(--brown-mid);">收货地址</p>
+                <p class="text-sm" style="color: var(--brown-mid);">加载中...</p>
+              </div>
+              <div class="flex items-center gap-1 text-sm font-semibold flex-shrink-0 mt-1" style="color: var(--orange);">
+                <span class="hidden sm:inline">更换</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 已选菜品卡 -->
+        <section class="bg-white rounded-[28px] card-shadow overflow-hidden">
+          <div class="px-6 sm:px-7 py-5 flex items-center justify-between border-b" style="border-color: var(--beige);">
+            <div class="flex items-center gap-3">
+              <h3 class="font-cn-display text-xl" style="color: var(--coffee);">已选菜品</h3>
+              <span class="pill-tag beige" id="cartCount">0 件</span>
+            </div>
+            <button id="clearBtn" class="text-sm font-semibold flex items-center gap-1.5 transition" style="color: var(--brown-mid);" onmouseover="this.style.color='var(--orange)'" onmouseout="this.style.color='var(--brown-mid)'">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+              清空购物车
+            </button>
+          </div>
+          <!-- 菜品列表容器 -->
+          <div id="cartList" class="divide-y divide-[#f9eedc]"></div>
+          <!-- 空状态 -->
+          <div id="emptyCart" class="empty-state hidden">
+            <div class="text-6xl mb-4">🛒</div>
+            <p class="font-cn-display text-xl mb-2" style="color: var(--coffee);">购物车空空如也</p>
+            <p class="text-sm mb-6" style="color: var(--brown-mid);">快去挑选你心仪的美食吧～</p>
+            <a href="merchants.html" class="btn-primary text-sm">去选菜品</a>
+          </div>
+        </section>
+
+        <!-- 订单留言卡 -->
+        <section class="bg-white rounded-[28px] card-shadow overflow-hidden">
+          <div class="px-6 sm:px-7 py-5 border-b flex items-center gap-3" style="border-color: var(--beige);">
+            <h3 class="font-cn-display text-xl" style="color: var(--coffee);">订单留言</h3>
+            <span class="pill-tag beige">可选</span>
+          </div>
+          <div class="p-6 sm:p-7">
+            <textarea id="noteInput" class="note-area w-full rounded-2xl border p-4 text-sm leading-relaxed resize-none transition focus:outline-none" style="border-color: var(--beige); background: var(--cream); color: var(--coffee); min-height: 96px;" rows="4" maxlength="200" placeholder="如：少放辣、不要香菜、放门口外卖柜等"></textarea>
+            <div class="flex items-center justify-between mt-3 text-xs" style="color: var(--brown-mid);">
+              <span class="flex items-center gap-1.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                留言将对商家和外卖配送员可见
+              </span>
+              <span><span id="noteCount" style="color: var(--coffee); font-weight: 600;">0</span> / 200</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 返回修改按钮 -->
+        <div class="flex flex-wrap gap-3">
+          <a href="#" id="backToShopBtn" class="btn-outline text-sm">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            返回修改
+          </a>
+        </div>
+      </div>
+
+      <!-- ===== 右栏：价格摘要 + 支付按钮（桌面 sticky） ===== -->
+      <aside class="lg:sticky lg:top-28">
+        <section class="bg-white rounded-[28px] card-shadow overflow-hidden">
+          <div class="px-6 py-5 border-b" style="border-color: var(--beige);">
+            <h3 class="font-cn-display text-xl" style="color: var(--coffee);">价格摘要</h3>
+          </div>
+          <div class="p-6 space-y-4">
+
+            <!-- 满减规则提示 -->
+            <div class="rounded-2xl p-4" style="background: var(--pale);">
+              <p class="text-xs font-bold mb-2 flex items-center gap-1.5" style="color: var(--orange);">
+                <span>🎉</span> 满减优惠
+              </p>
+              <div id="promoRules" class="flex flex-wrap gap-2"></div>
+            </div>
+
+            <!-- 金额明细 -->
+            <div class="space-y-3 text-sm">
+              <div class="flex items-center justify-between">
+                <span style="color: var(--brown-mid);">原价总额</span>
+                <span class="font-semibold" style="color: var(--coffee);">¥<span id="subtotalText">0.00</span></span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span style="color: var(--brown-mid);">满减优惠</span>
+                <span class="font-semibold" style="color: var(--green);">-¥<span id="discountText">0.00</span></span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span style="color: var(--brown-mid);">配送费</span>
+                <span class="font-semibold" style="color: var(--coffee);">¥<span id="deliveryText">0.00</span></span>
+              </div>
+            </div>
+
+            <!-- 分割线 -->
+            <div class="border-t pt-4" style="border-color: var(--beige);">
+              <div class="flex items-end justify-between">
+                <span class="font-cn-display text-lg" style="color: var(--coffee);">实付金额</span>
+                <div class="flex items-baseline gap-1">
+                  <span class="font-display text-3xl" style="color: var(--orange);">¥<span id="totalText">0.00</span></span>
+                </div>
+              </div>
+              <p class="text-xs mt-1 text-right" style="color: var(--brown-mid);" id="savedHint"></p>
+            </div>
+
+            <!-- 支付按钮（桌面端） -->
+            <button id="payBtnDesktop" class="btn-primary w-full text-base py-4 hidden lg:flex">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              确认支付 ¥<span id="payBtnTotal">0.00</span>
+            </button>
+
+            <!-- 安全提示 -->
+            <p class="text-xs text-center flex items-center justify-center gap-1.5" style="color: var(--brown-mid);">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              支付信息加密传输 · 安全有保障
+            </p>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<!-- ===== 移动端底部结算栏 ===== -->
+<div id="mobileBar" class="mobile-bar lg:hidden">
+  <div class="flex-1 min-w-0">
+    <p class="text-xs" style="color: var(--brown-mid);">实付金额</p>
+    <p class="font-display text-2xl" style="color: var(--orange);">¥<span id="mobileTotal">0.00</span></p>
+  </div>
+  <button id="payBtnMobile" class="btn-primary text-base py-3.5 px-8 flex-shrink-0">
+    确认支付
+  </button>
+</div>
+
+<!-- ===== 支付确认模态框 ===== -->
+<div id="payModal" class="modal-mask">
+  <div class="modal-box">
+    <div class="flex items-center justify-between mb-1">
+      <h3 class="font-cn-display text-2xl" style="color: var(--coffee);">确认支付</h3>
+      <button class="modal-close p-1 rounded-full transition" style="color: var(--brown-mid);" onmouseover="this.style.color='var(--coffee)'" onmouseout="this.style.color='var(--brown-mid)'">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <p class="text-sm mb-5" style="color: var(--brown-mid);">选择支付方式，完成下单</p>
+
+    <!-- 应付金额 -->
+    <div class="rounded-2xl p-4 mb-5 flex items-center justify-between" style="background: var(--pale);">
+      <span class="text-sm font-semibold" style="color: var(--coffee);">应付总额</span>
+      <span class="font-display text-3xl" style="color: var(--orange);">¥<span id="modalTotal">0.00</span></span>
+    </div>
+
+    <!-- 支付方式 -->
+    <div class="space-y-3 mb-6">
+      <div class="pay-option selected" data-method="wechat">
+        <div class="pay-icon" style="background: #dcfce7;">💬</div>
+        <div class="flex-1">
+          <p class="font-semibold text-sm" style="color: var(--coffee);">微信支付</p>
+          <p class="text-xs" style="color: var(--brown-mid);">推荐使用，到账快捷</p>
+        </div>
+        <div class="pay-radio"></div>
+      </div>
+      <div class="pay-option" data-method="alipay">
+        <div class="pay-icon" style="background: #dbeafe;">💰</div>
+        <div class="flex-1">
+          <p class="font-semibold text-sm" style="color: var(--coffee);">支付宝</p>
+          <p class="text-xs" style="color: var(--brown-mid);">余额 / 花呗均可</p>
+        </div>
+        <div class="pay-radio"></div>
+      </div>
+      <div class="pay-option" data-method="bank">
+        <div class="pay-icon" style="background: var(--beige);">💳</div>
+        <div class="flex-1">
+          <p class="font-semibold text-sm" style="color: var(--coffee);">银行卡</p>
+          <p class="text-xs" style="color: var(--brown-mid);">支持储蓄卡 / 信用卡</p>
+        </div>
+        <div class="pay-radio"></div>
+      </div>
+    </div>
+
+    <button id="confirmPayBtn" class="btn-primary w-full text-base py-4">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      确认支付 ¥<span id="confirmTotal">0.00</span>
+    </button>
+    <p class="text-xs text-center mt-3" style="color: var(--brown-mid);">点击确认支付即表示同意《咔滋外卖服务条款》</p>
+  </div>
+</div>
+
+<!-- ===== 清空购物车确认模态框 ===== -->
+<div id="clearModal" class="modal-mask">
+  <div class="modal-box" style="max-width: 380px;">
+    <div class="text-center mb-5">
+      <div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: var(--pale);">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--orange);"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <h3 class="font-cn-display text-xl mb-2" style="color: var(--coffee);">确认清空购物车？</h3>
+      <p class="text-sm" style="color: var(--brown-mid);">清空后已选菜品将全部移除，此操作不可撤销。</p>
+    </div>
+    <div class="flex gap-3">
+      <button class="modal-close btn-outline flex-1 text-sm py-3">再想想</button>
+      <button id="confirmClearBtn" class="btn-dark flex-1 text-sm py-3">确认清空</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 支付成功模态框 ===== -->
+<div id="successModal" class="modal-mask">
+  <div class="modal-box text-center" style="max-width: 380px;">
+    <div class="success-circle mb-5">
+      <svg class="success-check" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+    </div>
+    <h3 class="font-cn-display text-2xl mb-2" style="color: var(--coffee);">支付成功！</h3>
+    <p class="text-sm mb-1" style="color: var(--brown-mid);">订单已提交，商家正在备餐</p>
+    <p class="text-sm mb-6" style="color: var(--brown-mid);">预计 <span class="font-bold" style="color: var(--orange);" id="successEta">25 分钟</span> 内送达</p>
+    <div class="rounded-2xl p-4 mb-6" style="background: var(--pale);">
+      <div class="flex items-center justify-between text-sm mb-2">
+        <span style="color: var(--brown-mid);">订单金额</span>
+        <span class="font-semibold" style="color: var(--coffee);">¥<span id="successAmount">0.00</span></span>
+      </div>
+      <div class="flex items-center justify-between text-sm mb-2">
+        <span style="color: var(--brown-mid);">支付方式</span>
+        <span class="font-semibold" style="color: var(--coffee);" id="successMethod">微信支付</span>
+      </div>
+      <div class="flex items-center justify-between text-sm">
+        <span style="color: var(--brown-mid);">订单编号</span>
+        <span class="font-semibold" style="color: var(--coffee);" id="successOrderNo">—</span>
+      </div>
+    </div>
+    <div class="flex gap-3">
+      <a href="#" id="backToShopSuccess" class="btn-outline flex-1 text-sm py-3">返回商家</a>
+      <button id="viewOrderBtn" class="btn-primary flex-1 text-sm py-3">查看订单</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 地址选择模态框 ===== -->
+<div id="addressModal" class="modal-mask">
+  <div class="modal-box" style="max-width: 480px;">
+
+    <!-- 视图一：地址列表 -->
+    <div id="addrListView">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="font-cn-display text-2xl" style="color: var(--coffee);">选择收货地址</h3>
+        <button class="modal-close p-1 rounded-full transition" style="color: var(--brown-mid);" onmouseover="this.style.color='var(--coffee)'" onmouseout="this.style.color='var(--brown-mid)'">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div id="addressModalList" class="space-y-3 max-h-[45vh] overflow-y-auto addr-scroll"></div>
+      <div id="addressModalEmpty" class="hidden text-center py-10">
+        <div class="text-5xl mb-3">📍</div>
+        <p class="font-cn-display text-lg mb-2" style="color: var(--coffee);">还没有收货地址</p>
+        <p class="text-sm mb-6" style="color: var(--brown-mid);">添加地址后即可快速下单</p>
+      </div>
+      <button class="btn-outline w-full text-sm py-3 mt-4" onclick="showAddAddressForm()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        新增地址
+      </button>
+    </div>
+
+    <!-- 视图二：新增地址表单 -->
+    <div id="addrFormView" class="hidden">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="font-cn-display text-2xl" style="color: var(--coffee);">新增收货地址</h3>
+        <button class="modal-close p-1 rounded-full transition" style="color: var(--brown-mid);" onmouseover="this.style.color='var(--coffee)'" onmouseout="this.style.color='var(--brown-mid)'">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="checkoutAddrForm" class="space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="form-label">收件人 <span style="color:var(--orange);">*</span></label>
+            <input type="text" class="form-input" id="ckAddrName" required placeholder="收件人姓名" maxlength="32">
+          </div>
+          <div>
+            <label class="form-label">电话 <span style="color:var(--orange);">*</span></label>
+            <input type="text" class="form-input" id="ckAddrPhone" required placeholder="11 位手机号" maxlength="11">
+          </div>
+        </div>
+        <div>
+          <label class="form-label">所在地区 <span style="color:var(--orange);">*</span></label>
+          <input type="text" class="form-input" id="ckAddrRegion" required placeholder="如：北京市朝阳区">
+        </div>
+        <div>
+          <label class="form-label">详细地址 <span style="color:var(--orange);">*</span></label>
+          <textarea class="form-input" id="ckAddrDetail" required rows="2" placeholder="街道、楼栋、门牌号"></textarea>
+        </div>
+        <div>
+          <label class="form-label">标签</label>
+          <div class="flex gap-2" id="ckAddrTagPicker">
+            <button type="button" class="filter-tab active" data-tag="家">🏠 家</button>
+            <button type="button" class="filter-tab" data-tag="公司">🏢 公司</button>
+            <button type="button" class="filter-tab" data-tag="学校">🎓 学校</button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between pt-1">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <span class="switch">
+              <input type="checkbox" id="ckAddrDefault">
+              <span class="switch-slider"></span>
+            </span>
+            <span class="text-sm font-semibold" style="color: var(--coffee);">设为默认地址</span>
+          </label>
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button type="button" class="btn-outline flex-1 text-sm py-3" onclick="hideAddAddressForm()">返回列表</button>
+          <button type="submit" class="btn-primary flex-1 text-sm py-3" id="ckAddrSubmitBtn">保存并使用</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script>
+  // ===== 全局状态 =====
+  let merchantId = parseInt(API.util.getParam('merchantId')) || 1;
+  let merchant = null;        // Merchant 实体（来自 MerchantDetailVO.merchant）
+  let promoRules = [];        // 满减规则列表
+  let cartVO = null;          // 购物车汇总 CartVO
+  let defaultAddress = null;  // 当前选中的收货地址
+  let allAddresses = [];      // 全部收货地址（缓存）
+  let addressesLoaded = false; // 地址是否已加载（缓存标记）
+  let currentCkAddrTag = '家'; // 新增地址表单当前标签
+  let updating = false;       // 防止重复点击
+
+  // 支付方式映射
+  const payMethodMap = {
+    wechat: '微信支付',
+    alipay: '支付宝',
+    bank: '银行卡'
+  };
+  let selectedPayMethod = 'wechat';
+
+  // ===== DOM 引用 =====
+  const cartListEl = document.getElementById('cartList');
+  const emptyCartEl = document.getElementById('emptyCart');
+  const cartCountEl = document.getElementById('cartCount');
+  const subtotalEl = document.getElementById('subtotalText');
+  const discountEl = document.getElementById('discountText');
+  const deliveryEl = document.getElementById('deliveryText');
+  const totalEl = document.getElementById('totalText');
+  const payBtnTotalEl = document.getElementById('payBtnTotal');
+  const mobileTotalEl = document.getElementById('mobileTotal');
+  const modalTotalEl = document.getElementById('modalTotal');
+  const confirmTotalEl = document.getElementById('confirmTotal');
+  const savedHintEl = document.getElementById('savedHint');
+  const promoRulesEl = document.getElementById('promoRules');
+  const mobileBarEl = document.getElementById('mobileBar');
+  const noteInput = document.getElementById('noteInput');
+  const noteCountEl = document.getElementById('noteCount');
+
+  // ===== 工具 =====
+  function esc(s) { return API.util.escapeHtml(s); }
+  function money(n) { return API.util.money(n); }
+
+  // ===== 计算金额（基于 CartVO 与满减规则） =====
+  function calc() {
+    const items = (cartVO && cartVO.items) || [];
+    const subtotal = items.length > 0 ? Number(cartVO.totalAmount || 0) : 0;
+    // 满减：取满足条件的最高档
+    let discount = 0;
+    promoRules.forEach(rule => {
+      const th = Number(rule.threshold);
+      const dc = Number(rule.discount);
+      if (subtotal >= th && dc > discount) discount = dc;
+    });
+    const deliveryFee = items.length > 0 ? Number(cartVO.deliveryFee || 0) : 0;
+    const total = Math.max(0, subtotal - discount + deliveryFee);
+    return { subtotal, discount, deliveryFee, total };
+  }
+
+  // ===== 渲染满减规则条 =====
+  function renderPromoRules(subtotal) {
+    promoRulesEl.innerHTML = '';
+    if (!promoRules || promoRules.length === 0) {
+      promoRulesEl.innerHTML = '<span class="text-xs" style="color: var(--brown-mid);">暂无满减优惠</span>';
+      return;
+    }
+    promoRules.forEach(rule => {
+      const active = subtotal >= Number(rule.threshold);
+      const span = document.createElement('span');
+      span.className = 'promo-rule' + (active ? ' active' : '');
+      span.textContent = `满${money(rule.threshold)}减${money(rule.discount)}`;
+      promoRulesEl.appendChild(span);
+    });
+  }
+
+  // ===== 渲染商家信息 =====
+  function renderMerchant() {
+    if (!merchant) return;
+    document.getElementById('merchantName').textContent = merchant.name;
+    const logoEl = document.getElementById('merchantLogo');
+    logoEl.src = merchant.logo || `https://picsum.photos/seed/m${merchant.id}/120/120`;
+    logoEl.alt = merchant.name;
+
+    document.getElementById('merchantRating').textContent =
+      '★ ' + (merchant.rating != null ? money(merchant.rating) : '—');
+
+    const sales = merchant.sales != null ? merchant.sales : 0;
+    document.getElementById('merchantSales').textContent =
+      '月售 ' + (sales > 9999 ? '9999+' : sales);
+
+    const parts = [];
+    if (merchant.priceLevel) parts.push(merchant.priceLevel);
+    if (merchant.category) parts.push(merchant.category);
+    if (merchant.distance != null) parts.push(money(merchant.distance) + 'km');
+    document.getElementById('merchantMeta').textContent = parts.join(' · ') || '—';
+
+    // 配送信息条
+    document.getElementById('etaText').textContent =
+      (merchant.deliveryTime != null ? merchant.deliveryTime : 25) + ' 分钟';
+    const items = (cartVO && cartVO.items) || [];
+    const fee = items.length > 0 ? Number(cartVO.deliveryFee || 0) : Number(merchant.deliveryFee || 0);
+    document.getElementById('deliveryFeeText').textContent = '¥' + money(fee);
+  }
+
+  // ===== 渲染收货地址预览卡 =====
+  function renderAddress() {
+    const body = document.getElementById('addressPreviewBody');
+    if (defaultAddress) {
+      const tag = addrTagText(defaultAddress.tag);
+      const isDef = addrIsDefault(defaultAddress.isDefault);
+      body.innerHTML = `
+        <div class="flex items-center gap-2 flex-wrap mb-1">
+          <span class="font-bold text-sm" style="color: var(--coffee);">${API.util.escapeHtml(defaultAddress.name)}</span>
+          <span class="text-xs" style="color: var(--brown-mid);">${API.util.escapeHtml(defaultAddress.phone)}</span>
+          <span class="pill-tag beige text-[10px]" style="padding: 2px 8px;">${addrTagEmoji(defaultAddress.tag)} ${tag}</span>
+          ${isDef ? '<span class="pill-tag mustard text-[10px]" style="padding: 2px 8px;">默认</span>' : ''}
+        </div>
+        <p class="text-sm" style="color: var(--brown-mid);">${API.util.escapeHtml(defaultAddress.region)} ${API.util.escapeHtml(defaultAddress.detail)}</p>`;
+    } else {
+      body.innerHTML = `
+        <p class="font-bold text-sm mb-1" style="color: var(--coffee);">尚未选择收货地址</p>
+        <p class="text-sm" style="color: var(--brown-mid);">点击此处选择或新增地址</p>`;
+    }
+  }
+
+  // ===== 地址标签辅助函数 =====
+  function addrTagText(t) {
+    return { home: '家', company: '公司', school: '学校' }[t] || t || '家';
+  }
+  function addrTagEmoji(t) {
+    const cn = addrTagText(t);
+    return { '家': '🏠', '公司': '🏢', '学校': '🎓' }[cn] || '📍';
+  }
+  function addrTagToApi(cn) {
+    return { '家': 'home', '公司': 'company', '学校': 'school' }[cn] || 'home';
+  }
+  function addrIsDefault(v) {
+    return v === 1 || v === true;
+  }
+
+  // ===== 渲染地址列表（弹窗内） =====
+  function renderAddrModalList() {
+    const listEl = document.getElementById('addressModalList');
+    const emptyEl = document.getElementById('addressModalEmpty');
+
+    if (!allAddresses || allAddresses.length === 0) {
+      listEl.innerHTML = '';
+      emptyEl.classList.remove('hidden');
+      return;
+    }
+    emptyEl.classList.add('hidden');
+    listEl.innerHTML = allAddresses.map(a => {
+      const isDefault = addrIsDefault(a.isDefault);
+      const isSelected = defaultAddress && defaultAddress.id === a.id;
+      return `
+      <div class="addr-item ${isSelected ? 'selected' : ''}" onclick="selectAddress(${a.id})">
+        <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style="background: var(--beige);">
+          <span class="text-base">${addrTagEmoji(a.tag)}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap mb-1">
+            <span class="font-bold text-sm" style="color: var(--coffee);">${API.util.escapeHtml(a.name)}</span>
+            <span class="text-xs" style="color: var(--brown-mid);">${API.util.escapeHtml(a.phone)}</span>
+            <span class="pill-tag beige text-[10px]" style="padding: 2px 8px;">${addrTagText(a.tag)}</span>
+            ${isDefault ? '<span class="pill-tag mustard text-[10px]" style="padding: 2px 8px;">默认</span>' : ''}
+          </div>
+          <p class="text-xs" style="color: var(--brown-mid);">${API.util.escapeHtml(a.region)} ${API.util.escapeHtml(a.detail)}</p>
+        </div>
+        ${isSelected ? '<svg class="flex-shrink-0" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+      </div>`;
+    }).join('');
+  }
+
+  // ===== 打开地址选择弹窗 =====
+  function openAddressModal() {
+    hideAddAddressForm();
+    renderAddrModalList();
+    openModal('addressModal');
+  }
+
+  // ===== 选择收货地址 =====
+  function selectAddress(id) {
+    const addr = allAddresses.find(a => a.id === id);
+    if (addr) {
+      defaultAddress = addr;
+      renderAddress();
+    }
+    closeModal(document.getElementById('addressModal'));
+  }
+
+  // ===== 切换到新增地址表单 =====
+  function showAddAddressForm() {
+    document.getElementById('addrListView').classList.add('hidden');
+    document.getElementById('addrFormView').classList.remove('hidden');
+    document.getElementById('checkoutAddrForm').reset();
+    currentCkAddrTag = '家';
+    document.querySelectorAll('#ckAddrTagPicker .filter-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.tag === '家');
+    });
+  }
+
+  // ===== 返回地址列表 =====
+  function hideAddAddressForm() {
+    document.getElementById('addrFormView').classList.add('hidden');
+    document.getElementById('addrListView').classList.remove('hidden');
+  }
+
+  // ===== 提交新增地址 =====
+  async function submitNewAddress(e) {
+    e.preventDefault();
+    const name = document.getElementById('ckAddrName').value.trim();
+    const phone = document.getElementById('ckAddrPhone').value.trim();
+    const region = document.getElementById('ckAddrRegion').value.trim();
+    const detail = document.getElementById('ckAddrDetail').value.trim();
+    const isDefault = document.getElementById('ckAddrDefault').checked ? 1 : 0;
+
+    if (name.length < 2) { showToast('收件人姓名至少 2 个字', 'error'); return; }
+    if (!/^1[3-9]\d{9}$/.test(phone)) { showToast('请输入正确的 11 位手机号', 'error'); return; }
+    if (!region) { showToast('请输入所在地区', 'error'); return; }
+    if (!detail) { showToast('请输入详细地址', 'error'); return; }
+
+    const btn = document.getElementById('ckAddrSubmitBtn');
+    const orig = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '保存中...';
+
+    try {
+      const payload = { name, phone, region, detail, tag: addrTagToApi(currentCkAddrTag), isDefault };
+      await API.user.addAddress(payload);
+
+      // 刷新地址列表（清除缓存强制重新加载）
+      addressesLoaded = false;
+      await loadAddress();
+
+      // 自动选中新添加的地址（按 name + phone 匹配）
+      const newAddr = allAddresses.find(a => a.name === name && a.phone === phone);
+      if (newAddr) {
+        defaultAddress = newAddr;
+        renderAddress();
+      }
+
+      showToast('地址添加成功', 'success');
+      hideAddAddressForm();
+      renderAddrModalList();
+    } catch (err) {
+      showToast(err.message || '地址添加失败', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = orig;
+    }
+  }
+
+  // ===== 渲染菜品列表 =====
+  function renderCart() {
+    cartListEl.innerHTML = '';
+    const items = (cartVO && cartVO.items) || [];
+    if (items.length === 0) {
+      emptyCartEl.classList.remove('hidden');
+      mobileBarEl.classList.remove('show');
+      cartCountEl.textContent = '0 件';
+      return;
+    }
+    emptyCartEl.classList.add('hidden');
+    mobileBarEl.classList.add('show');
+
+    items.forEach(item => {
+      const unitPrice = Number(item.unitPrice || 0);
+      const qty = item.qty || 0;
+      const lineTotal = unitPrice * qty;
+      const img = item.dishImage || `https://picsum.photos/seed/dish${item.dishId}/200/200`;
+      const row = document.createElement('div');
+      row.className = 'px-6 sm:px-7 py-5 flex items-center gap-4';
+      row.style.borderColor = 'var(--beige)';
+      row.innerHTML = `
+        <img src="${esc(img)}" alt="${esc(item.dishName)}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover flex-shrink-0">
+        <div class="flex-1 min-w-0">
+          <h4 class="font-cn-display text-base sm:text-lg leading-tight truncate" style="color: var(--coffee);">${esc(item.dishName)}</h4>
+          ${item.optionsText ? `<p class="text-xs mt-1 truncate" style="color: var(--brown-mid);">${esc(item.optionsText)}</p>` : ''}
+          <p class="text-sm mt-1.5 font-semibold" style="color: var(--orange);">¥${money(unitPrice)}</p>
+        </div>
+        <div class="flex flex-col items-end gap-2 flex-shrink-0">
+          <div class="flex items-center gap-2.5">
+            <button class="qty-btn minus" data-action="minus" data-id="${item.id}" ${qty <= 1 ? 'disabled' : ''} aria-label="减少数量">−</button>
+            <span class="qty-num">${qty}</span>
+            <button class="qty-btn plus" data-action="plus" data-id="${item.id}" aria-label="增加数量">+</button>
+          </div>
+          <p class="text-sm font-bold" style="color: var(--coffee);">¥${money(lineTotal)}</p>
+        </div>
+      `;
+      cartListEl.appendChild(row);
+    });
+
+    // 绑定数量按钮事件
+    cartListEl.querySelectorAll('.qty-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (updating) return;
+        const id = parseInt(btn.dataset.id);
+        const action = btn.dataset.action;
+        const item = items.find(c => c.id === id);
+        if (!item) return;
+        let newQty = item.qty;
+        if (action === 'plus') {
+          newQty = item.qty + 1;
+        } else if (action === 'minus') {
+          if (item.qty <= 1) return;
+          newQty = item.qty - 1;
+        }
+        updating = true;
+        try {
+          await API.cart.updateQty(id, newQty);
+          await loadCart();
+        } catch (e) {
+          showToast(e.message || '更新数量失败');
+        } finally {
+          updating = false;
+        }
+      });
+    });
+
+    // 更新购物车件数
+    cartCountEl.textContent = (cartVO.totalCount || 0) + ' 件';
+  }
+
+  // ===== 渲染金额 =====
+  function renderAmount() {
+    const { subtotal, discount, deliveryFee, total } = calc();
+    subtotalEl.textContent = money(subtotal);
+    discountEl.textContent = money(discount);
+    deliveryEl.textContent = money(deliveryFee);
+    totalEl.textContent = money(total);
+    payBtnTotalEl.textContent = money(total);
+    mobileTotalEl.textContent = money(total);
+    modalTotalEl.textContent = money(total);
+    confirmTotalEl.textContent = money(total);
+
+    // 省钱提示
+    if (discount > 0) {
+      savedHintEl.innerHTML = `已优惠 <span style="color:var(--green);font-weight:700;">¥${money(discount)}</span>`;
+    } else {
+      // 距离下一档满减还差多少
+      const next = promoRules.find(r => subtotal < Number(r.threshold));
+      if (next) {
+        const diff = money(Number(next.threshold) - subtotal);
+        savedHintEl.innerHTML = `再点 <span style="color:var(--orange);font-weight:700;">¥${diff}</span> 可享满${money(next.threshold)}减${money(next.discount)}`;
+      } else {
+        savedHintEl.textContent = '';
+      }
+    }
+
+    renderPromoRules(subtotal);
+
+    // 支付按钮禁用状态
+    const items = (cartVO && cartVO.items) || [];
+    const disabled = items.length === 0;
+    document.getElementById('payBtnDesktop').disabled = disabled;
+    document.getElementById('payBtnMobile').disabled = disabled;
+  }
+
+  // ===== 统一渲染 =====
+  function renderAll() {
+    renderMerchant();
+    renderCart();
+    renderAmount();
+  }
+
+  // ===== 加载商家详情 =====
+  async function loadMerchant() {
+    try {
+      const data = await API.menu.getMerchantDetail(merchantId);
+      merchant = data.merchant || data;
+      promoRules = data.promoRules || [];
+    } catch (e) {
+      if (e.message !== '请先登录') {
+        showToast('加载商家信息失败：' + (e.message || ''));
+      }
+    }
+  }
+
+  // ===== 加载购物车 =====
+  async function loadCart() {
+    try {
+      cartVO = await API.cart.get(merchantId);
+      renderAll();
+    } catch (e) {
+      if (e.message !== '请先登录') {
+        showToast('加载购物车失败：' + (e.message || ''));
+      }
+    }
+  }
+
+  // ===== 加载收货地址列表（带缓存） =====
+  async function loadAddress() {
+    if (addressesLoaded) return; // 命中缓存，跳过请求
+    try {
+      const list = await API.user.listAddresses();
+      allAddresses = list || [];
+      addressesLoaded = true;
+      if (allAddresses.length > 0 && !defaultAddress) {
+        defaultAddress = allAddresses.find(a => a.isDefault === 1 || a.isDefault === true) || allAddresses[0];
+      }
+      renderAddress();
+    } catch (e) {
+      // 静默处理（未登录时 api.js 已处理跳转）
+    }
+  }
+
+  // ===== 留言字数统计 =====
+  noteInput.addEventListener('input', () => {
+    noteCountEl.textContent = noteInput.value.length;
+  });
+
+  // ===== 模态框通用控制 =====
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(modal) {
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.querySelectorAll('.modal-mask').forEach(mask => {
+    // 点击遮罩关闭
+    mask.addEventListener('click', e => {
+      if (e.target === mask) closeModal(mask);
+    });
+    // 关闭按钮
+    mask.querySelectorAll('.modal-close').forEach(btn => {
+      btn.addEventListener('click', () => closeModal(mask));
+    });
+  });
+
+  // ===== 地址标签选择器 =====
+  document.querySelectorAll('#ckAddrTagPicker .filter-tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('#ckAddrTagPicker .filter-tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      currentCkAddrTag = t.dataset.tag;
+    });
+  });
+
+  // ===== 新增地址表单提交 =====
+  document.getElementById('checkoutAddrForm').addEventListener('submit', submitNewAddress);
+
+  // ===== 清空购物车 =====
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    const items = (cartVO && cartVO.items) || [];
+    if (items.length === 0) {
+      showToast('购物车已经是空的啦～');
+      return;
+    }
+    openModal('clearModal');
+  });
+  document.getElementById('confirmClearBtn').addEventListener('click', async () => {
+    if (updating) return;
+    updating = true;
+    try {
+      await API.cart.clear(merchantId);
+      cartVO = await API.cart.get(merchantId);
+      noteInput.value = '';
+      noteCountEl.textContent = '0';
+      renderAll();
+      closeModal(document.getElementById('clearModal'));
+      showToast('已清空购物车');
+    } catch (e) {
+      showToast(e.message || '清空失败');
+    } finally {
+      updating = false;
+    }
+  });
+
+  // ===== 支付方式选择 =====
+  document.querySelectorAll('.pay-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      selectedPayMethod = opt.dataset.method;
+    });
+  });
+
+  // ===== 打开支付模态框 =====
+  function openPayModal() {
+    const items = (cartVO && cartVO.items) || [];
+    if (items.length === 0) {
+      showToast('购物车空空如也，先去选菜品吧～');
+      return;
+    }
+    if (!defaultAddress) {
+      showToast('请先选择收货地址', 'error');
+      openAddressModal();
+      return;
+    }
+    openModal('payModal');
+  }
+  document.getElementById('payBtnDesktop').addEventListener('click', openPayModal);
+  document.getElementById('payBtnMobile').addEventListener('click', openPayModal);
+
+  // ===== 确认支付：创建订单 → 支付订单 =====
+  document.getElementById('confirmPayBtn').addEventListener('click', async () => {
+    const { total } = calc();
+    const btn = document.getElementById('confirmPayBtn');
+    const originalHtml = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> 确认支付 ¥<span id="confirmTotal">0.00</span>';
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> 支付处理中...';
+
+    try {
+      // 1. 创建订单
+      const order = await API.order.create({
+        merchantId: merchantId,
+        note: noteInput.value.trim() || undefined,
+        payMethod: selectedPayMethod,
+        addressId: defaultAddress ? defaultAddress.id : undefined
+      });
+
+      // 2. 支付订单
+      await API.order.pay(order.id, selectedPayMethod);
+
+      // 3. 刷新购物车（后端已清空）
+      cartVO = await API.cart.get(merchantId);
+
+      // 4. 关闭支付弹窗，恢复按钮
+      closeModal(document.getElementById('payModal'));
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+
+      // 5. 填充成功信息（使用真实订单数据）
+      document.getElementById('successAmount').textContent = money(order.totalAmount);
+      document.getElementById('successMethod').textContent = payMethodMap[selectedPayMethod] || selectedPayMethod;
+      document.getElementById('successEta').textContent =
+        (merchant && merchant.deliveryTime != null ? merchant.deliveryTime : 25) + ' 分钟';
+      document.getElementById('successOrderNo').textContent = order.orderNo || '—';
+      openModal('successModal');
+
+      // 6. 重新渲染（购物车已空）
+      renderAll();
+    } catch (e) {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+      document.getElementById('confirmTotal').textContent = money(total);
+      showToast(e.message || '支付失败，请重试');
+    }
+  });
+
+  // ===== 成功后查看订单（跳转个人中心"我的订单"） =====
+  document.getElementById('viewOrderBtn').addEventListener('click', () => {
+    closeModal(document.getElementById('successModal'));
+    location.href = 'profile.html?tab=orders';
+  });
+
+  // ===== Toast 提示（与 index.html 风格一致） =====
+  function showToast(msg, type) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    const bg = type === 'success' ? 'var(--green)' : type === 'error' ? '#c0392b' : 'var(--coffee)';
+    t.style.cssText = 'position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);background:' + bg + ';color:var(--pale);padding:14px 26px;border-radius:100px;font-size:14px;font-weight:600;box-shadow:0 12px 32px -8px rgba(0,0,0,.3);z-index:9999;opacity:0;transition:all .35s cubic-bezier(.22,1,.36,1);max-width:90vw;text-align:center;';
+    document.body.appendChild(t);
+    requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)'; });
+    setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(20px)'; setTimeout(() => t.remove(), 400); }, 2200);
+  }
+
+  // ===== ESC 关闭模态框 =====
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-mask.open').forEach(m => closeModal(m));
+    }
+  });
+
+  // ===== 初始化：并行加载商家详情、购物车、地址 =====
+  (async function init() {
+    // 设置返回商家链接（指向当前下单的店铺）
+    const shopHref = 'shop.html?id=' + merchantId;
+    document.getElementById('backToShopNav').href = shopHref;
+    document.getElementById('backToShopBtn').href = shopHref;
+    document.getElementById('backToShopSuccess').href = shopHref;
+
+    // 显示加载状态
+    cartListEl.innerHTML = '<div style="padding:48px 20px;text-align:center;color:var(--brown-mid);font-size:14px;"><svg class="animate-spin" style="width:30px;height:30px;margin:0 auto 12px;display:block;color:var(--orange);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>加载中...</div>';
+    await Promise.all([
+      loadMerchant(),
+      loadCart(),
+      loadAddress()
+    ]);
+    renderAll();
+  })();
+</script>
+
+</body>
+</html>

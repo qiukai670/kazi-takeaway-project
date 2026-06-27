@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>管理后台 — 咔滋外卖</title>
+<meta name="description" content="咔滋外卖管理后台系统，管理商家、菜品与订单，一站式运营你的外卖平台。" />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Boldonse&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #fcf7ee;
+    --coffee: #7d2c0f;
+    --orange: #ff8342;
+    --brown-mid: #af4f28;
+    --beige: #f9eedc;
+    --pale: #ffefd5;
+    --coffee-dark: #664237;
+    --green: #00704f;
+    --mustard: #fed16a;
+  }
+
+  * { -webkit-font-smoothing: antialiased; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Manrope', 'Noto Sans SC', sans-serif;
+    background: var(--cream);
+    color: var(--coffee);
+    letter-spacing: -0.01em;
+  }
+
+  .font-display { font-family: 'Boldonse', 'Noto Sans SC', sans-serif; font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; }
+  .font-cn-display { font-family: 'Noto Sans SC', sans-serif; font-weight: 900; letter-spacing: -0.01em; line-height: 1.2; }
+
+  /* 按钮 */
+  .btn-primary { background: var(--orange); color: #fff; border-radius: 100px; padding: 14px 28px; font-weight: 600; transition: transform .25s cubic-bezier(.22,1,.36,1), filter .25s, box-shadow .25s; box-shadow: 0 6px 16px -4px rgba(255,131,66,.5); display: inline-flex; align-items: center; gap: 8px; }
+  .btn-primary:hover { transform: scale(1.03); filter: brightness(1.05); }
+  .btn-primary:active { transform: scale(0.97); }
+  .btn-dark { background: var(--coffee-dark); color: #fff; border-radius: 100px; padding: 14px 28px; font-weight: 600; transition: transform .25s, filter .25s; }
+  .btn-dark:hover { transform: scale(1.03); filter: brightness(1.1); }
+  .btn-outline { border: 1.5px solid var(--coffee); color: var(--coffee); border-radius: 100px; padding: 12px 26px; font-weight: 600; transition: all .25s; background: transparent; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-outline:hover { background: var(--coffee); color: #fff; }
+
+  /* 阴影 */
+  .card-shadow { box-shadow: 0 1px 2px -1px rgba(0,0,0,.12), 0 4px 6px -2px rgba(0,0,0,.11), 0 16px 14px -3px rgba(0,0,0,.08); }
+  .card-shadow-lg { box-shadow: 0 1px 3px -1px rgba(0,0,0,.10), 0 6px 12px -3px rgba(0,0,0,.10), 0 24px 32px -6px rgba(0,0,0,.10); }
+
+  /* 顶部毛玻璃 */
+  .nav-blur { background: rgba(252, 247, 238, 0.82); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(125,44,15,.08); }
+
+  /* 侧边栏 */
+  .sidebar { background: #fff; border-right: 1px solid var(--beige); }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 14px; font-weight: 600; color: var(--brown-mid); cursor: pointer; transition: all .25s; }
+  .nav-item:hover { background: var(--beige); color: var(--coffee); }
+  .nav-item.active { background: var(--orange); color: #fff; box-shadow: 0 6px 16px -4px rgba(255,131,66,.5); }
+  .nav-item .icon { width: 22px; height: 22px; flex-shrink: 0; }
+
+  /* 表格 */
+  .data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .data-table thead th { text-align: left; padding: 14px 16px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--brown-mid); background: var(--beige); border-bottom: 1px solid var(--beige); }
+  .data-table thead th:first-child { border-top-left-radius: 14px; }
+  .data-table thead th:last-child { border-top-right-radius: 14px; }
+  .data-table tbody td { padding: 14px 16px; border-bottom: 1px solid var(--beige); font-size: 14px; color: var(--coffee); vertical-align: middle; }
+  .data-table tbody tr { transition: background .2s; }
+  .data-table tbody tr:hover { background: var(--beige); }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+
+  /* 状态标签 */
+  .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 100px; font-size: 12px; font-weight: 700; }
+  .status-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .status-green { background: rgba(0,112,79,.12); color: var(--green); }
+  .status-gray { background: rgba(125,44,15,.10); color: var(--brown-mid); }
+  .status-orange { background: rgba(255,131,66,.16); color: var(--orange); }
+  .status-blue { background: rgba(37,99,235,.12); color: #2563eb; }
+  .status-purple { background: rgba(147,51,234,.14); color: #9333ea; }
+  .status-new { background: var(--orange); color: #fff; }
+
+  /* 操作按钮 */
+  .action-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 10px; transition: all .2s; cursor: pointer; border: 1px solid transparent; }
+  .action-btn:hover { background: var(--beige); }
+  .action-btn.edit { color: var(--brown-mid); }
+  .action-btn.edit:hover { color: var(--orange); border-color: var(--orange); }
+  .action-btn.toggle { color: var(--brown-mid); }
+  .action-btn.toggle:hover { color: var(--green); border-color: var(--green); }
+  .action-btn.delete { color: var(--brown-mid); }
+  .action-btn.delete:hover { color: #dc2626; border-color: #dc2626; }
+  .action-btn.popular { color: var(--brown-mid); }
+  .action-btn.popular.active { color: var(--orange); border-color: var(--orange); background: rgba(237,139,0,.1); }
+  .action-btn.popular:hover { color: var(--orange); border-color: var(--orange); }
+
+  /* Toggle 开关 */
+  .toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle .slider { position: absolute; cursor: pointer; inset: 0; background: #d4c4b3; border-radius: 100px; transition: .3s; }
+  .toggle .slider::before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .3s; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
+  .toggle input:checked + .slider { background: var(--orange); }
+  .toggle input:checked + .slider::before { transform: translateX(20px); }
+
+  /* 口味定制属性卡片 */
+  .option-group-card { background: #fff; border: 1px solid var(--beige); border-radius: 14px; padding: 14px; }
+  .option-group-head { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+  .option-choice-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .option-choice-row input { flex: 1; }
+
+  /* 模态框 */
+  .modal-mask { position: fixed; inset: 0; background: rgba(125,44,15,.45); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; visibility: hidden; transition: opacity .25s, visibility .25s; padding: 16px; }
+  .modal-mask.show { opacity: 1; visibility: visible; }
+  .modal-box { background: #fff; border-radius: 24px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; transform: translateY(20px) scale(.98); transition: transform .3s cubic-bezier(.22,1,.36,1); box-shadow: 0 24px 60px -12px rgba(0,0,0,.3); }
+  .modal-mask.show .modal-box { transform: translateY(0) scale(1); }
+  .modal-box.lg { max-width: 720px; }
+
+  /* 表单 */
+  .form-label { display: block; font-size: 13px; font-weight: 700; color: var(--coffee); margin-bottom: 6px; letter-spacing: .02em; }
+  .form-input, .form-select, .form-textarea { width: 100%; padding: 11px 14px; border: 1.5px solid var(--beige); border-radius: 12px; font-size: 14px; color: var(--coffee); background: #fff; transition: border-color .2s, box-shadow .2s; font-family: inherit; }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255,131,66,.15); }
+  .form-textarea { resize: vertical; min-height: 80px; }
+  .form-error { color: #dc2626; font-size: 12px; margin-top: 4px; font-weight: 600; }
+  .form-input.invalid, .form-select.invalid, .form-textarea.invalid { border-color: #dc2626; }
+
+  /* Toast */
+  .toast-wrap { position: fixed; top: 100px; right: 24px; z-index: 200; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+  .toast { background: #fff; color: var(--coffee); padding: 14px 20px; border-radius: 14px; font-size: 14px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(0,0,0,.2); display: flex; align-items: center; gap: 10px; min-width: 240px; max-width: 360px; transform: translateX(120%); transition: transform .35s cubic-bezier(.22,1,.36,1); border-left: 4px solid var(--orange); pointer-events: auto; }
+  .toast.show { transform: translateX(0); }
+  .toast.success { border-left-color: var(--green); }
+  .toast.error { border-left-color: #dc2626; }
+  .toast .toast-icon { font-size: 18px; }
+
+  /* 统计卡片 */
+  .stat-card { background: #fff; border-radius: 20px; padding: 20px; display: flex; align-items: center; gap: 16px; transition: transform .3s, box-shadow .3s; }
+  .stat-card:hover { transform: translateY(-4px); box-shadow: 0 16px 32px -8px rgba(0,0,0,.12); }
+  .stat-icon { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+
+  /* 筛选标签 */
+  .filter-chip { padding: 8px 18px; border-radius: 100px; font-size: 13px; font-weight: 600; color: var(--brown-mid); background: #fff; border: 1.5px solid var(--beige); cursor: pointer; transition: all .25s; }
+  .filter-chip:hover { border-color: var(--orange); color: var(--orange); }
+  .filter-chip.active { background: var(--coffee); color: #fff; border-color: var(--coffee); }
+
+  /* 徽章预设按钮 */
+  .badge-preset { padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 600; color: var(--brown-mid); background: #fff; border: 1.5px solid var(--beige); cursor: pointer; transition: all .2s; }
+  .badge-preset:hover { border-color: var(--orange); color: var(--orange); background: var(--pale); }
+  .badge-preset.active { background: var(--orange); color: #fff; border-color: var(--orange); }
+
+  /* 徽章预览 pill（与 index.html 保持一致） */
+  .pill-tag { display: inline-flex; align-items: center; background: var(--orange); color: var(--pale); border-radius: 100px; padding: 4px 12px; font-size: 12px; font-weight: 700; letter-spacing: .03em; }
+  .pill-tag.dark { background: var(--coffee); }
+  .pill-tag.green { background: var(--green); }
+  .pill-tag.mustard { background: var(--mustard); color: var(--coffee); }
+  .pill-tag.beige { background: var(--beige); color: var(--coffee); }
+  .pill-tag.empty { background: var(--beige); color: var(--brown-mid); font-weight: 600; letter-spacing: 0; }
+
+  /* 上传预览 */
+  .img-preview { width: 100%; aspect-ratio: 4/3; border-radius: 14px; overflow: hidden; background: var(--beige); display: flex; align-items: center; justify-content: center; border: 2px dashed var(--beige); cursor: pointer; transition: border-color .25s; position: relative; }
+  .img-preview:hover { border-color: var(--orange); }
+  .img-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .img-preview .placeholder { color: var(--brown-mid); font-size: 13px; text-align: center; padding: 16px; }
+
+  /* 滚动条 */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--beige); border-radius: 100px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--brown-mid); }
+
+  ::selection { background: var(--orange); color: #fff; }
+
+  /* 移动端侧边栏抽屉 */
+  @media (max-width: 1023px) {
+    .sidebar-wrap { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; z-index: 90; transform: translateX(-100%); transition: transform .3s cubic-bezier(.22,1,.36,1); }
+    .sidebar-wrap.open { transform: translateX(0); }
+    .sidebar-mask { position: fixed; inset: 0; background: rgba(125,44,15,.4); z-index: 80; opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s; }
+    .sidebar-mask.open { opacity: 1; visibility: visible; }
+  }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- ===== 顶部栏 ===== -->
+<header class="nav-blur fixed top-0 left-0 right-0 z-50">
+  <nav class="h-20 flex items-center justify-between px-4 lg:px-8">
+    <div class="flex items-center gap-3">
+      <!-- 移动端菜单按钮 -->
+      <button id="sidebarToggle" class="lg:hidden p-2 rounded-lg hover:bg-[var(--beige)] transition" style="color: var(--coffee);" aria-label="打开菜单">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <a href="admin.html" class="font-display text-xl sm:text-2xl tracking-tight" style="color: var(--coffee);">
+        咔滋<span class="text-[10px] align-top ml-1" style="color:var(--orange);">外卖</span>
+        <span class="ml-2 text-xs sm:text-sm font-cn-display" style="color: var(--brown-mid); font-weight:700;">· 管理后台</span>
+      </a>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- 管理员信息 -->
+      <div class="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full" style="background: var(--beige);">
+        <img id="adminAvatar" src="https://picsum.photos/seed/admin/80/80" alt="管理员头像" class="w-9 h-9 rounded-full object-cover ring-2 ring-white">
+        <span id="adminName" class="hidden sm:inline text-sm font-semibold pr-2" style="color: var(--coffee);">管理员</span>
+      </div>
+      <button id="logoutBtn" class="btn-outline text-sm py-2 px-4" title="退出登录">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span class="hidden sm:inline">退出</span>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<!-- ===== 主体布局 ===== -->
+<div class="pt-20 flex">
+
+  <!-- 侧边栏遮罩（移动端） -->
+  <div id="sidebarMask" class="sidebar-mask lg:hidden"></div>
+
+  <!-- 左侧导航栏 -->
+  <aside id="sidebar" class="sidebar-wrap lg:sticky lg:top-20 lg:h-[calc(100vh-5rem)] lg:w-64 lg:flex-shrink-0 w-72">
+    <div class="sidebar h-full w-72 lg:w-full flex flex-col p-4 overflow-y-auto">
+      <p class="px-3 pt-2 pb-3 text-xs font-bold uppercase tracking-wider" style="color: var(--brown-mid);">运营管理</p>
+      <nav class="space-y-1.5">
+        <div class="nav-item active" data-module="merchants">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span>商家管理</span>
+        </div>
+        <div class="nav-item" data-module="menu">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18M3 11a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h18a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2M3 11v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8M7 15h.01M11 15h2"/></svg>
+          <span>菜单管理</span>
+        </div>
+        <div class="nav-item" data-module="orders">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4M9 11V7a3 3 0 0 1 6 0v4M9 11h6"/></svg>
+          <span>订单管理</span>
+          <span id="pendingBadge" class="ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full" style="background: var(--orange); color:#fff;">0</span>
+        </div>
+      </nav>
+
+      <div class="mt-auto p-4 rounded-2xl" style="background: var(--beige);">
+        <p class="font-cn-display text-sm mb-1" style="color: var(--coffee);">需要帮助？</p>
+        <p class="text-xs leading-relaxed mb-3" style="color: var(--brown-mid);">查看管理指南或联系客服 400-123-4567</p>
+        <a href="#" class="text-xs font-bold" style="color: var(--orange);">查看指南 →</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 右侧内容区 -->
+  <main class="flex-1 min-w-0 px-4 lg:px-8 py-6 lg:py-8">
+
+    <!-- ===== 数据统计概览 ===== -->
+    <section class="mb-8">
+      <h1 class="font-cn-display text-2xl sm:text-3xl mb-1" style="color: var(--coffee);">数据概览</h1>
+      <p class="text-sm mb-6" style="color: var(--brown-mid);">实时掌握平台运营状况</p>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="stat-card card-shadow">
+          <div class="stat-icon" style="background: rgba(255,131,66,.16); color: var(--orange);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4M9 11V7a3 3 0 0 1 6 0v4M9 11h6"/></svg>
+          </div>
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--brown-mid);">今日订单</p>
+            <p class="font-display text-2xl mt-1" id="statOrders" style="color: var(--coffee);">0</p>
+          </div>
+        </div>
+        <div class="stat-card card-shadow">
+          <div class="stat-icon" style="background: rgba(0,112,79,.14); color: var(--green);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--brown-mid);">今日营业额</p>
+            <p class="font-display text-2xl mt-1" id="statRevenue" style="color: var(--coffee);">¥0</p>
+          </div>
+        </div>
+        <div class="stat-card card-shadow">
+          <div class="stat-icon" style="background: rgba(254,209,106,.30); color: var(--brown-mid);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--brown-mid);">商家总数</p>
+            <p class="font-display text-2xl mt-1" id="statMerchants" style="color: var(--coffee);">0</p>
+          </div>
+        </div>
+        <div class="stat-card card-shadow">
+          <div class="stat-icon" style="background: rgba(125,44,15,.12); color: var(--coffee);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18M3 11a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h18a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2M3 11v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8"/></svg>
+          </div>
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--brown-mid);">菜品总数</p>
+            <p class="font-display text-2xl mt-1" id="statDishes" style="color: var(--coffee);">0</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 商家管理模块 ===== -->
+    <section id="module-merchants" class="module">
+      <div class="bg-white rounded-3xl card-shadow overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 border-b" style="border-color: var(--beige);">
+          <div>
+            <h2 class="font-cn-display text-xl sm:text-2xl" style="color: var(--coffee);">商家列表</h2>
+            <p class="text-sm mt-1" style="color: var(--brown-mid);">管理平台所有商家信息</p>
+          </div>
+          <button id="addMerchantBtn" class="btn-primary text-sm py-3 px-6 self-start sm:self-auto">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            添加商家
+          </button>
+        </div>
+
+        <!-- 搜索工具栏 -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 px-6 py-4 border-b" style="border-color: var(--beige); background: var(--cream);">
+          <div class="relative flex-1 max-w-xs">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="color: var(--brown-mid);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="merchantSearchInput" class="form-input pl-9" placeholder="搜索商家名称 / 分类 / 标签">
+          </div>
+        </div>
+
+        <!-- 桌面端表格 -->
+        <div class="hidden md:block overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>商家</th>
+                <th>分类</th>
+                <th>评分</th>
+                <th>月售</th>
+                <th>起送价/配送费</th>
+                <th>状态</th>
+                <th class="text-right">操作</th>
+              </tr>
+            </thead>
+            <tbody id="merchantTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- 移动端卡片 -->
+        <div class="md:hidden p-4 space-y-3" id="merchantCardList"></div>
+
+        <div id="merchantEmpty" class="hidden p-12 text-center" style="color: var(--brown-mid);">
+          <p class="text-4xl mb-3">🏪</p>
+          <p class="font-semibold">暂无商家，点击「添加商家」开始创建</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 菜单管理模块 ===== -->
+    <section id="module-menu" class="module hidden">
+      <div class="bg-white rounded-3xl card-shadow overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 border-b" style="border-color: var(--beige);">
+          <div>
+            <h2 class="font-cn-display text-xl sm:text-2xl" style="color: var(--coffee);">菜品列表</h2>
+            <p class="text-sm mt-1" style="color: var(--brown-mid);">管理平台所有菜品上下架与信息</p>
+          </div>
+          <button id="addDishBtn" class="btn-primary text-sm py-3 px-6 self-start sm:self-auto">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            添加菜品
+          </button>
+        </div>
+
+        <!-- 桌面端表格 -->
+        <div class="hidden md:block overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>菜品</th>
+                <th>所属商家</th>
+                <th>分类</th>
+                <th>价格</th>
+                <th>销量</th>
+                <th>状态</th>
+                <th class="text-right">操作</th>
+              </tr>
+            </thead>
+            <tbody id="dishTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- 移动端卡片 -->
+        <div class="md:hidden p-4 space-y-3" id="dishCardList"></div>
+
+        <div id="dishEmpty" class="hidden p-12 text-center" style="color: var(--brown-mid);">
+          <p class="text-4xl mb-3">🍽️</p>
+          <p class="font-semibold">暂无菜品，点击「添加菜品」开始创建</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 订单管理模块 ===== -->
+    <section id="module-orders" class="module hidden">
+      <div class="bg-white rounded-3xl card-shadow overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 border-b" style="border-color: var(--beige);">
+          <div>
+            <h2 class="font-cn-display text-xl sm:text-2xl" style="color: var(--coffee);">订单列表</h2>
+            <p class="text-sm mt-1" style="color: var(--brown-mid);">查看与处理用户订单</p>
+          </div>
+          <div class="flex flex-wrap gap-2" id="orderFilters">
+            <button class="filter-chip active" data-filter="all">全部</button>
+            <button class="filter-chip" data-filter="pending">待确认</button>
+            <button class="filter-chip" data-filter="cooking">制作中</button>
+            <button class="filter-chip" data-filter="delivering">配送中</button>
+            <button class="filter-chip" data-filter="done">已完成</button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>订单号</th>
+                <th>用户</th>
+                <th>菜品摘要</th>
+                <th>金额</th>
+                <th>下单时间</th>
+                <th>状态</th>
+                <th class="text-right">操作</th>
+              </tr>
+            </thead>
+            <tbody id="orderTableBody"></tbody>
+          </table>
+        </div>
+
+        <div id="orderEmpty" class="hidden p-12 text-center" style="color: var(--brown-mid);">
+          <p class="text-4xl mb-3">📦</p>
+          <p class="font-semibold">该状态下暂无订单</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===== 商家编辑/添加模态框 ===== -->
+<div id="merchantModal" class="modal-mask">
+  <div class="modal-box lg">
+    <div class="flex items-center justify-between p-6 border-b sticky top-0 bg-white z-10" style="border-color: var(--beige); border-radius: 24px 24px 0 0;">
+      <h3 id="merchantModalTitle" class="font-cn-display text-xl" style="color: var(--coffee);">添加商家</h3>
+      <button class="action-btn" data-close-modal="merchantModal" aria-label="关闭">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <form id="merchantForm" class="p-6 space-y-5" novalidate>
+      <input type="hidden" id="merchantId">
+
+      <!-- Logo -->
+      <div>
+        <label class="form-label">商家Logo</label>
+        <div class="grid sm:grid-cols-[200px_1fr] gap-4 items-start">
+          <div class="img-preview" id="merchantLogoPreview">
+            <div class="placeholder">点击上传或输入图片URL</div>
+          </div>
+          <div class="space-y-3">
+            <input type="file" id="merchantLogoFile" accept="image/*" class="hidden">
+            <button type="button" id="uploadLogoBtn" class="btn-outline text-sm py-2.5 px-4 w-full justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              上传Logo
+            </button>
+            <input type="text" id="merchantLogoUrl" class="form-input" placeholder="或输入图片URL">
+          </div>
+        </div>
+      </div>
+
+      <!-- 封面图 -->
+      <div>
+        <label class="form-label">封面图</label>
+        <div class="grid sm:grid-cols-[200px_1fr] gap-4 items-start">
+          <div class="img-preview" id="merchantCoverPreview">
+            <div class="placeholder">点击上传或输入图片URL</div>
+          </div>
+          <div class="space-y-3">
+            <input type="file" id="merchantCoverFile" accept="image/*" class="hidden">
+            <button type="button" id="uploadCoverBtn" class="btn-outline text-sm py-2.5 px-4 w-full justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              上传封面
+            </button>
+            <input type="text" id="merchantCoverUrl" class="form-input" placeholder="或输入图片URL">
+          </div>
+        </div>
+      </div>
+
+      <!-- 商家名称 -->
+      <div>
+        <label class="form-label">商家名称 <span style="color:#dc2626;">*</span></label>
+        <input type="text" id="merchantName" class="form-input" placeholder="例如：汉堡研究所" maxlength="30">
+        <p class="form-error hidden" id="errMerchantName">请输入商家名称</p>
+      </div>
+
+      <!-- 分类 + 价格档位 -->
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">分类</label>
+          <select id="merchantCategory" class="form-select">
+            <option value="西式快餐">🍔 西式快餐</option>
+            <option value="中式快餐">🍜 中式快餐</option>
+            <option value="小吃系列">🍗 小吃系列</option>
+            <option value="川渝美食">🌶️ 川渝美食</option>
+            <option value="日式料理">🍣 日式料理</option>
+            <option value="饮料甜品">🧋 饮料甜品</option>
+            <option value="沙拉轻食">🥗 沙拉轻食</option>
+            <option value="火锅烧烤">🍢 火锅烧烤</option>
+            <option value="蛋糕烘焙">🍰 蛋糕烘焙</option>
+            <option value="其他">🍽️ 其他</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">价格档位</label>
+          <select id="merchantPriceLevel" class="form-select">
+            <option value="¥">¥</option>
+            <option value="¥¥">¥¥</option>
+            <option value="¥¥¥">¥¥¥</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 评分 + 配送时长 -->
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">评分</label>
+          <input type="number" id="merchantRating" class="form-input" value="4.8" min="0" max="5" step="0.1">
+        </div>
+        <div>
+          <label class="form-label">配送时长（分钟）</label>
+          <input type="number" id="merchantDeliveryTime" class="form-input" value="30" min="0" step="1">
+        </div>
+      </div>
+
+      <!-- 起送价 + 配送费 -->
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">起送价（元）</label>
+          <input type="number" id="merchantMinOrder" class="form-input" value="20" min="0" step="0.01">
+        </div>
+        <div>
+          <label class="form-label">配送费（元）</label>
+          <input type="number" id="merchantDeliveryFee" class="form-input" value="3" min="0" step="0.01">
+        </div>
+      </div>
+
+      <!-- 特色标签 -->
+      <div>
+        <label class="form-label">特色标签</label>
+        <input type="text" id="merchantTags" class="form-input" placeholder="多个标签用逗号分隔，例如：招牌,人气,新品">
+      </div>
+
+      <!-- 商家徽章 -->
+      <div>
+        <label class="form-label">商家徽章</label>
+        <div class="flex flex-wrap gap-2 mb-2" id="badgePresets">
+          <button type="button" class="badge-preset" data-badge="品牌">品牌</button>
+          <button type="button" class="badge-preset" data-badge="品质优选">品质优选</button>
+          <button type="button" class="badge-preset" data-badge="新店">新店</button>
+          <button type="button" class="badge-preset" data-badge="人气推荐">人气推荐</button>
+        </div>
+        <input type="text" id="merchantBadge" class="form-input" placeholder="选择预设或自定义输入（留空则无徽章）" maxlength="20">
+        <div class="flex items-center gap-2 mt-2">
+          <span class="text-xs" style="color: var(--brown-mid);">预览：</span>
+          <span id="badgePreview" class="pill-tag empty text-xs">暂无徽章</span>
+        </div>
+      </div>
+
+      <!-- 状态 -->
+      <div class="flex items-center justify-between p-4 rounded-xl" style="background: var(--beige);">
+        <div>
+          <p class="font-semibold text-sm" style="color: var(--coffee);">营业状态</p>
+          <p class="text-xs" style="color: var(--brown-mid);">关闭后商家显示为休息中</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="merchantStatus" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="button" class="btn-outline flex-1 justify-center" data-close-modal="merchantModal">取消</button>
+        <button type="submit" class="btn-primary flex-1 justify-center">保存商家</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== 菜品编辑/添加模态框 ===== -->
+<div id="dishModal" class="modal-mask">
+  <div class="modal-box lg">
+    <div class="flex items-center justify-between p-6 border-b sticky top-0 bg-white z-10" style="border-color: var(--beige); border-radius: 24px 24px 0 0;">
+      <h3 id="dishModalTitle" class="font-cn-display text-xl" style="color: var(--coffee);">添加菜品</h3>
+      <button class="action-btn" data-close-modal="dishModal" aria-label="关闭">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <form id="dishForm" class="p-6 space-y-5" novalidate>
+      <input type="hidden" id="dishId">
+
+      <!-- 所属商家 -->
+      <div>
+        <label class="form-label">所属商家 <span style="color:#dc2626;">*</span></label>
+        <select id="dishMerchantId" class="form-select">
+          <option value="">请选择商家</option>
+        </select>
+        <p class="form-error hidden" id="errMerchant">请选择所属商家</p>
+      </div>
+
+      <!-- 图片 -->
+      <div>
+        <label class="form-label">菜品图片</label>
+        <div class="grid sm:grid-cols-[200px_1fr] gap-4 items-start">
+          <div class="img-preview" id="imgPreview">
+            <div class="placeholder">点击上传或输入图片URL</div>
+          </div>
+          <div class="space-y-3">
+            <input type="file" id="dishImgFile" accept="image/*" class="hidden">
+            <button type="button" id="uploadImgBtn" class="btn-outline text-sm py-2.5 px-4 w-full justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              上传图片
+            </button>
+            <input type="text" id="dishImgUrl" class="form-input" placeholder="或输入图片URL">
+          </div>
+        </div>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">菜品名称 <span style="color:#dc2626;">*</span></label>
+          <input type="text" id="dishName" class="form-input" placeholder="例如：双层芝士堡" maxlength="30">
+          <p class="form-error hidden" id="errName">请输入菜品名称</p>
+        </div>
+        <div>
+          <label class="form-label">价格（元） <span style="color:#dc2626;">*</span></label>
+          <input type="number" id="dishPrice" class="form-input" placeholder="0.00" min="0" step="0.01">
+          <p class="form-error hidden" id="errPrice">价格必须为大于0的数字</p>
+        </div>
+      </div>
+
+      <div>
+        <label class="form-label">菜品描述</label>
+        <textarea id="dishDesc" class="form-textarea" placeholder="简要描述菜品特色、食材、口味..." maxlength="200"></textarea>
+      </div>
+
+      <div>
+        <label class="form-label">分类</label>
+        <select id="dishCategory" class="form-select">
+          <option value="汉堡炸鸡">汉堡炸鸡</option>
+          <option value="小吃系列">小食</option>
+          <option value="川渝美食">川渝美食</option>
+          <option value="面食系列">面食系列</option>
+          <option value="盖饭系列">盖饭系列</option>
+          <option value="日式料理">日式料理</option>
+          <option value="饮料甜品">饮料甜品</option>
+          <option value="冰激凌/圣代">冰激凌/圣代</option>
+          <option value="沙拉轻食">沙拉轻食</option>
+          <option value="饮料">饮料</option>
+          <option value="套餐">套餐</option>
+          <option value="其他">螺蛳粉</option>
+        </select>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="flex items-center justify-between p-4 rounded-xl" style="background: var(--beige);">
+          <div>
+            <p class="font-semibold text-sm" style="color: var(--coffee);">新品标签</p>
+            <p class="text-xs" style="color: var(--brown-mid);">在菜品上展示「新品」</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="dishIsNew">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="flex items-center justify-between p-4 rounded-xl" style="background: var(--beige);">
+          <div>
+            <p class="font-semibold text-sm" style="color: var(--coffee);">上架状态</p>
+            <p class="text-xs" style="color: var(--brown-mid);">关闭后用户不可见</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="dishOnShelf" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 支持口味定制 -->
+      <div class="p-4 rounded-xl" style="background: var(--beige);">
+        <div class="flex items-center justify-between mb-2">
+          <div>
+            <p class="font-semibold text-sm" style="color: var(--coffee);">支持口味定制</p>
+            <p class="text-xs" style="color: var(--brown-mid);">开启后可配置冰度、甜度、辣度等可选属性</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="dishCustomizable">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div id="dishOptionsBox" class="space-y-3" style="display:none;">
+          <div id="dishOptionsList" class="space-y-3"></div>
+          <button type="button" id="addOptionGroupBtn" class="btn-outline text-sm py-2 px-4 w-full justify-center">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            添加定制属性
+          </button>
+        </div>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="button" class="btn-outline flex-1 justify-center" data-close-modal="dishModal">取消</button>
+        <button type="submit" class="btn-primary flex-1 justify-center">保存菜品</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== 确认对话框 ===== -->
+<div id="confirmModal" class="modal-mask">
+  <div class="modal-box" style="max-width: 420px;">
+    <div class="p-6 text-center">
+      <div id="confirmIcon" class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl" style="background: rgba(220,38,38,.12); color: #dc2626;">⚠️</div>
+      <h3 id="confirmTitle" class="font-cn-display text-xl mb-2" style="color: var(--coffee);">确认删除？</h3>
+      <p id="confirmMsg" class="text-sm leading-relaxed" style="color: var(--brown-mid);">此操作不可撤销，请谨慎确认。</p>
+    </div>
+    <div class="flex gap-3 p-6 pt-2">
+      <button type="button" class="btn-outline flex-1 justify-center" data-close-modal="confirmModal">取消</button>
+      <button type="button" id="confirmOk" class="flex-1 justify-center text-white font-semibold rounded-full py-3 px-6 transition" style="background: #dc2626;">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Toast 容器 ===== -->
+<div id="toastWrap" class="toast-wrap"></div>
+
+<script src="api.js"></script>
+<script>
+  // ===== 全局状态 =====
+  let dishes = [];
+  let orders = [];
+  let merchants = [];
+  let merchantMap = {};
+  let currentOrderFilter = 'all';
+  let confirmCallback = null;
+  let currentUser = null;
+
+  // ===== 工具函数 =====
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => document.querySelectorAll(sel);
+  const escapeHtml = API.util.escapeHtml;
+  const formatTime = API.util.formatTime;
+  const money = API.util.money;
+
+  // 订单状态映射（后端使用大写枚举）
+  const ORDER_STATUS = {
+    PENDING_PAY:     { label: '待支付', cls: 'status-gray' },
+    PAID:            { label: '已支付', cls: 'status-blue' },
+    PENDING_CONFIRM: { label: '待确认', cls: 'status-orange' },
+    CONFIRMED:       { label: '已确认', cls: 'status-blue' },
+    DELIVERING:      { label: '配送中', cls: 'status-purple' },
+    COMPLETED:       { label: '已完成', cls: 'status-green' },
+    CANCELLED:       { label: '已取消', cls: 'status-gray' },
+  };
+
+  // 筛选标签 → 后端状态映射
+  const FILTER_TO_STATUS = {
+    all: null,
+    pending: 'PENDING_CONFIRM',
+    cooking: 'CONFIRMED',
+    delivering: 'DELIVERING',
+    done: 'COMPLETED',
+  };
+
+  // 已支付状态集合（用于营业额统计）
+  const PAID_STATUSES = ['PAID', 'PENDING_CONFIRM', 'CONFIRMED', 'DELIVERING', 'COMPLETED'];
+
+  // 判断订单是否为今日下单（兼容 LocalDateTime 数组序列化 [y,m,d,h,m,s]）
+  function isToday(createTime) {
+    if (!createTime) return false;
+    let dt;
+    if (Array.isArray(createTime)) {
+      const [y, m, d] = createTime;
+      dt = new Date(y, m - 1, d);
+    } else {
+      dt = new Date(String(createTime).replace(' ', 'T'));
+    }
+    if (isNaN(dt.getTime())) return false;
+    const now = new Date();
+    return dt.getFullYear() === now.getFullYear() && dt.getMonth() === now.getMonth() && dt.getDate() === now.getDate();
+  }
+
+  // ===== Toast 提示 =====
+  function showToast(msg, type = 'success') {
+    const wrap = $('#toastWrap');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    const icon = type === 'success' ? '✓' : (type === 'error' ? '✕' : 'ℹ');
+    t.innerHTML = `<span class="toast-icon">${icon}</span><span>${msg}</span>`;
+    wrap.appendChild(t);
+    requestAnimationFrame(() => t.classList.add('show'));
+    setTimeout(() => {
+      t.classList.remove('show');
+      setTimeout(() => t.remove(), 400);
+    }, 2600);
+  }
+
+  // ===== 模态框控制 =====
+  function openModal(id) {
+    $(`#${id}`).classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    $(`#${id}`).classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  // 点击遮罩关闭
+  $$('.modal-mask').forEach(mask => {
+    mask.addEventListener('click', (e) => {
+      if (e.target === mask) closeModal(mask.id);
+    });
+  });
+  // 关闭按钮
+  $$('[data-close-modal]').forEach(btn => {
+    btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
+  });
+  // ESC 关闭
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      $$('.modal-mask.show').forEach(m => closeModal(m.id));
+    }
+  });
+
+  // ===== 确认对话框 =====
+  function showConfirm({ title = '确认操作？', msg = '', okText = '确认', danger = true, onOk }) {
+    $('#confirmTitle').textContent = title;
+    $('#confirmMsg').textContent = msg;
+    $('#confirmOk').textContent = okText;
+    $('#confirmOk').style.background = danger ? '#dc2626' : 'var(--orange)';
+    $('#confirmIcon').style.background = danger ? 'rgba(220,38,38,.12)' : 'rgba(255,131,66,.16)';
+    $('#confirmIcon').style.color = danger ? '#dc2626' : 'var(--orange)';
+    $('#confirmIcon').textContent = danger ? '⚠️' : 'ℹ️';
+    confirmCallback = onOk;
+    openModal('confirmModal');
+  }
+  $('#confirmOk').addEventListener('click', () => {
+    closeModal('confirmModal');
+    if (confirmCallback) { confirmCallback(); confirmCallback = null; }
+  });
+
+  // ===== 模块切换 =====
+  $$('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const mod = item.dataset.module;
+      $$('.nav-item').forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+      $$('.module').forEach(m => m.classList.add('hidden'));
+      $(`#module-${mod}`).classList.remove('hidden');
+      // 移动端关闭侧边栏
+      closeSidebar();
+    });
+  });
+
+  // ===== 移动端侧边栏 =====
+  function openSidebar() {
+    $('#sidebar').classList.add('open');
+    $('#sidebarMask').classList.add('open');
+  }
+  function closeSidebar() {
+    $('#sidebar').classList.remove('open');
+    $('#sidebarMask').classList.remove('open');
+  }
+  $('#sidebarToggle').addEventListener('click', openSidebar);
+  $('#sidebarMask').addEventListener('click', closeSidebar);
+
+  // ===== 退出登录 =====
+  $('#logoutBtn').addEventListener('click', () => {
+    showConfirm({
+      title: '退出登录？',
+      msg: '退出后需要重新登录才能管理平台',
+      okText: '退出',
+      danger: false,
+      onOk: async () => {
+        try {
+          await API.auth.logout();
+        } catch (e) { /* 忽略退出接口错误 */ }
+        showToast('已退出登录，即将跳转...', 'success');
+        setTimeout(() => { window.location.href = 'login.html'; }, 1200);
+      }
+    });
+  });
+
+  // ===== 通用图片上传设置 =====
+  function setupImageUpload({ previewId, urlInputId, fileId, uploadBtnId }) {
+    const preview = $(`#${previewId}`);
+    const urlInput = $(`#${urlInputId}`);
+    const fileInput = $(`#${fileId}`);
+    const uploadBtn = $(`#${uploadBtnId}`);
+
+    function updatePreview(src) {
+      if (src) {
+        preview.innerHTML = `<img src="${escapeHtml(src)}" alt="预览">`;
+      } else {
+        preview.innerHTML = `<div class="placeholder">点击上传或输入图片URL</div>`;
+      }
+    }
+
+    uploadBtn.addEventListener('click', () => fileInput.click());
+    preview.addEventListener('click', () => fileInput.click());
+    urlInput.addEventListener('input', (e) => updatePreview(e.target.value.trim()));
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) { showToast('请选择图片文件', 'error'); return; }
+      if (file.size > 5 * 1024 * 1024) { showToast('图片大小不能超过 5MB', 'error'); return; }
+      showToast('正在上传图片...', '');
+      try {
+        const url = await API.util.uploadImage(file);
+        urlInput.value = url;
+        updatePreview(url);
+        showToast('图片上传成功', 'success');
+      } catch (err) {
+        showToast(err.message || '图片上传失败', 'error');
+      }
+    });
+
+    return updatePreview;
+  }
+
+  // ===== 数据加载 =====
+  async function loadMerchants() {
+    $('#merchantTableBody').innerHTML = `<tr><td colspan="7" class="text-center py-8" style="color: var(--brown-mid);">加载中...</td></tr>`;
+    $('#merchantCardList').innerHTML = '';
+    $('#merchantEmpty').classList.add('hidden');
+    try {
+      merchants = await API.admin.listMerchants() || [];
+      merchantMap = {};
+      merchants.forEach(m => { merchantMap[m.id] = m.name; });
+    } catch (e) {
+      showToast('加载商家失败：' + e.message, 'error');
+      merchants = [];
+    }
+    renderMerchants();
+    renderStats();
+    populateMerchantSelect();
+  }
+
+  function populateMerchantSelect() {
+    const select = $('#dishMerchantId');
+    if (!select) return;
+    select.innerHTML = '<option value="">请选择商家</option>' +
+      merchants.map(m => `<option value="${m.id}">${escapeHtml(m.name)}</option>`).join('');
+  }
+
+  async function loadDishes() {
+    $('#dishTableBody').innerHTML = `<tr><td colspan="7" class="text-center py-8" style="color: var(--brown-mid);">加载中...</td></tr>`;
+    $('#dishCardList').innerHTML = '';
+    $('#dishEmpty').classList.add('hidden');
+    try {
+      dishes = await API.admin.listDishes() || [];
+    } catch (e) {
+      showToast('加载菜品失败：' + e.message, 'error');
+      dishes = [];
+    }
+    renderDishes();
+    renderStats();
+  }
+
+  async function loadOrders() {
+    $('#orderTableBody').innerHTML = `<tr><td colspan="7" class="text-center py-8" style="color: var(--brown-mid);">加载中...</td></tr>`;
+    $('#orderEmpty').classList.add('hidden');
+    try {
+      orders = await API.admin.listOrders() || [];
+    } catch (e) {
+      showToast('加载订单失败：' + e.message, 'error');
+      orders = [];
+    }
+    renderOrders();
+    renderStats();
+  }
+
+  // ===== 渲染统计 =====
+  function renderStats() {
+    // 今日订单（仅统计今日下单）
+    const todayOrders = orders.filter(o => isToday(o.createTime));
+    $('#statOrders').textContent = todayOrders.length;
+    // 今日营业额（今日已支付状态的订单总额）
+    const revenue = todayOrders
+      .filter(o => PAID_STATUSES.includes(o.status))
+      .reduce((sum, o) => sum + Number(o.totalAmount || 0), 0);
+    $('#statRevenue').textContent = '¥' + money(revenue);
+    // 商家总数
+    $('#statMerchants').textContent = merchants.length;
+    // 菜品总数
+    $('#statDishes').textContent = dishes.length;
+    // 侧边栏待确认徽标（全部待确认订单，不限今日）
+    const pendingConfirmCount = orders.filter(o => o.status === 'PENDING_CONFIRM').length;
+    $('#pendingBadge').textContent = pendingConfirmCount;
+    $('#pendingBadge').style.display = pendingConfirmCount ? '' : 'none';
+  }
+
+  // ===== 渲染商家列表 =====
+  // 按搜索关键词过滤商家（名称 / 分类 / 标签 / 徽章）
+  function getFilteredMerchants() {
+    const q = ($('#merchantSearchInput') ? $('#merchantSearchInput').value : '').trim().toLowerCase();
+    if (!q) return merchants;
+    return merchants.filter(m =>
+      (m.name || '').toLowerCase().includes(q) ||
+      (m.category || '').toLowerCase().includes(q) ||
+      (m.tags || '').toLowerCase().includes(q) ||
+      (m.badge || '').toLowerCase().includes(q)
+    );
+  }
+
+  function renderMerchants() {
+    const tbody = $('#merchantTableBody');
+    const cardList = $('#merchantCardList');
+    const empty = $('#merchantEmpty');
+    const list = getFilteredMerchants();
+
+    if (list.length === 0) {
+      tbody.innerHTML = '';
+      cardList.innerHTML = '';
+      empty.classList.remove('hidden');
+      const msgEl = empty.querySelector('p.font-semibold');
+      if (msgEl) msgEl.textContent = merchants.length === 0 ? '暂无商家，点击「添加商家」开始创建' : '未找到匹配的商家';
+      return;
+    }
+    empty.classList.add('hidden');
+
+    // 后端字段：status 0=营业, 1=休息；isRecommended 0=否, 1=是
+    const isOpen = (m) => Number(m.status) === 0;
+    const isRec = (m) => Number(m.isRecommended) === 1;
+    const esc = escapeHtml;
+
+    // 桌面表格
+    tbody.innerHTML = list.map(m => `
+      <tr>
+        <td>
+          <div class="flex items-center gap-3">
+            <img src="${esc(m.logo || '')}" alt="${esc(m.name)}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0">
+            <div class="min-w-0">
+              <span class="font-semibold truncate" style="color: var(--coffee);">${esc(m.name)}</span>
+              ${m.badge ? `<p class="text-xs truncate" style="color: var(--orange);">${esc(m.badge)}</p>` : ''}
+            </div>
+          </div>
+        </td>
+        <td><span class="text-xs font-semibold px-2.5 py-1 rounded-full" style="background: var(--beige); color: var(--brown-mid);">${esc(m.category)}</span></td>
+        <td><span style="color: var(--orange); font-weight:600;">★ ${m.rating || 0}</span></td>
+        <td><span style="color: var(--brown-mid);">${m.sales || 0}</span></td>
+        <td><span class="text-xs" style="color: var(--brown-mid);">¥${money(m.minOrder)}起 / ¥${money(m.deliveryFee)}配送</span></td>
+        <td>
+          ${isOpen(m)
+            ? '<span class="status-pill status-green"><span class="dot"></span>营业中</span>'
+            : '<span class="status-pill status-gray"><span class="dot"></span>休息中</span>'}
+        </td>
+        <td>
+          <div class="flex items-center justify-end gap-1">
+            <button class="action-btn edit" data-edit-merchant="${m.id}" title="编辑">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="action-btn popular ${isRec(m) ? 'active' : ''}" data-recommended="${m.id}" title="${isRec(m) ? '取消好评' : '设为好评'}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="${isRec(m) ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+            <button class="action-btn delete" data-delete-merchant="${m.id}" title="删除">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+
+    // 移动端卡片
+    cardList.innerHTML = list.map(m => `
+      <div class="rounded-2xl p-4" style="background: var(--cream);">
+        <div class="flex gap-3 mb-3">
+          <img src="${esc(m.logo || '')}" alt="${esc(m.name)}" class="w-16 h-16 rounded-xl object-cover flex-shrink-0">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="font-cn-display text-base" style="color: var(--coffee);">${esc(m.name)}</span>
+            </div>
+            <p class="text-xs mb-1" style="color: var(--brown-mid);">${esc(m.category)} · ★ ${m.rating || 0} · 月售 ${m.sales || 0}</p>
+            <span class="text-xs" style="color: var(--brown-mid);">¥${money(m.minOrder)}起 / ¥${money(m.deliveryFee)}配送</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between">
+          ${isOpen(m)
+            ? '<span class="status-pill status-green"><span class="dot"></span>营业中</span>'
+            : '<span class="status-pill status-gray"><span class="dot"></span>休息中</span>'}
+          <div class="flex gap-1">
+            <button class="action-btn edit" data-edit-merchant="${m.id}" title="编辑">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="action-btn popular ${isRec(m) ? 'active' : ''}" data-recommended="${m.id}" title="${isRec(m) ? '取消好评' : '设为好评'}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="${isRec(m) ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+            <button class="action-btn delete" data-delete-merchant="${m.id}" title="删除">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    // 绑定操作事件
+    $$('[data-edit-merchant]').forEach(b => b.addEventListener('click', () => openMerchantModal(Number(b.dataset.editMerchant))));
+    $$('[data-delete-merchant]').forEach(b => b.addEventListener('click', () => deleteMerchant(Number(b.dataset.deleteMerchant))));
+    // 绑定好评切换（与人气菜品按钮一致的 click 交互）
+    $$('[data-recommended]').forEach(b => b.addEventListener('click', () => toggleMerchantRecommended(Number(b.dataset.recommended))));
+  }
+
+  // 好评商家切换（与人气菜品 toggleDishPopular 交互一致）
+  async function toggleMerchantRecommended(id) {
+    const m = merchants.find(x => x.id === id);
+    if (!m) return;
+    const wasRec = Number(m.isRecommended) === 1;
+    try {
+      await API.admin.toggleMerchantRecommended(id);
+      showToast(`「${m.name}」${wasRec ? '已取消好评' : '已设为好评商家'}`, 'success');
+      await loadMerchants();
+    } catch (e) {
+      showToast('操作失败：' + e.message, 'error');
+    }
+  }
+
+  // 搜索输入（防抖 200ms）
+  let merchantSearchTimer = null;
+  $('#merchantSearchInput').addEventListener('input', () => {
+    clearTimeout(merchantSearchTimer);
+    merchantSearchTimer = setTimeout(renderMerchants, 200);
+  });
+
+  // ===== 商家模态框 =====
+  const updateLogoPreview = setupImageUpload({
+    previewId: 'merchantLogoPreview',
+    urlInputId: 'merchantLogoUrl',
+    fileId: 'merchantLogoFile',
+    uploadBtnId: 'uploadLogoBtn',
+  });
+  const updateCoverPreview = setupImageUpload({
+    previewId: 'merchantCoverPreview',
+    urlInputId: 'merchantCoverUrl',
+    fileId: 'merchantCoverFile',
+    uploadBtnId: 'uploadCoverBtn',
+  });
+
+  function openMerchantModal(id = null) {
+    const form = $('#merchantForm');
+    form.reset();
+    $$('.form-error').forEach(e => e.classList.add('hidden'));
+    $$('.form-input, .form-select, .form-textarea').forEach(i => i.classList.remove('invalid'));
+
+    if (id) {
+      const m = merchants.find(x => x.id === id);
+      if (!m) return;
+      $('#merchantModalTitle').textContent = '编辑商家';
+      $('#merchantId').value = m.id;
+      $('#merchantName').value = m.name || '';
+      $('#merchantLogoUrl').value = m.logo || '';
+      $('#merchantCoverUrl').value = m.cover || '';
+      $('#merchantCategory').value = m.category || '';
+      $('#merchantPriceLevel').value = m.priceLevel || '¥';
+      $('#merchantRating').value = m.rating || 4.8;
+      $('#merchantDeliveryTime').value = m.deliveryTime || 30;
+      $('#merchantMinOrder').value = m.minOrder || 20;
+      $('#merchantDeliveryFee').value = m.deliveryFee || 3;
+      $('#merchantTags').value = m.tags || '';
+      $('#merchantBadge').value = m.badge || '';
+      // status: 0=营业 → 勾选
+      $('#merchantStatus').checked = Number(m.status) === 0;
+      updateLogoPreview(m.logo || '');
+      updateCoverPreview(m.cover || '');
+    } else {
+      $('#merchantModalTitle').textContent = '添加商家';
+      $('#merchantId').value = '';
+      // 设置默认值
+      $('#merchantRating').value = 4.8;
+      $('#merchantDeliveryTime').value = 30;
+      $('#merchantMinOrder').value = 20;
+      $('#merchantDeliveryFee').value = 3;
+      $('#merchantStatus').checked = true;
+      $('#merchantBadge').value = '';
+      updateLogoPreview('');
+      updateCoverPreview('');
+    }
+    syncBadgePresetActive();
+    updateBadgePreview();
+    openModal('merchantModal');
+  }
+
+  // 徽章实时预览：颜色映射与 index.html 保持一致（品牌→dark, 品质优选→green, 其他→默认orange）
+  function updateBadgePreview() {
+    const v = ($('#merchantBadge').value || '').trim();
+    const el = $('#badgePreview');
+    if (!v) {
+      el.className = 'pill-tag empty text-xs';
+      el.textContent = '暂无徽章';
+      return;
+    }
+    const bc = v === '品牌' ? 'dark' : v === '品质优选' ? 'green' : '';
+    el.className = 'pill-tag text-xs' + (bc ? ' ' + bc : '');
+    el.textContent = v;
+  }
+
+  // 同步预设按钮高亮状态
+  function syncBadgePresetActive() {
+    const v = ($('#merchantBadge').value || '').trim();
+    $$('#badgePresets .badge-preset').forEach(b => {
+      b.classList.toggle('active', b.dataset.badge === v);
+    });
+  }
+
+  // 预设按钮点击 → 填入输入框并刷新预览
+  $$('#badgePresets .badge-preset').forEach(b => b.addEventListener('click', () => {
+    $('#merchantBadge').value = b.dataset.badge;
+    syncBadgePresetActive();
+    updateBadgePreview();
+  }));
+  // 自定义输入 → 实时刷新预览与预设高亮
+  $('#merchantBadge').addEventListener('input', () => {
+    syncBadgePresetActive();
+    updateBadgePreview();
+  });
+
+  $('#addMerchantBtn').addEventListener('click', () => openMerchantModal());
+
+  // 表单验证
+  function validateMerchantForm() {
+    let valid = true;
+    const name = $('#merchantName').value.trim();
+    if (!name) {
+      $('#errMerchantName').classList.remove('hidden');
+      $('#merchantName').classList.add('invalid');
+      valid = false;
+    } else {
+      $('#errMerchantName').classList.add('hidden');
+      $('#merchantName').classList.remove('invalid');
+    }
+    return valid;
+  }
+
+  // 保存商家（调用后端接口）
+  $('#merchantForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!validateMerchantForm()) {
+      showToast('请检查表单填写', 'error');
+      return;
+    }
+    const id = $('#merchantId').value ? Number($('#merchantId').value) : null;
+    const logo = $('#merchantLogoUrl').value.trim() || `https://picsum.photos/seed/merchant${Date.now()}/200/200`;
+    const cover = $('#merchantCoverUrl').value.trim() || `https://picsum.photos/seed/cover${Date.now()}/600/300`;
+    // MerchantDTO 字段映射：status 勾选=营业=0（与后端语义相反）
+    const data = {
+      name: $('#merchantName').value.trim(),
+      logo,
+      cover,
+      category: $('#merchantCategory').value,
+      priceLevel: $('#merchantPriceLevel').value,
+      rating: parseFloat($('#merchantRating').value) || 4.8,
+      deliveryTime: parseInt($('#merchantDeliveryTime').value) || 30,
+      minOrder: parseFloat($('#merchantMinOrder').value) || 20,
+      deliveryFee: parseFloat($('#merchantDeliveryFee').value) || 3,
+      tags: $('#merchantTags').value.trim(),
+      badge: $('#merchantBadge').value.trim(),
+      // status: 勾选=营业=0, 未勾选=休息=1
+      status: $('#merchantStatus').checked ? 0 : 1,
+    };
+
+    try {
+      if (id) {
+        await API.admin.updateMerchant(id, data);
+        showToast('商家已更新', 'success');
+      } else {
+        await API.admin.addMerchant(data);
+        showToast('商家已添加', 'success');
+      }
+      closeModal('merchantModal');
+      await loadMerchants();
+    } catch (e) {
+      showToast('保存失败：' + e.message, 'error');
+    }
+  });
+
+  // 删除商家
+  function deleteMerchant(id) {
+    const m = merchants.find(x => x.id === id);
+    if (!m) return;
+    showConfirm({
+      title: '删除商家？',
+      msg: `确定要删除「${m.name}」吗？该商家下的菜品可能受到影响。此操作不可撤销。`,
+      okText: '删除',
+      danger: true,
+      onOk: async () => {
+        try {
+          await API.admin.deleteMerchant(id);
+          showToast(`「${m.name}」已删除`, 'success');
+          await loadMerchants();
+        } catch (e) {
+          showToast('删除失败：' + e.message, 'error');
+        }
+      }
+    });
+  }
+
+  // ===== 渲染菜品列表 =====
+  function renderDishes() {
+    const tbody = $('#dishTableBody');
+    const cardList = $('#dishCardList');
+    const empty = $('#dishEmpty');
+
+    if (dishes.length === 0) {
+      tbody.innerHTML = '';
+      cardList.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+
+    // 后端字段：onShelf 0=上架, 1=下架；isNew 0=否, 1=是；isPopular 0=否, 1=是
+    const isOnShelf = (d) => Number(d.onShelf) === 0;
+    const isNewDish = (d) => Number(d.isNew) === 1;
+    const isPopularDish = (d) => Number(d.isPopular) === 1;
+    const merchantName = (d) => merchantMap[d.merchantId] || `商家#${d.merchantId || '?'}`;
+
+    // 桌面表格
+    tbody.innerHTML = dishes.map(d => `
+      <tr>
+        <td>
+          <div class="flex items-center gap-3">
+            <img src="${escapeHtml(d.image)}" alt="${escapeHtml(d.name)}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-semibold truncate" style="color: var(--coffee);">${escapeHtml(d.name)}</span>
+                ${isNewDish(d) ? '<span class="status-pill status-new" style="padding:2px 8px;font-size:10px;">新品</span>' : ''}
+                ${isPopularDish(d) ? '<span class="status-pill" style="padding:2px 8px;font-size:10px;background:var(--orange);color:#fff;">人气</span>' : ''}
+              </div>
+              <p class="text-xs truncate" style="color: var(--brown-mid);">${escapeHtml(d.description) || '—'}</p>
+            </div>
+          </div>
+        </td>
+        <td><span class="text-xs font-semibold" style="color: var(--brown-mid);">${escapeHtml(merchantName(d))}</span></td>
+        <td><span class="text-xs font-semibold px-2.5 py-1 rounded-full" style="background: var(--beige); color: var(--brown-mid);">${escapeHtml(d.category)}</span></td>
+        <td><span class="font-display text-base" style="color: var(--orange);">¥${money(d.price)}</span></td>
+        <td><span style="color: var(--brown-mid);">${d.sales || 0}</span></td>
+        <td>
+          ${isOnShelf(d)
+            ? '<span class="status-pill status-green"><span class="dot"></span>上架中</span>'
+            : '<span class="status-pill status-gray"><span class="dot"></span>已下架</span>'}
+        </td>
+        <td>
+          <div class="flex items-center justify-end gap-1">
+            <button class="action-btn edit" data-edit="${d.id}" title="编辑">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="action-btn popular ${isPopularDish(d) ? 'active' : ''}" data-popular="${d.id}" title="${isPopularDish(d) ? '取消人气' : '设为人气'}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="${isPopularDish(d) ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+            <button class="action-btn toggle" data-toggle="${d.id}" title="${isOnShelf(d) ? '下架' : '上架'}">
+              ${isOnShelf(d)
+                ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+                : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'}
+            </button>
+            <button class="action-btn delete" data-delete="${d.id}" title="删除">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+
+    // 移动端卡片
+    cardList.innerHTML = dishes.map(d => `
+      <div class="rounded-2xl p-4" style="background: var(--cream);">
+        <div class="flex gap-3 mb-3">
+          <img src="${escapeHtml(d.image)}" alt="${escapeHtml(d.name)}" class="w-16 h-16 rounded-xl object-cover flex-shrink-0">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap mb-1">
+              <span class="font-cn-display text-base" style="color: var(--coffee);">${escapeHtml(d.name)}</span>
+              ${isNewDish(d) ? '<span class="status-pill status-new" style="padding:2px 8px;font-size:10px;">新品</span>' : ''}
+              ${isPopularDish(d) ? '<span class="status-pill" style="padding:2px 8px;font-size:10px;background:var(--orange);color:#fff;">人气</span>' : ''}
+            </div>
+            <p class="text-xs mb-1" style="color: var(--brown-mid);">${escapeHtml(merchantName(d))} · ${escapeHtml(d.category)} · 销量 ${d.sales || 0}</p>
+            <span class="font-display text-lg" style="color: var(--orange);">¥${money(d.price)}</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between">
+          ${isOnShelf(d)
+            ? '<span class="status-pill status-green"><span class="dot"></span>上架中</span>'
+            : '<span class="status-pill status-gray"><span class="dot"></span>已下架</span>'}
+          <div class="flex gap-1">
+            <button class="action-btn edit" data-edit="${d.id}" title="编辑">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="action-btn popular ${isPopularDish(d) ? 'active' : ''}" data-popular="${d.id}" title="${isPopularDish(d) ? '取消人气' : '设为人气'}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="${isPopularDish(d) ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+            <button class="action-btn toggle" data-toggle="${d.id}" title="${isOnShelf(d) ? '下架' : '上架'}">
+              ${isOnShelf(d)
+                ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+                : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'}
+            </button>
+            <button class="action-btn delete" data-delete="${d.id}" title="删除">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    // 绑定操作事件
+    $$('[data-edit]').forEach(b => b.addEventListener('click', () => openDishModal(Number(b.dataset.edit))));
+    $$('[data-toggle]').forEach(b => b.addEventListener('click', () => toggleDishShelf(Number(b.dataset.toggle))));
+    $$('[data-popular]').forEach(b => b.addEventListener('click', () => toggleDishPopular(Number(b.dataset.popular))));
+    $$('[data-delete]').forEach(b => b.addEventListener('click', () => deleteDish(Number(b.dataset.delete))));
+  }
+
+  // ===== 菜品模态框 =====
+  async function openDishModal(id = null) {
+    const form = $('#dishForm');
+    form.reset();
+    $$('.form-error').forEach(e => e.classList.add('hidden'));
+    $$('.form-input, .form-select, .form-textarea').forEach(i => i.classList.remove('invalid'));
+    // 重置口味定制
+    $('#dishOptionsList').innerHTML = '';
+    $('#dishOptionsBox').style.display = 'none';
+    $('#dishCustomizable').checked = false;
+
+    if (id) {
+      const d = dishes.find(x => x.id === id);
+      if (!d) return;
+      $('#dishModalTitle').textContent = '编辑菜品';
+      $('#dishId').value = d.id;
+      $('#dishMerchantId').value = d.merchantId || '';
+      $('#dishName').value = d.name || '';
+      $('#dishPrice').value = d.price || '';
+      $('#dishDesc').value = d.description || '';
+      $('#dishCategory').value = d.category || '';
+      // isNew: 1=是 → 勾选
+      $('#dishIsNew').checked = Number(d.isNew) === 1;
+      // onShelf: 0=上架 → 勾选（与后端语义相反）
+      $('#dishOnShelf').checked = Number(d.onShelf) === 0;
+      $('#dishImgUrl').value = d.image || '';
+      updateImgPreview(d.image);
+      // 加载已有规格选项：用标志位禁止 change 事件在设置 checked 时自动添加默认选项组
+      try {
+        const detail = await API.menu.getDishDetail(id);
+        if (detail && detail.options && detail.options.length > 0) {
+          window.__loadingExistingOptions = true;
+          $('#dishCustomizable').checked = true;
+          $('#dishOptionsBox').style.display = '';
+          detail.options.forEach(g => addOptionGroup(g.name, g.optionType, g.choices));
+          delete window.__loadingExistingOptions;
+        }
+      } catch (e) {
+        console.error('加载菜品选项失败:', e);
+        showToast('加载口味选项失败: ' + (e.message || e), 'error');
+      }
+    } else {
+      $('#dishModalTitle').textContent = '添加菜品';
+      $('#dishId').value = '';
+      $('#dishMerchantId').value = '';
+      updateImgPreview('');
+    }
+    openModal('dishModal');
+  }
+
+  $('#addDishBtn').addEventListener('click', () => openDishModal());
+
+  // ===== 口味定制：动态表单 =====
+  // 切换显示
+  $('#dishCustomizable').addEventListener('change', (e) => {
+    $('#dishOptionsBox').style.display = e.target.checked ? '' : 'none';
+    // 编程式设置 checked（如编辑模式加载已有选项）时，跳过自动添加默认组
+    if (window.__loadingExistingOptions) return;
+    if (e.target.checked && $('#dishOptionsList').children.length === 0) {
+      addOptionGroup('辣度', 'single', [{ name: '不辣', priceAdd: 0 }, { name: '微辣', priceAdd: 0 }, { name: '中辣', priceAdd: 0 }]);
+    }
+  });
+  // 添加属性组
+  $('#addOptionGroupBtn').addEventListener('click', () => addOptionGroup('', 'single', []));
+
+  function addOptionGroup(name, optionType, choices) {
+    const list = $('#dishOptionsList');
+    const wrap = document.createElement('div');
+    wrap.className = 'option-group-card';
+    wrap.innerHTML = `
+      <div class="option-group-head">
+        <input type="text" class="form-input opt-name" placeholder="属性名（如冰度、甜度、辣度）" value="${escapeHtml(name || '')}" style="flex:1;">
+        <select class="form-select opt-type" style="width:auto;">
+          <option value="single" ${optionType === 'single' ? 'selected' : ''}>单选</option>
+          <option value="multi" ${optionType === 'multi' ? 'selected' : ''}>多选</option>
+        </select>
+        <button type="button" class="action-btn delete" title="删除该属性">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </div>
+      <div class="opt-choices space-y-1.5"></div>
+      <button type="button" class="btn-outline text-xs py-1.5 px-3 mt-2 add-choice-btn">+ 添加选项值</button>
+    `;
+    list.appendChild(wrap);
+    const choicesBox = wrap.querySelector('.opt-choices');
+    if (choices && choices.length) {
+      choices.forEach(c => addChoiceRow(choicesBox, c.name, c.priceAdd));
+    } else {
+      addChoiceRow(choicesBox, '', 0);
+    }
+    // 删除属性组
+    wrap.querySelector('.action-btn.delete').addEventListener('click', () => wrap.remove());
+    // 添加选项值
+    wrap.querySelector('.add-choice-btn').addEventListener('click', () => addChoiceRow(choicesBox, '', 0));
+  }
+
+  function addChoiceRow(container, name, priceAdd) {
+    const row = document.createElement('div');
+    row.className = 'option-choice-row';
+    row.innerHTML = `
+      <input type="text" class="form-input opt-choice-name" placeholder="选项名（如少冰、中辣）" value="${escapeHtml(name || '')}">
+      <input type="number" class="form-input opt-choice-price" placeholder="加价" value="${priceAdd || 0}" min="0" step="0.5" style="width:90px;">
+      <span class="text-xs" style="color: var(--brown-mid);">元</span>
+      <button type="button" class="action-btn delete" title="删除">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    `;
+    container.appendChild(row);
+    row.querySelector('.action-btn.delete').addEventListener('click', () => row.remove());
+  }
+
+  // 收集口味定制选项数据
+  function collectDishOptions() {
+    if (!$('#dishCustomizable').checked) return null;
+    const groups = [];
+    Array.from($('#dishOptionsList').children).forEach(wrap => {
+      const name = wrap.querySelector('.opt-name').value.trim();
+      if (!name) return;
+      const optionType = wrap.querySelector('.opt-type').value;
+      const choices = [];
+      Array.from(wrap.querySelectorAll('.option-choice-row')).forEach(row => {
+        const cName = row.querySelector('.opt-choice-name').value.trim();
+        if (!cName) return;
+        const cPrice = parseFloat(row.querySelector('.opt-choice-price').value) || 0;
+        choices.push({ name: cName, priceAdd: cPrice });
+      });
+      if (choices.length === 0) return;
+      groups.push({ name, optionType, choices });
+    });
+    return groups.length > 0 ? groups : null;
+  }
+
+  // 图片预览
+  function updateImgPreview(src) {
+    const preview = $('#imgPreview');
+    if (src) {
+      preview.innerHTML = `<img src="${escapeHtml(src)}" alt="预览">`;
+    } else {
+      preview.innerHTML = `<div class="placeholder">点击上传或输入图片URL</div>`;
+    }
+  }
+
+  // 上传图片
+  $('#uploadImgBtn').addEventListener('click', () => $('#dishImgFile').click());
+  $('#dishImgFile').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      showToast('请选择图片文件', 'error');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('图片大小不能超过 5MB', 'error');
+      return;
+    }
+    showToast('正在上传图片...', '');
+    try {
+      const url = await API.util.uploadImage(file);
+      $('#dishImgUrl').value = url;
+      updateImgPreview(url);
+      showToast('图片上传成功', 'success');
+    } catch (err) {
+      showToast(err.message || '图片上传失败', 'error');
+    }
+  });
+  // URL 输入实时预览
+  $('#dishImgUrl').addEventListener('input', (e) => updateImgPreview(e.target.value.trim()));
+  // 点击预览区也可上传
+  $('#imgPreview').addEventListener('click', () => $('#dishImgFile').click());
+
+  // 表单验证
+  function validateDishForm() {
+    let valid = true;
+    const merchantIdVal = $('#dishMerchantId').value;
+    const name = $('#dishName').value.trim();
+    const price = parseFloat($('#dishPrice').value);
+
+    if (!merchantIdVal) {
+      $('#errMerchant').classList.remove('hidden');
+      $('#dishMerchantId').classList.add('invalid');
+      valid = false;
+    } else {
+      $('#errMerchant').classList.add('hidden');
+      $('#dishMerchantId').classList.remove('invalid');
+    }
+
+    if (!name) {
+      $('#errName').classList.remove('hidden');
+      $('#dishName').classList.add('invalid');
+      valid = false;
+    } else {
+      $('#errName').classList.add('hidden');
+      $('#dishName').classList.remove('invalid');
+    }
+
+    if (!price || price <= 0 || isNaN(price)) {
+      $('#errPrice').classList.remove('hidden');
+      $('#dishPrice').classList.add('invalid');
+      valid = false;
+    } else {
+      $('#errPrice').classList.add('hidden');
+      $('#dishPrice').classList.remove('invalid');
+    }
+    return valid;
+  }
+
+  // 保存菜品（调用后端接口）
+  $('#dishForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!validateDishForm()) {
+      showToast('请检查表单填写', 'error');
+      return;
+    }
+    const id = $('#dishId').value ? Number($('#dishId').value) : null;
+    const img = $('#dishImgUrl').value.trim() || `https://picsum.photos/seed/dish${Date.now()}/400/300`;
+    // DishDTO 字段映射：isNew 勾选=1；onShelf 勾选=上架=0（与后端语义相反）
+    // 口味定制：开启时收集选项组；关闭时传空数组以清除已有选项；未配置时传 null 表示不修改
+    const customizable = $('#dishCustomizable').checked;
+    const collected = customizable ? collectDishOptions() : null;
+    const options = customizable ? (collected && collected.length > 0 ? collected : []) : null;
+    const data = {
+      merchantId: Number($('#dishMerchantId').value),
+      name: $('#dishName').value.trim(),
+      price: parseFloat($('#dishPrice').value),
+      oldPrice: null,
+      image: img,
+      description: $('#dishDesc').value.trim(),
+      category: $('#dishCategory').value,
+      isDiscount: 0,
+      isNew: $('#dishIsNew').checked ? 1 : 0,
+      onShelf: $('#dishOnShelf').checked ? 0 : 1,
+      options: options,
+    };
+
+    try {
+      if (id) {
+        await API.admin.updateDish(id, data);
+        showToast('菜品已更新', 'success');
+      } else {
+        await API.admin.addDish(data);
+        showToast('菜品已添加', 'success');
+      }
+      closeModal('dishModal');
+      await loadDishes();
+    } catch (e) {
+      showToast('保存失败：' + e.message, 'error');
+    }
+  });
+
+  // 上下架切换
+  async function toggleDishShelf(id) {
+    const d = dishes.find(x => x.id === id);
+    if (!d) return;
+    const wasOnShelf = Number(d.onShelf) === 0;
+    try {
+      await API.admin.toggleShelf(id);
+      showToast(`「${d.name}」已${wasOnShelf ? '下架' : '上架'}`, 'success');
+      await loadDishes();
+    } catch (e) {
+      showToast('操作失败：' + e.message, 'error');
+    }
+  }
+
+  // 人气标记切换
+  async function toggleDishPopular(id) {
+    const d = dishes.find(x => x.id === id);
+    if (!d) return;
+    const wasPopular = Number(d.isPopular) === 1;
+    try {
+      await API.admin.togglePopular(id);
+      showToast(`「${d.name}」${wasPopular ? '已取消人气' : '已设为人气菜品'}`, 'success');
+      await loadDishes();
+    } catch (e) {
+      showToast('操作失败：' + e.message, 'error');
+    }
+  }
+
+  // 删除菜品
+  function deleteDish(id) {
+    const d = dishes.find(x => x.id === id);
+    if (!d) return;
+    showConfirm({
+      title: '删除菜品？',
+      msg: `确定要删除「${d.name}」吗？此操作不可撤销。`,
+      okText: '删除',
+      danger: true,
+      onOk: async () => {
+        try {
+          await API.admin.deleteDish(id);
+          showToast(`「${d.name}」已删除`, 'success');
+          await loadDishes();
+        } catch (e) {
+          showToast('删除失败：' + e.message, 'error');
+        }
+      }
+    });
+  }
+
+  // ===== 渲染订单 =====
+  function renderOrders() {
+    const tbody = $('#orderTableBody');
+    const empty = $('#orderEmpty');
+    const list = currentOrderFilter === 'all' ? orders : orders.filter(o => o.status === FILTER_TO_STATUS[currentOrderFilter]);
+
+    if (list.length === 0) {
+      tbody.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+
+    tbody.innerHTML = list.map(o => {
+      const st = ORDER_STATUS[o.status] || { label: o.status, cls: 'status-gray' };
+      // 根据状态生成操作按钮
+      let actionBtn = '';
+      if (o.status === 'PAID') {
+        actionBtn = `<button class="btn-primary text-xs py-2 px-4" data-assign-order="${o.id}">审核订单</button>`;
+      } else if (o.status === 'PENDING_CONFIRM') {
+        actionBtn = `<button class="btn-primary text-xs py-2 px-4" data-confirm-order="${o.id}">确认接单</button>`;
+      } else if (o.status === 'CONFIRMED') {
+        actionBtn = `<button class="btn-primary text-xs py-2 px-4" data-dispatch-order="${o.id}">开始派送</button>`;
+      } else {
+        actionBtn = `<span class="text-xs" style="color: var(--brown-mid);">—</span>`;
+      }
+      return `
+        <tr>
+          <td><span class="font-mono text-xs font-semibold" style="color: var(--coffee);">${escapeHtml(o.orderNo)}</span></td>
+          <td><span style="color: var(--coffee); font-weight:600;">${escapeHtml(o.username || ('用户#' + o.userId))}</span></td>
+          <td><span class="text-xs" style="color: var(--brown-mid);">${escapeHtml(o.merchantName)}</span></td>
+          <td><span class="font-display text-base" style="color: var(--orange);">¥${money(o.totalAmount)}</span></td>
+          <td><span class="text-xs" style="color: var(--brown-mid);">${formatTime(o.createTime)}</span></td>
+          <td><span class="status-pill ${st.cls}"><span class="dot"></span>${st.label}</span></td>
+          <td>
+            <div class="flex items-center justify-end gap-2">
+              ${actionBtn}
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    $$('[data-confirm-order]').forEach(b => b.addEventListener('click', () => confirmOrder(Number(b.dataset.confirmOrder))));
+    $$('[data-assign-order]').forEach(b => b.addEventListener('click', () => assignOrder(Number(b.dataset.assignOrder))));
+    $$('[data-dispatch-order]').forEach(b => b.addEventListener('click', () => dispatchOrder(Number(b.dataset.dispatchOrder))));
+  }
+
+  // 确认接单（PENDING_CONFIRM → CONFIRMED）
+  function confirmOrder(id) {
+    const o = orders.find(x => x.id === id);
+    if (!o) return;
+    showConfirm({
+      title: '确认接单？',
+      msg: `订单 ${o.orderNo}（${o.username || ('用户#' + o.userId)}）确认后将通知商家开始制作。`,
+      okText: '确认接单',
+      danger: false,
+      onOk: async () => {
+        try {
+          await API.admin.confirmOrder(id);
+          showToast('已确认接单', 'success');
+          await loadOrders();
+        } catch (e) {
+          showToast('操作失败：' + e.message, 'error');
+        }
+      }
+    });
+  }
+
+  // 审核订单（PAID → PENDING_CONFIRM）
+  function assignOrder(id) {
+    const o = orders.find(x => x.id === id);
+    if (!o) return;
+    showConfirm({
+      title: '审核订单？',
+      msg: `订单 ${o.orderNo}（${o.username || ('用户#' + o.userId)}）审核后将进入待确认状态。`,
+      okText: '审核',
+      danger: false,
+      onOk: async () => {
+        try {
+          await API.admin.assignOrder(id);
+          showToast('已审核订单', 'success');
+          await loadOrders();
+        } catch (e) {
+          showToast('操作失败：' + e.message, 'error');
+        }
+      }
+    });
+  }
+
+  // 开始派送（CONFIRMED → DELIVERING）
+  function dispatchOrder(id) {
+    const o = orders.find(x => x.id === id);
+    if (!o) return;
+    showConfirm({
+      title: '开始派送？',
+      msg: `订单 ${o.orderNo}（${o.username || ('用户#' + o.userId)}）确认后将开始派送。`,
+      okText: '开始派送',
+      danger: false,
+      onOk: async () => {
+        try {
+          await API.admin.dispatchOrder(id);
+          showToast('已开始派送', 'success');
+          await loadOrders();
+        } catch (e) {
+          showToast('操作失败：' + e.message, 'error');
+        }
+      }
+    });
+  }
+
+  // 订单筛选
+  $$('#orderFilters .filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      $$('#orderFilters .filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentOrderFilter = chip.dataset.filter;
+      renderOrders();
+    });
+  });
+
+  // ===== 初始化 =====
+  async function init() {
+    // 检查登录态与管理员权限
+    const user = await API.auth.currentUser();
+    if (!user || user.role !== 1) {
+      window.location.href = 'login.html?redirect=admin.html';
+      return;
+    }
+    currentUser = user;
+    // 更新头部管理员信息
+    $('#adminName').textContent = currentUser.nickname || currentUser.username || '管理员';
+    if (currentUser.avatar) $('#adminAvatar').src = currentUser.avatar;
+    // 先加载商家，再并行加载菜品与订单
+    await loadMerchants();
+    await Promise.all([loadDishes(), loadOrders()]);
+  }
+  init();
+</script>
+
+</body>
+</html>

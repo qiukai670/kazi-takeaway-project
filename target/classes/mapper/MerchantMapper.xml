@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qiukai.mapper.MerchantMapper">
+
+    <resultMap id="merchantResultMap" type="com.qiukai.entity.Merchant">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="logo" column="logo"/>
+        <result property="cover" column="cover"/>
+        <result property="category" column="category"/>
+        <result property="priceLevel" column="price_level"/>
+        <result property="rating" column="rating"/>
+        <result property="sales" column="sales"/>
+        <result property="deliveryTime" column="delivery_time"/>
+        <result property="distance" column="distance"/>
+        <result property="minOrder" column="min_order"/>
+        <result property="deliveryFee" column="delivery_fee"/>
+        <result property="badge" column="badge"/>
+        <result property="tags" column="tags"/>
+        <result property="status" column="status"/>
+        <result property="isRecommended" column="is_recommended"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="allColumns">
+        id, name, logo, cover, category, price_level, rating, sales, delivery_time, distance,
+        min_order, delivery_fee, badge, tags, status, is_recommended, create_time, update_time
+    </sql>
+
+    <select id="selectById" resultMap="merchantResultMap">
+        SELECT <include refid="allColumns"/> FROM merchant WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="merchantResultMap">
+        SELECT <include refid="allColumns"/> FROM merchant WHERE status = 0 ORDER BY sales DESC
+    </select>
+
+    <select id="selectAllForAdmin" resultMap="merchantResultMap">
+        SELECT <include refid="allColumns"/> FROM merchant ORDER BY status ASC, sales DESC
+    </select>
+
+    <select id="selectByCategory" resultMap="merchantResultMap">
+        SELECT <include refid="allColumns"/> FROM merchant
+        WHERE status = 0 AND category = #{category} ORDER BY sales DESC
+    </select>
+
+    <select id="search" resultMap="merchantResultMap">
+        SELECT <include refid="allColumns"/> FROM merchant
+        WHERE status = 0
+        AND (name LIKE CONCAT('%', #{keyword}, '%')
+             OR category LIKE CONCAT('%', #{keyword}, '%')
+             OR tags LIKE CONCAT('%', #{keyword}, '%'))
+        ORDER BY sales DESC
+    </select>
+
+    <select id="selectRecommended" resultMap="merchantResultMap">
+        SELECT <include refid="allColumns"/> FROM merchant
+        WHERE status = 0 AND is_recommended = 1
+        ORDER BY sales DESC
+    </select>
+
+    <update id="updateRecommended">
+        UPDATE merchant SET is_recommended = #{isRecommended} WHERE id = #{id}
+    </update>
+
+    <insert id="insert" parameterType="com.qiukai.entity.Merchant" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO merchant (name, logo, cover, category, price_level, rating, sales, delivery_time, distance,
+        min_order, delivery_fee, badge, tags, status, is_recommended)
+        VALUES (#{name}, #{logo}, #{cover}, #{category}, #{priceLevel}, #{rating}, #{sales}, #{deliveryTime}, #{distance},
+        #{minOrder}, #{deliveryFee}, #{badge}, #{tags}, #{status}, #{isRecommended})
+    </insert>
+
+    <update id="update" parameterType="com.qiukai.entity.Merchant">
+        UPDATE merchant
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="logo != null">logo = #{logo},</if>
+            <if test="cover != null">cover = #{cover},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="priceLevel != null">price_level = #{priceLevel},</if>
+            <if test="rating != null">rating = #{rating},</if>
+            <if test="sales != null">sales = #{sales},</if>
+            <if test="deliveryTime != null">delivery_time = #{deliveryTime},</if>
+            <if test="distance != null">distance = #{distance},</if>
+            <if test="minOrder != null">min_order = #{minOrder},</if>
+            <if test="deliveryFee != null">delivery_fee = #{deliveryFee},</if>
+            <if test="badge != null">badge = #{badge},</if>
+            <if test="tags != null">tags = #{tags},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="isRecommended != null">is_recommended = #{isRecommended},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM merchant WHERE id = #{id}
+    </delete>
+
+</mapper>
