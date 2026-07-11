@@ -14,4 +14,6 @@ public class PromoRule {
     private Long merchantId;
     private BigDecimal threshold;
     private BigDecimal discount;
+    /** 0启用 1停用 */
+    private Integer status;
 }

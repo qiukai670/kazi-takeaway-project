@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,8 @@ public class UserService {
     private ReviewItemMapper reviewItemMapper;
     @Autowired
     private OrderMapper orderMapper;
+    @Autowired
+    private MerchantMapper merchantMapper;
 
     // ==================== 注册 ====================
 
@@ -113,6 +116,70 @@ public class UserService {
             throw new BusinessException("管理员账号或密码错误");
         }
         return buildLoginVO(user, true);
+    }
+
+    /**
+     * 商家注册：创建 role=2 用户 + 关联商家记录
+     */
+    @Transactional
+    public void merchantRegister(MerchantRegisterDTO dto) {
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+            throw new BusinessException("两次输入的密码不一致");
+        }
+        if (userMapper.selectByUsername(dto.getUsername()) != null) {
+            throw new BusinessException("该用户名已存在");
+        }
+        if (userMapper.selectByPhone(dto.getPhone()) != null) {
+            throw new BusinessException("该手机号已注册");
+        }
+        User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setNickname(dto.getRegistrantName());
+        user.setPassword(PasswordUtil.encode(dto.getPassword()));
+        user.setPhone(dto.getPhone());
+        user.setGender(0);
+        user.setRole(2);
+        user.setPoints(0);
+        user.setStatus(0);
+        userMapper.insert(user);
+
+        Merchant m = new Merchant();
+        m.setUserId(user.getId());
+        m.setName(dto.getMerchantName());
+        m.setLogo(dto.getLogo());
+        m.setCover(dto.getCover());
+        m.setCategory(dto.getCategory());
+        m.setPriceLevel("¥¥");
+        m.setRating(new BigDecimal("4.8"));
+        m.setSales(0);
+        m.setDeliveryTime(30);
+        m.setDistance(new BigDecimal("1.0"));
+        m.setMinOrder(new BigDecimal("20.00"));
+        m.setDeliveryFee(new BigDecimal("3.00"));
+        m.setStatus(1);
+        m.setIsRecommended(0);
+        merchantMapper.insert(m);
+    }
+
+    /**
+     * 商家登录：支持手机号或用户名 + 密码，role=2
+     */
+    @Transactional
+    public LoginVO merchantLogin(LoginDTO dto) {
+        User user = userMapper.selectByPhone(dto.getAccount());
+        if (user == null) {
+            user = userMapper.selectByUsername(dto.getAccount());
+        }
+        if (user == null || user.getRole() != 2) {
+            throw new BusinessException("商家账号或密码错误");
+        }
+        if (user.getStatus() != null && user.getStatus() != 0) {
+            throw new BusinessException("账号已被禁用");
+        }
+        if (!PasswordUtil.matches(dto.getPassword(), user.getPassword())) {
+            throw new BusinessException("商家账号或密码错误");
+        }
+        return buildLoginVO(user, dto.getRememberMe());
     }
 
     /**

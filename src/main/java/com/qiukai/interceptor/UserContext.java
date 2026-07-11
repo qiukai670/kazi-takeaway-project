@@ -31,6 +31,12 @@ public class UserContext {
         return role != null && role == 1;
     }
 
+    /** 判断当前是否为商家 */
+    public static boolean isMerchant() {
+        Integer role = CURRENT_ROLE.get();
+        return role != null && role == 2;
+    }
+
     public static void clear() {
         CURRENT_USER_ID.remove();
         CURRENT_ROLE.remove();

@@ -16,13 +16,14 @@
         <result property="isNew" column="is_new"/>
         <result property="isPopular" column="is_popular"/>
         <result property="onShelf" column="on_shelf"/>
+        <result property="soldOut" column="sold_out"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
     <sql id="allColumns">
         id, merchant_id, name, price, old_price, image, description, category, sales,
-        is_discount, is_new, is_popular, on_shelf, create_time, update_time
+        is_discount, is_new, is_popular, on_shelf, sold_out, create_time, update_time
     </sql>
 
     <select id="selectById" resultMap="dishResultMap">
@@ -54,8 +55,8 @@
     </select>
 
     <insert id="insert" parameterType="com.qiukai.entity.Dish" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO dish (merchant_id, name, price, old_price, image, description, category, sales, is_discount, is_new, is_popular, on_shelf)
-        VALUES (#{merchantId}, #{name}, #{price}, #{oldPrice}, #{image}, #{description}, #{category}, #{sales}, #{isDiscount}, #{isNew}, #{isPopular}, #{onShelf})
+        INSERT INTO dish (merchant_id, name, price, old_price, image, description, category, sales, is_discount, is_new, is_popular, on_shelf, sold_out)
+        VALUES (#{merchantId}, #{name}, #{price}, #{oldPrice}, #{image}, #{description}, #{category}, #{sales}, #{isDiscount}, #{isNew}, #{isPopular}, #{onShelf}, #{soldOut})
     </insert>
 
     <update id="update" parameterType="com.qiukai.entity.Dish">
@@ -71,6 +72,7 @@
             <if test="isNew != null">is_new = #{isNew},</if>
             <if test="isPopular != null">is_popular = #{isPopular},</if>
             <if test="onShelf != null">on_shelf = #{onShelf},</if>
+            <if test="soldOut != null">sold_out = #{soldOut},</if>
         </set>
         WHERE id = #{id}
     </update>
@@ -81,6 +83,10 @@
 
     <update id="increaseSales">
         UPDATE dish SET sales = sales + #{qty} WHERE id = #{id}
+    </update>
+
+    <update id="updateSoldOut">
+        UPDATE dish SET sold_out = #{soldOut} WHERE id = #{id}
     </update>
 
 </mapper>

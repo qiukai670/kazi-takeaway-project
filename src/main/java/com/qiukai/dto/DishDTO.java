@@ -51,6 +51,9 @@ public class DishDTO {
     /** 上下架 0上架 1下架 */
     private Integer onShelf;
 
+    /** 售罄 0否 1是 */
+    private Integer soldOut;
+
     /** 口味定制选项组列表（为空表示不支持定制） */
     private List<DishOptionDTO> options;
 }

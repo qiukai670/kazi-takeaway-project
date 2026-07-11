@@ -147,6 +147,15 @@ public class AdminController {
         return Result.success("人气标记已切换", null);
     }
 
+    /**
+     * 切换菜品售罄状态
+     */
+    @PutMapping("/dishes/{id}/sold-out")
+    public Result<Void> toggleSoldOut(@PathVariable Long id) {
+        adminService.toggleSoldOut(id);
+        return Result.success("售罄状态已切换", null);
+    }
+
     // ==================== 订单管理 ====================
 
     /**
@@ -166,29 +175,11 @@ public class AdminController {
     }
 
     /**
-     * 分配订单给商家：已支付 -> 待确认
+     * 分配订单给商家：已支付 -> 待确认（订单流转至商家后台）
      */
     @PutMapping("/orders/{id}/assign")
     public Result<Void> assignOrder(@PathVariable Long id) {
         orderService.assignOrder(id);
-        return Result.success("订单已分配给商家", null);
-    }
-
-    /**
-     * 确认订单：待确认 -> 已确认
-     */
-    @PutMapping("/orders/{id}/confirm")
-    public Result<Void> confirmOrder(@PathVariable Long id) {
-        orderService.confirmOrder(id);
-        return Result.success("订单已确认", null);
-    }
-
-    /**
-     * 派送订单：已确认 -> 配送中
-     */
-    @PutMapping("/orders/{id}/dispatch")
-    public Result<Void> dispatchOrder(@PathVariable Long id) {
-        orderService.dispatchOrder(id);
-        return Result.success("订单已派送", null);
+        return Result.success("订单已确认并流转至商家", null);
     }
 }

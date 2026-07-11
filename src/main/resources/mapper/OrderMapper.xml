@@ -64,10 +64,13 @@
     </select>
 
     <select id="selectByMerchantId" resultMap="orderResultMap">
-        SELECT <include refid="allColumns"/> FROM orders
-        WHERE merchant_id = #{merchantId}
-        <if test="status != null and status != ''">AND status = #{status}</if>
-        ORDER BY create_time DESC
+        SELECT <include refid="allColumnsRich"/>
+        FROM orders o
+        LEFT JOIN user u ON o.user_id = u.id
+        LEFT JOIN merchant m ON o.merchant_id = m.id
+        WHERE o.merchant_id = #{merchantId}
+        <if test="status != null and status != ''">AND o.status = #{status}</if>
+        ORDER BY o.create_time DESC
     </select>
 
     <select id="selectAll" resultMap="orderResultMap">

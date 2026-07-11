@@ -30,7 +30,7 @@
         SELECT <include refid="baseColumns"/>
         FROM review_item WHERE review_id = #{reviewId} ORDER BY id ASC
     </select>
-
+  
     <select id="selectByReviewIds" resultMap="itemResultMap">
         SELECT <include refid="baseColumns"/>
         FROM review_item WHERE review_id IN

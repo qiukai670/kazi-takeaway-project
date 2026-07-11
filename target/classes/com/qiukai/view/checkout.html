@@ -293,10 +293,10 @@
           </div>
           <div class="p-6 space-y-4">
 
-            <!-- 满减规则提示 -->
+            <!-- 优惠活动提示 -->
             <div class="rounded-2xl p-4" style="background: var(--pale);">
               <p class="text-xs font-bold mb-2 flex items-center gap-1.5" style="color: var(--orange);">
-                <span>🎉</span> 满减优惠
+                <span>🎉</span> 优惠活动
               </p>
               <div id="promoRules" class="flex flex-wrap gap-2"></div>
             </div>
@@ -308,12 +308,12 @@
                 <span class="font-semibold" style="color: var(--coffee);">¥<span id="subtotalText">0.00</span></span>
               </div>
               <div class="flex items-center justify-between">
-                <span style="color: var(--brown-mid);">满减优惠</span>
+                <span style="color: var(--brown-mid);" id="discountLabel">优惠</span>
                 <span class="font-semibold" style="color: var(--green);">-¥<span id="discountText">0.00</span></span>
               </div>
-              <div class="flex items-center justify-between">
+              <div class="flex items-center justify-between" id="deliveryRow">
                 <span style="color: var(--brown-mid);">配送费</span>
-                <span class="font-semibold" style="color: var(--coffee);">¥<span id="deliveryText">0.00</span></span>
+                <span class="font-semibold" style="color: var(--coffee);">¥<span id="deliveryText">0.00</span><span id="freeDeliveryBadge" class="hidden pill-tag mustard" style="font-size:10px; margin-left:6px;">免配送费</span></span>
               </div>
             </div>
 
@@ -541,6 +541,7 @@
   let merchantId = parseInt(API.util.getParam('merchantId')) || 1;
   let merchant = null;        // Merchant 实体（来自 MerchantDetailVO.merchant）
   let promoRules = [];        // 满减规则列表
+  let promos = [];            // 优惠活动列表（discount/freefee）
   let cartVO = null;          // 购物车汇总 CartVO
   let defaultAddress = null;  // 当前选中的收货地址
   let allAddresses = [];      // 全部收货地址（缓存）
@@ -578,34 +579,104 @@
   function esc(s) { return API.util.escapeHtml(s); }
   function money(n) { return API.util.money(n); }
 
-  // ===== 计算金额（基于 CartVO 与满减规则） =====
+  // ===== 判断优惠活动是否生效 =====
+  function isPromoActive(promo, now) {
+    if (promo.status != null && promo.status !== 0) return false;
+    if (promo.startTime && now < new Date(promo.startTime)) return false;
+    if (promo.endTime && now > new Date(promo.endTime)) return false;
+    return true;
+  }
+
+  // ===== 计算金额（满减与折扣互斥取大，免配送费独立叠加） =====
   function calc() {
     const items = (cartVO && cartVO.items) || [];
     const subtotal = items.length > 0 ? Number(cartVO.totalAmount || 0) : 0;
+    const now = new Date();
     // 满减：取满足条件的最高档
-    let discount = 0;
+    let fullcutDiscount = 0;
     promoRules.forEach(rule => {
+      if (rule.status != null && rule.status !== 0) return;
       const th = Number(rule.threshold);
       const dc = Number(rule.discount);
-      if (subtotal >= th && dc > discount) discount = dc;
+      if (subtotal >= th && dc > fullcutDiscount) fullcutDiscount = dc;
     });
-    const deliveryFee = items.length > 0 ? Number(cartVO.deliveryFee || 0) : 0;
+    // 折扣：取满足条件的最大优惠金额
+    let discountPromoDiscount = 0;
+    let discountPromoPriority = -1;
+    promos.forEach(p => {
+      if (p.type !== 'discount' || !isPromoActive(p, now)) return;
+      if (p.minSpend != null && subtotal < Number(p.minSpend)) return;
+      const disc = subtotal * (100 - Number(p.discountRatio)) / 100;
+      if (disc > discountPromoDiscount) {
+        discountPromoDiscount = disc;
+        discountPromoPriority = p.priority ?? 0;
+      }
+    });
+    // 互斥：取优惠更大者，相等时 priority 高者胜
+    let discount = 0;
+    let discountType = null;
+    if (discountPromoDiscount > fullcutDiscount) {
+      discount = discountPromoDiscount;
+      discountType = 'discount';
+    } else if (fullcutDiscount > discountPromoDiscount) {
+      discount = fullcutDiscount;
+      discountType = 'fullcut';
+    } else if (discountPromoDiscount > 0) {
+      if (discountPromoPriority > 0) { discount = discountPromoDiscount; discountType = 'discount'; }
+      else { discount = fullcutDiscount; discountType = 'fullcut'; }
+    }
+    // 免配送费：独立叠加
+    let deliveryFee = items.length > 0 ? Number(cartVO.deliveryFee || 0) : 0;
+    let freeDelivery = false;
+    for (const p of promos) {
+      if (p.type !== 'freefee' || !isPromoActive(p, now)) continue;
+      if (p.minSpend != null && subtotal < Number(p.minSpend)) continue;
+      deliveryFee = 0;
+      freeDelivery = true;
+      break;
+    }
     const total = Math.max(0, subtotal - discount + deliveryFee);
-    return { subtotal, discount, deliveryFee, total };
+    return { subtotal, discount, deliveryFee, total, discountType, freeDelivery };
   }
 
-  // ===== 渲染满减规则条 =====
+  // ===== 渲染优惠活动条 =====
   function renderPromoRules(subtotal) {
     promoRulesEl.innerHTML = '';
-    if (!promoRules || promoRules.length === 0) {
-      promoRulesEl.innerHTML = '<span class="text-xs" style="color: var(--brown-mid);">暂无满减优惠</span>';
+    const allRules = [];
+    // 满减规则
+    promoRules.forEach(rule => {
+      if (rule.status != null && rule.status !== 0) return;
+      allRules.push({
+        text: `满${money(rule.threshold)}减${money(rule.discount)}`,
+        active: subtotal >= Number(rule.threshold)
+      });
+    });
+    // 折扣/免配送费活动
+    const now = new Date();
+    promos.forEach(p => {
+      if (!isPromoActive(p, now)) return;
+      if (p.type === 'discount') {
+        const meetMin = p.minSpend == null || subtotal >= Number(p.minSpend);
+        allRules.push({
+          text: p.discountRatio === 0 ? '免单' : (p.discountRatio / 10) + '折',
+          active: meetMin
+        });
+      } else if (p.type === 'freefee') {
+        const meetMin = p.minSpend == null || subtotal >= Number(p.minSpend);
+        allRules.push({
+          text: `满${money(p.minSpend)}免配送费`,
+          active: meetMin
+        });
+      }
+    });
+    if (allRules.length === 0) {
+      promoRulesEl.innerHTML = '<span class="text-xs" style="color: var(--brown-mid);">暂无优惠活动</span>';
       return;
     }
-    promoRules.forEach(rule => {
-      const active = subtotal >= Number(rule.threshold);
+    allRules.forEach(r => {
       const span = document.createElement('span');
-      span.className = 'promo-rule' + (active ? ' active' : '');
-      span.textContent = `满${money(rule.threshold)}减${money(rule.discount)}`;
+      span.className = 'promo-rule' + (r.active ? ' active' : '');
+      span.textContent = r.text;
       promoRulesEl.appendChild(span);
     });
   }
@@ -860,7 +931,7 @@
 
   // ===== 渲染金额 =====
   function renderAmount() {
-    const { subtotal, discount, deliveryFee, total } = calc();
+    const { subtotal, discount, deliveryFee, total, discountType, freeDelivery } = calc();
     subtotalEl.textContent = money(subtotal);
     discountEl.textContent = money(discount);
     deliveryEl.textContent = money(deliveryFee);
@@ -870,11 +941,20 @@
     modalTotalEl.textContent = money(total);
     confirmTotalEl.textContent = money(total);
 
-    // 省钱提示
-    if (discount > 0) {
-      savedHintEl.innerHTML = `已优惠 <span style="color:var(--green);font-weight:700;">¥${money(discount)}</span>`;
+    // 优惠金额标签动态化
+    const discountLabel = document.getElementById('discountLabel');
+    if (discountLabel) {
+      discountLabel.textContent = discountType === 'discount' ? '折扣优惠' : discountType === 'fullcut' ? '满减优惠' : '优惠';
+    }
+    // 免配送费标签
+    document.getElementById('freeDeliveryBadge').classList.toggle('hidden', !freeDelivery);
+
+    // 省钱提示（含配送费减免）
+    const baseDeliveryFee = cartVO ? Number(cartVO.deliveryFee || 0) : 0;
+    const totalSaving = discount + (freeDelivery ? baseDeliveryFee : 0);
+    if (totalSaving > 0) {
+      savedHintEl.innerHTML = `已优惠 <span style="color:var(--green);font-weight:700;">¥${money(totalSaving)}</span>`;
     } else {
-      // 距离下一档满减还差多少
       const next = promoRules.find(r => subtotal < Number(r.threshold));
       if (next) {
         const diff = money(Number(next.threshold) - subtotal);
@@ -906,6 +986,7 @@
       const data = await API.menu.getMerchantDetail(merchantId);
       merchant = data.merchant || data;
       promoRules = data.promoRules || [];
+      promos = data.promos || [];
     } catch (e) {
       if (e.message !== '请先登录') {
         showToast('加载商家信息失败：' + (e.message || ''));

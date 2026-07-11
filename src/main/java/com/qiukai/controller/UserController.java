@@ -50,6 +50,19 @@ public class UserController {
         return Result.success("登录成功", vo);
     }
 
+    @PostMapping("/merchant/register")
+    public Result<Void> merchantRegister(@Valid @RequestBody MerchantRegisterDTO dto) {
+        userService.merchantRegister(dto);
+        return Result.success("商家注册成功", null);
+    }
+
+    @PostMapping("/merchant/login")
+    public Result<LoginVO> merchantLogin(@Valid @RequestBody LoginDTO dto, HttpServletResponse response) {
+        LoginVO vo = userService.merchantLogin(dto);
+        setTokenCookie(response, vo.getToken());
+        return Result.success("登录成功", vo);
+    }
+
     @PostMapping("/logout")
     public Result<Void> logout() {
         userService.logout();

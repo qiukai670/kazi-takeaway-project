@@ -63,6 +63,22 @@ const API = (function () {
       });
     },
 
+    /** 商家注册 */
+    merchantRegister(body) {
+      return request('/api/user/merchant/register', {
+        method: 'POST',
+        body,
+      });
+    },
+
+    /** 商家登录（用户名） */
+    merchantLogin(account, password, rememberMe = true) {
+      return request('/api/user/merchant/login', {
+        method: 'POST',
+        body: { account, password, rememberMe },
+      });
+    },
+
     /** 注册 */
     register(body) {
       return request('/api/user/register', {
@@ -103,6 +119,46 @@ const API = (function () {
       }
       return true;
     },
+  };
+
+  // ==================== 商家后台 ====================
+
+  const merchant = {
+    /** 获取我的店铺信息 */
+    getInfo() { return request('/api/merchant/info'); },
+    /** 更新店铺信息（禁止修改好评商家和徽章） */
+    updateInfo(body) { return request('/api/merchant/info', { method: 'PUT', body }); },
+
+    /** 菜品列表 */
+    listDishes() { return request('/api/merchant/dishes'); },
+    addDish(body) { return request('/api/merchant/dishes', { method: 'POST', body }); },
+    updateDish(id, body) { return request('/api/merchant/dishes/' + id, { method: 'PUT', body }); },
+    deleteDish(id) { return request('/api/merchant/dishes/' + id, { method: 'DELETE' }); },
+    toggleDishShelf(id) { return request('/api/merchant/dishes/' + id + '/shelf', { method: 'PUT' }); },
+    toggleDishSoldOut(id) { return request('/api/merchant/dishes/' + id + '/sold-out', { method: 'PUT' }); },
+
+    /** 订单管理 */
+    listOrders(status) {
+      const qs = status ? '?status=' + status : '';
+      return request('/api/merchant/orders' + qs);
+    },
+    getOrderDetail(id) { return request('/api/merchant/orders/' + id); },
+    confirmOrder(id) { return request('/api/merchant/orders/' + id + '/confirm', { method: 'PUT' }); },
+    dispatchOrder(id) { return request('/api/merchant/orders/' + id + '/dispatch', { method: 'PUT' }); },
+
+    /** 优惠活动 */
+    listPromos() { return request('/api/merchant/promos'); },
+    addPromo(body) { return request('/api/merchant/promos', { method: 'POST', body }); },
+    updatePromo(id, body) { return request('/api/merchant/promos/' + id, { method: 'PUT', body }); },
+    togglePromoStatus(id) { return request('/api/merchant/promos/' + id + '/status', { method: 'PUT' }); },
+    deletePromo(id) { return request('/api/merchant/promos/' + id, { method: 'DELETE' }); },
+
+    /** 满减规则 */
+    listPromoRules() { return request('/api/merchant/promo-rules'); },
+    addPromoRule(body) { return request('/api/merchant/promo-rules', { method: 'POST', body }); },
+    updatePromoRule(id, body) { return request('/api/merchant/promo-rules/' + id, { method: 'PUT', body }); },
+    togglePromoRuleStatus(id) { return request('/api/merchant/promo-rules/' + id + '/status', { method: 'PUT' }); },
+    deletePromoRule(id) { return request('/api/merchant/promo-rules/' + id, { method: 'DELETE' }); },
   };
 
   // ==================== 菜单浏览 ====================
@@ -272,6 +328,7 @@ const API = (function () {
     deleteDish(id) { return request('/api/admin/dishes/' + id, { method: 'DELETE' }); },
     toggleShelf(id) { return request('/api/admin/dishes/' + id + '/shelf', { method: 'PUT' }); },
     togglePopular(id) { return request('/api/admin/dishes/' + id + '/popular', { method: 'PUT' }); },
+    toggleSoldOut(id) { return request('/api/admin/dishes/' + id + '/sold-out', { method: 'PUT' }); },
 
     // 订单管理
     listOrders(status) {
@@ -280,8 +337,46 @@ const API = (function () {
     },
     orderDetail(id) { return request('/api/admin/orders/' + id); },
     assignOrder(id) { return request('/api/admin/orders/' + id + '/assign', { method: 'PUT' }); },
-    confirmOrder(id) { return request('/api/admin/orders/' + id + '/confirm', { method: 'PUT' }); },
-    dispatchOrder(id) { return request('/api/admin/orders/' + id + '/dispatch', { method: 'PUT' }); },
+  };
+
+  // ==================== 商家后台 ====================
+
+  const shop = {
+    // 店铺管理
+    getMerchant() { return request('/api/shop/merchant'); },
+    updateMerchant(body) { return request('/api/shop/merchant', { method: 'PUT', body }); },
+
+    // 菜品管理
+    listDishes() { return request('/api/shop/dishes'); },
+    addDish(body) { return request('/api/shop/dishes', { method: 'POST', body }); },
+    updateDish(id, body) { return request('/api/shop/dishes/' + id, { method: 'PUT', body }); },
+    deleteDish(id) { return request('/api/shop/dishes/' + id, { method: 'DELETE' }); },
+    toggleShelf(id) { return request('/api/shop/dishes/' + id + '/shelf', { method: 'PUT' }); },
+    togglePopular(id) { return request('/api/shop/dishes/' + id + '/popular', { method: 'PUT' }); },
+    toggleSoldOut(id) { return request('/api/shop/dishes/' + id + '/sold-out', { method: 'PUT' }); },
+
+    // 优惠描述（MerchantPromo）
+    listPromos() { return request('/api/shop/promos'); },
+    addPromo(body) { return request('/api/shop/promos', { method: 'POST', body }); },
+    updatePromo(id, body) { return request('/api/shop/promos/' + id, { method: 'PUT', body }); },
+    deletePromo(id) { return request('/api/shop/promos/' + id, { method: 'DELETE' }); },
+    togglePromoStatus(id, status) { return request('/api/shop/promos/' + id + '/status?status=' + status, { method: 'PUT' }); },
+
+    // 满减规则（PromoRule）
+    listPromoRules() { return request('/api/shop/promo-rules'); },
+    addPromoRule(body) { return request('/api/shop/promo-rules', { method: 'POST', body }); },
+    updatePromoRule(id, body) { return request('/api/shop/promo-rules/' + id, { method: 'PUT', body }); },
+    deletePromoRule(id) { return request('/api/shop/promo-rules/' + id, { method: 'DELETE' }); },
+    togglePromoRuleStatus(id, status) { return request('/api/shop/promo-rules/' + id + '/status?status=' + status, { method: 'PUT' }); },
+
+    // 订单管理
+    listOrders(status) {
+      const qs = status ? '?status=' + status : '';
+      return request('/api/shop/orders' + qs);
+    },
+    orderDetail(id) { return request('/api/shop/orders/' + id); },
+    confirmOrder(id) { return request('/api/shop/orders/' + id + '/confirm', { method: 'PUT' }); },
+    dispatchOrder(id) { return request('/api/shop/orders/' + id + '/dispatch', { method: 'PUT' }); },
   };
 
   // ==================== 工具方法 ====================
@@ -360,5 +455,5 @@ const API = (function () {
     },
   };
 
-  return { auth, menu, cart, order, user, admin, util, request };
+  return { auth, merchant, menu, cart, order, user, admin, shop, util, request };
 })();

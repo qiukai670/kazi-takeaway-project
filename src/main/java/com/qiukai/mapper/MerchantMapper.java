@@ -14,6 +14,9 @@ public interface MerchantMapper {
 
     Merchant selectById(@Param("id") Long id);
 
+    /** 按用户ID查询商家（商家登录后查询关联店铺） */
+    Merchant selectByUserId(@Param("userId") Long userId);
+
     List<Merchant> selectAll();
 
     /** 管理员查询全部商家（含休息状态） */

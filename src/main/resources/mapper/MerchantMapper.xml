@@ -4,6 +4,7 @@
 
     <resultMap id="merchantResultMap" type="com.qiukai.entity.Merchant">
         <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
         <result property="name" column="name"/>
         <result property="logo" column="logo"/>
         <result property="cover" column="cover"/>
@@ -24,7 +25,7 @@
     </resultMap>
 
     <sql id="allColumns">
-        id, name, logo, cover, category, price_level, rating, sales, delivery_time, distance,
+        id, user_id, name, logo, cover, category, price_level, rating, sales, delivery_time, distance,
         min_order, delivery_fee, badge, tags, status, is_recommended, create_time, update_time
     </sql>
 
@@ -65,11 +66,15 @@
     </update>
 
     <insert id="insert" parameterType="com.qiukai.entity.Merchant" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO merchant (name, logo, cover, category, price_level, rating, sales, delivery_time, distance,
+        INSERT INTO merchant (user_id, name, logo, cover, category, price_level, rating, sales, delivery_time, distance,
         min_order, delivery_fee, badge, tags, status, is_recommended)
-        VALUES (#{name}, #{logo}, #{cover}, #{category}, #{priceLevel}, #{rating}, #{sales}, #{deliveryTime}, #{distance},
+        VALUES (#{userId}, #{name}, #{logo}, #{cover}, #{category}, #{priceLevel}, #{rating}, #{sales}, #{deliveryTime}, #{distance},
         #{minOrder}, #{deliveryFee}, #{badge}, #{tags}, #{status}, #{isRecommended})
     </insert>
+
+    <select id="selectByUserId" resultMap="merchantResultMap">
+        SELECT <include refid="allColumns"/> FROM merchant WHERE user_id = #{userId} LIMIT 1
+    </select>
 
     <update id="update" parameterType="com.qiukai.entity.Merchant">
         UPDATE merchant

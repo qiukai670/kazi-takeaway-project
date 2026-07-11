@@ -7,11 +7,43 @@
         <result property="merchantId" column="merchant_id"/>
         <result property="threshold" column="threshold"/>
         <result property="discount" column="discount"/>
+        <result property="status" column="status"/>
     </resultMap>
 
+    <sql id="allColumns">
+        id, merchant_id, threshold, discount, status
+    </sql>
+
     <select id="selectByMerchantId" resultMap="ruleResultMap">
-        SELECT id, merchant_id, threshold, discount
+        SELECT <include refid="allColumns"/>
         FROM promo_rule WHERE merchant_id = #{merchantId} ORDER BY threshold ASC
     </select>
+
+    <select id="selectById" resultMap="ruleResultMap">
+        SELECT <include refid="allColumns"/> FROM promo_rule WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.qiukai.entity.PromoRule" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO promo_rule (merchant_id, threshold, discount, status)
+        VALUES (#{merchantId}, #{threshold}, #{discount}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.qiukai.entity.PromoRule">
+        UPDATE promo_rule
+        <set>
+            <if test="threshold != null">threshold = #{threshold},</if>
+            <if test="discount != null">discount = #{discount},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM promo_rule WHERE id = #{id}
+    </delete>
+
+    <update id="updateStatus">
+        UPDATE promo_rule SET status = #{status} WHERE id = #{id}
+    </update>
 
 </mapper>

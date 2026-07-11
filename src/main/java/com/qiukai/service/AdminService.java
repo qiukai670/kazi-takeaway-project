@@ -210,6 +210,7 @@ public class AdminService {
         dish.setIsNew(dto.getIsNew() != null ? dto.getIsNew() : 0);
         dish.setIsPopular(dto.getIsPopular() != null ? dto.getIsPopular() : 0);
         dish.setOnShelf(dto.getOnShelf() != null ? dto.getOnShelf() : 0);
+        dish.setSoldOut(dto.getSoldOut() != null ? dto.getSoldOut() : 0);
         dishMapper.insert(dish);
 
         // 保存口味定制选项
@@ -237,6 +238,7 @@ public class AdminService {
         if (dto.getIsNew() != null) dish.setIsNew(dto.getIsNew());
         if (dto.getIsPopular() != null) dish.setIsPopular(dto.getIsPopular());
         if (dto.getOnShelf() != null) dish.setOnShelf(dto.getOnShelf());
+        if (dto.getSoldOut() != null) dish.setSoldOut(dto.getSoldOut());
         dishMapper.update(dish);
 
         // 更新口味定制选项：options==null 表示不修改；空数组表示清空；非空数组表示替换
@@ -284,6 +286,20 @@ public class AdminService {
         }
         dish.setIsPopular(dish.getIsPopular() != null && dish.getIsPopular() == 1 ? 0 : 1);
         dishMapper.update(dish);
+    }
+
+    /**
+     * 切换菜品售罄状态
+     */
+    @Transactional
+    public void toggleSoldOut(Long id) {
+        requireAdmin();
+        Dish dish = dishMapper.selectById(id);
+        if (dish == null) {
+            throw new BusinessException("菜品不存在");
+        }
+        int newVal = (dish.getSoldOut() != null && dish.getSoldOut() == 1) ? 0 : 1;
+        dishMapper.updateSoldOut(id, newVal);
     }
 
     // ==================== 口味定制选项辅助方法 ====================

@@ -24,6 +24,8 @@ public class Dish {
     private Integer isNew;
     private Integer isPopular;
     private Integer onShelf;
+    /** 售罄 0否 1是 */
+    private Integer soldOut;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

@@ -34,4 +34,7 @@ public interface DishMapper {
 
     /** 销量自增 */
     int increaseSales(@Param("id") Long id, @Param("qty") Integer qty);
+
+    /** 切换售罄状态 */
+    int updateSoldOut(@Param("id") Long id, @Param("soldOut") Integer soldOut);
 }

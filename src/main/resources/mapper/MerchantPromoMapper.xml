@@ -7,12 +7,60 @@
         <result property="merchantId" column="merchant_id"/>
         <result property="type" column="type"/>
         <result property="description" column="description"/>
+        <result property="name" column="name"/>
+        <result property="discountRatio" column="discount_ratio"/>
+        <result property="minSpend" column="min_spend"/>
+        <result property="priority" column="priority"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="status" column="status"/>
         <result property="createTime" column="create_time"/>
     </resultMap>
 
+    <sql id="allColumns">
+        id, merchant_id, type, description, name, discount_ratio, min_spend,
+        priority, start_time, end_time, status, create_time
+    </sql>
+
     <select id="selectByMerchantId" resultMap="promoResultMap">
-        SELECT id, merchant_id, type, description, create_time
+        SELECT <include refid="allColumns"/>
         FROM merchant_promo WHERE merchant_id = #{merchantId}
+        ORDER BY priority DESC, id ASC
     </select>
+
+    <select id="selectById" resultMap="promoResultMap">
+        SELECT <include refid="allColumns"/> FROM merchant_promo WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.qiukai.entity.MerchantPromo" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO merchant_promo (merchant_id, type, description, name, discount_ratio,
+            min_spend, priority, start_time, end_time, status)
+        VALUES (#{merchantId}, #{type}, #{description}, #{name}, #{discountRatio},
+            #{minSpend}, #{priority}, #{startTime}, #{endTime}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.qiukai.entity.MerchantPromo">
+        UPDATE merchant_promo
+        <set>
+            <if test="type != null">type = #{type},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="discountRatio != null">discount_ratio = #{discountRatio},</if>
+            <if test="minSpend != null">min_spend = #{minSpend},</if>
+            <if test="priority != null">priority = #{priority},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM merchant_promo WHERE id = #{id}
+    </delete>
+
+    <update id="updateStatus">
+        UPDATE merchant_promo SET status = #{status} WHERE id = #{id}
+    </update>
 
 </mapper>

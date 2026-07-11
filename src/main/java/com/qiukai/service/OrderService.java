@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -66,11 +67,10 @@ public class OrderService {
             subtotal = subtotal.add(item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQty())));
         }
 
-        // 满减优惠计算：取满足条件的最高档优惠
-        BigDecimal discount = computeDiscount(dto.getMerchantId(), subtotal);
-
-        // 配送费
-        BigDecimal deliveryFee = merchant.getDeliveryFee();
+        // 优惠计算：满减与折扣互斥取大，免配送费独立叠加
+        PromoCalcResult promo = computePromos(dto.getMerchantId(), subtotal, merchant.getDeliveryFee());
+        BigDecimal discount = promo.discount;
+        BigDecimal deliveryFee = promo.deliveryFee;
 
         // 实付金额
         BigDecimal totalAmount = subtotal.subtract(discount).add(deliveryFee);
@@ -122,18 +122,98 @@ public class OrderService {
     }
 
     /**
-     * 满减优惠计算：在满足门槛的规则中取优惠金额最大的一档
+     * 优惠计算：满减与折扣互斥取优惠更大者，免配送费独立叠加
      */
-    private BigDecimal computeDiscount(Long merchantId, BigDecimal subtotal) {
+    private PromoCalcResult computePromos(Long merchantId, BigDecimal subtotal, BigDecimal baseDeliveryFee) {
+        PromoCalcResult result = new PromoCalcResult();
+        result.deliveryFee = baseDeliveryFee;
+        LocalDateTime now = LocalDateTime.now();
+
+        // 1. 满减优惠：取满足门槛的最大档
+        BigDecimal fullcutDiscount = BigDecimal.ZERO;
         List<PromoRule> rules = menuService.getPromoRules(merchantId);
-        BigDecimal bestDiscount = BigDecimal.ZERO;
         for (PromoRule rule : rules) {
-            if (subtotal.compareTo(rule.getThreshold()) >= 0
-                    && rule.getDiscount().compareTo(bestDiscount) > 0) {
-                bestDiscount = rule.getDiscount();
+            if ((rule.getStatus() == null || rule.getStatus() == 0)
+                    && subtotal.compareTo(rule.getThreshold()) >= 0
+                    && rule.getDiscount().compareTo(fullcutDiscount) > 0) {
+                fullcutDiscount = rule.getDiscount();
             }
         }
-        return bestDiscount;
+
+        // 2. 折扣优惠：取满足条件的最大优惠金额（Mapper 已按 priority DESC 排序）
+        BigDecimal discountPromoDiscount = BigDecimal.ZERO;
+        int discountPromoPriority = -1;
+        List<MerchantPromo> promos = menuService.getMerchantPromos(merchantId);
+        for (MerchantPromo promo : promos) {
+            if (!"discount".equals(promo.getType()) || !isPromoActive(promo, now)) {
+                continue;
+            }
+            if (promo.getMinSpend() != null && subtotal.compareTo(promo.getMinSpend()) < 0) {
+                continue;
+            }
+            BigDecimal discountAmount = subtotal.multiply(BigDecimal.valueOf(100 - promo.getDiscountRatio()))
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            if (discountAmount.compareTo(discountPromoDiscount) > 0) {
+                discountPromoDiscount = discountAmount;
+                discountPromoPriority = promo.getPriority() != null ? promo.getPriority() : 0;
+            }
+        }
+
+        // 3. 互斥决策：满减 vs 折扣，取优惠更大者；相等且非零时 priority 高者胜（满减视为 0）
+        if (discountPromoDiscount.compareTo(fullcutDiscount) > 0) {
+            result.discount = discountPromoDiscount;
+            result.discountType = "discount";
+        } else if (fullcutDiscount.compareTo(discountPromoDiscount) > 0) {
+            result.discount = fullcutDiscount;
+            result.discountType = "fullcut";
+        } else if (discountPromoDiscount.compareTo(BigDecimal.ZERO) > 0) {
+            if (discountPromoPriority > 0) {
+                result.discount = discountPromoDiscount;
+                result.discountType = "discount";
+            } else {
+                result.discount = fullcutDiscount;
+                result.discountType = "fullcut";
+            }
+        }
+
+        // 4. 免配送费：独立叠加，满足门槛即减免配送费
+        for (MerchantPromo promo : promos) {
+            if (!"freefee".equals(promo.getType()) || !isPromoActive(promo, now)) {
+                continue;
+            }
+            if (promo.getMinSpend() != null && subtotal.compareTo(promo.getMinSpend()) < 0) {
+                continue;
+            }
+            result.deliveryFee = BigDecimal.ZERO;
+            result.freeDelivery = true;
+            break;
+        }
+
+        return result;
+    }
+
+    /**
+     * 判断优惠活动是否生效：启用状态 + 当前时间在有效期内
+     */
+    private boolean isPromoActive(MerchantPromo promo, LocalDateTime now) {
+        if (promo.getStatus() != null && promo.getStatus() != 0) {
+            return false;
+        }
+        if (promo.getStartTime() != null && now.isBefore(promo.getStartTime())) {
+            return false;
+        }
+        if (promo.getEndTime() != null && now.isAfter(promo.getEndTime())) {
+            return false;
+        }
+        return true;
+    }
+
+    /** 优惠计算结果 */
+    private static class PromoCalcResult {
+        BigDecimal discount = BigDecimal.ZERO;
+        BigDecimal deliveryFee;
+        String discountType = null;
+        boolean freeDelivery = false;
     }
 
     /**
@@ -248,7 +328,7 @@ public class OrderService {
     // ==================== 管理员操作 ====================
 
     /**
-     * 管理员分配订单给商家：已支付 -> 待确认
+     * 管理员分配订单给商家：已支付 -> 待确认（订单流转至商家后台）
      */
     @Transactional
     public void assignOrder(Long orderId) {
@@ -261,38 +341,6 @@ public class OrderService {
             throw new BusinessException("仅已支付订单可分配");
         }
         orderMapper.updateStatus(orderId, OrderStatus.PENDING_CONFIRM);
-    }
-
-    /**
-     * 管理员确认订单：待确认 -> 已确认
-     */
-    @Transactional
-    public void confirmOrder(Long orderId) {
-        requireAdmin();
-        Order order = orderMapper.selectById(orderId);
-        if (order == null) {
-            throw new BusinessException("订单不存在");
-        }
-        if (!OrderStatus.PENDING_CONFIRM.equals(order.getStatus()) && !OrderStatus.PAID.equals(order.getStatus())) {
-            throw new BusinessException("当前订单状态不可确认");
-        }
-        orderMapper.updateStatus(orderId, OrderStatus.CONFIRMED);
-    }
-
-    /**
-     * 管理员派送：已确认 -> 配送中
-     */
-    @Transactional
-    public void dispatchOrder(Long orderId) {
-        requireAdmin();
-        Order order = orderMapper.selectById(orderId);
-        if (order == null) {
-            throw new BusinessException("订单不存在");
-        }
-        if (!OrderStatus.CONFIRMED.equals(order.getStatus())) {
-            throw new BusinessException("仅已确认订单可派送");
-        }
-        orderMapper.updateStatus(orderId, OrderStatus.DELIVERING);
     }
 
     /**
@@ -316,6 +364,46 @@ public class OrderService {
         vo.setOrder(order);
         vo.setItems(orderItemMapper.selectByOrderId(orderId));
         return vo;
+    }
+
+    // ==================== 商家操作 ====================
+
+    /**
+     * 商家确认订单（接单）：待确认 -> 已确认
+     * 校验订单归属当前商家
+     */
+    @Transactional
+    public void merchantConfirmOrder(Long orderId, Long merchantId) {
+        Order order = orderMapper.selectById(orderId);
+        if (order == null) {
+            throw new BusinessException("订单不存在");
+        }
+        if (!merchantId.equals(order.getMerchantId())) {
+            throw new BusinessException(403, "无权操作此订单");
+        }
+        if (!OrderStatus.PENDING_CONFIRM.equals(order.getStatus())) {
+            throw new BusinessException("当前订单状态不可确认");
+        }
+        orderMapper.updateStatus(orderId, OrderStatus.CONFIRMED);
+    }
+
+    /**
+     * 商家派送：已确认 -> 配送中
+     * 校验订单归属当前商家
+     */
+    @Transactional
+    public void merchantDispatchOrder(Long orderId, Long merchantId) {
+        Order order = orderMapper.selectById(orderId);
+        if (order == null) {
+            throw new BusinessException("订单不存在");
+        }
+        if (!merchantId.equals(order.getMerchantId())) {
+            throw new BusinessException(403, "无权操作此订单");
+        }
+        if (!OrderStatus.CONFIRMED.equals(order.getStatus())) {
+            throw new BusinessException("仅已确认订单可派送");
+        }
+        orderMapper.updateStatus(orderId, OrderStatus.DELIVERING);
     }
 
     // ==================== 工具 ====================

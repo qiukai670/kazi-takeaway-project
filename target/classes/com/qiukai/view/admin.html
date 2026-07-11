@@ -1707,14 +1707,10 @@
 
     tbody.innerHTML = list.map(o => {
       const st = ORDER_STATUS[o.status] || { label: o.status, cls: 'status-gray' };
-      // 根据状态生成操作按钮
+      // 根据状态生成操作按钮（管理员仅负责审核订单，接单/派送由商家完成）
       let actionBtn = '';
       if (o.status === 'PAID') {
         actionBtn = `<button class="btn-primary text-xs py-2 px-4" data-assign-order="${o.id}">审核订单</button>`;
-      } else if (o.status === 'PENDING_CONFIRM') {
-        actionBtn = `<button class="btn-primary text-xs py-2 px-4" data-confirm-order="${o.id}">确认接单</button>`;
-      } else if (o.status === 'CONFIRMED') {
-        actionBtn = `<button class="btn-primary text-xs py-2 px-4" data-dispatch-order="${o.id}">开始派送</button>`;
       } else {
         actionBtn = `<span class="text-xs" style="color: var(--brown-mid);">—</span>`;
       }
@@ -1735,30 +1731,7 @@
       `;
     }).join('');
 
-    $$('[data-confirm-order]').forEach(b => b.addEventListener('click', () => confirmOrder(Number(b.dataset.confirmOrder))));
     $$('[data-assign-order]').forEach(b => b.addEventListener('click', () => assignOrder(Number(b.dataset.assignOrder))));
-    $$('[data-dispatch-order]').forEach(b => b.addEventListener('click', () => dispatchOrder(Number(b.dataset.dispatchOrder))));
-  }
-
-  // 确认接单（PENDING_CONFIRM → CONFIRMED）
-  function confirmOrder(id) {
-    const o = orders.find(x => x.id === id);
-    if (!o) return;
-    showConfirm({
-      title: '确认接单？',
-      msg: `订单 ${o.orderNo}（${o.username || ('用户#' + o.userId)}）确认后将通知商家开始制作。`,
-      okText: '确认接单',
-      danger: false,
-      onOk: async () => {
-        try {
-          await API.admin.confirmOrder(id);
-          showToast('已确认接单', 'success');
-          await loadOrders();
-        } catch (e) {
-          showToast('操作失败：' + e.message, 'error');
-        }
-      }
-    });
   }
 
   // 审核订单（PAID → PENDING_CONFIRM）
@@ -1774,27 +1747,6 @@
         try {
           await API.admin.assignOrder(id);
           showToast('已审核订单', 'success');
-          await loadOrders();
-        } catch (e) {
-          showToast('操作失败：' + e.message, 'error');
-        }
-      }
-    });
-  }
-
-  // 开始派送（CONFIRMED → DELIVERING）
-  function dispatchOrder(id) {
-    const o = orders.find(x => x.id === id);
-    if (!o) return;
-    showConfirm({
-      title: '开始派送？',
-      msg: `订单 ${o.orderNo}（${o.username || ('用户#' + o.userId)}）确认后将开始派送。`,
-      okText: '开始派送',
-      danger: false,
-      onOk: async () => {
-        try {
-          await API.admin.dispatchOrder(id);
-          showToast('已开始派送', 'success');
           await loadOrders();
         } catch (e) {
           showToast('操作失败：' + e.message, 'error');

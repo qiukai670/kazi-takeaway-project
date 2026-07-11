@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 public class Merchant {
 
     private Long id;
+    /** 关联用户ID(role=2) */
+    private Long userId;
     private String name;
     private String logo;
     private String cover;

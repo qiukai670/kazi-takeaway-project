@@ -122,10 +122,17 @@ public class MenuService {
     }
 
     /**
-     * 商家优惠（供订单计算使用）
+     * 商家满减规则（供订单计算使用）
      */
     public List<PromoRule> getPromoRules(Long merchantId) {
         return promoRuleMapper.selectByMerchantId(merchantId);
+    }
+
+    /**
+     * 商家优惠活动（discount/freefee 等，供订单计算使用）
+     */
+    public List<MerchantPromo> getMerchantPromos(Long merchantId) {
+        return merchantPromoMapper.selectByMerchantId(merchantId);
     }
 
     /**

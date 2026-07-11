@@ -54,6 +54,7 @@ CREATE TABLE `user_token` (
 -- ----------------------------------------------------------------------
 CREATE TABLE `merchant` (
   `id`            BIGINT         NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `user_id`       BIGINT         DEFAULT NULL COMMENT '关联用户ID(role=2)',
   `name`          VARCHAR(64)    NOT NULL COMMENT '商家名称',
   `logo`          VARCHAR(512)   DEFAULT NULL COMMENT 'Logo',
   `cover`         VARCHAR(512)   DEFAULT NULL COMMENT '封面图',
@@ -74,7 +75,8 @@ CREATE TABLE `merchant` (
   PRIMARY KEY (`id`),
   KEY `idx_category` (`category`),
   KEY `idx_sales` (`sales`),
-  KEY `idx_is_recommended` (`is_recommended`)
+  KEY `idx_is_recommended` (`is_recommended`),
+  KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商家表';
 
 -- ----------------------------------------------------------------------
@@ -82,11 +84,18 @@ CREATE TABLE `merchant` (
 --    type: discount 折扣 fullcut 满减 freefee 免配送费 newuser 新客立减
 -- ----------------------------------------------------------------------
 CREATE TABLE `merchant_promo` (
-  `id`           BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `merchant_id`  BIGINT       NOT NULL COMMENT '商家ID',
-  `type`         VARCHAR(16)  NOT NULL COMMENT '优惠类型',
-  `description`  VARCHAR(128) DEFAULT NULL COMMENT '优惠描述',
-  `create_time`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `id`             BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `merchant_id`    BIGINT       NOT NULL COMMENT '商家ID',
+  `type`           VARCHAR(16)  NOT NULL COMMENT '优惠类型',
+  `description`    VARCHAR(128) DEFAULT NULL COMMENT '优惠描述',
+  `name`           VARCHAR(64)  DEFAULT NULL COMMENT '活动名称',
+  `discount_ratio` INT          DEFAULT NULL COMMENT '折扣率0-99(80=打8折)',
+  `min_spend`      DECIMAL(8,2) DEFAULT NULL COMMENT '最低消费门槛',
+  `priority`       INT          NOT NULL DEFAULT 0 COMMENT '优先级(大优先)',
+  `start_time`     DATETIME     DEFAULT NULL COMMENT '生效时间',
+  `end_time`       DATETIME     DEFAULT NULL COMMENT '失效时间',
+  `status`         TINYINT      NOT NULL DEFAULT 0 COMMENT '0启用 1停用',
+  `create_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`),
   KEY `idx_merchant_id` (`merchant_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商家优惠表';
@@ -99,6 +108,7 @@ CREATE TABLE `promo_rule` (
   `merchant_id`  BIGINT       NOT NULL COMMENT '商家ID',
   `threshold`    DECIMAL(8,2) NOT NULL COMMENT '满减门槛',
   `discount`     DECIMAL(8,2) NOT NULL COMMENT '优惠金额',
+  `status`       TINYINT      NOT NULL DEFAULT 0 COMMENT '0启用 1停用',
   PRIMARY KEY (`id`),
   KEY `idx_merchant_id` (`merchant_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='满减规则表';
@@ -120,7 +130,8 @@ CREATE TABLE `dish` (
   `is_discount`  TINYINT        NOT NULL DEFAULT 0 COMMENT '是否折扣 0否 1是',
   `is_new`       TINYINT        NOT NULL DEFAULT 0 COMMENT '是否新品 0否 1是',
   `is_popular`   TINYINT        NOT NULL DEFAULT 0 COMMENT '是否人气菜品 0否 1是',
-  `on_shelf`     TINYINT        NOT NULL DEFAULT 0 COMMENT '上下架 0上架 1下架',
+  `on_shelf`     TINYINT      NOT NULL DEFAULT 0 COMMENT '上下架 0上架 1下架',
+  `sold_out`     TINYINT      NOT NULL DEFAULT 0 COMMENT '售罄 0否 1是',
   `create_time`  DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time`  DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),

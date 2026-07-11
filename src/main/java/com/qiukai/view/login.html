@@ -363,6 +363,70 @@
   }
 
   ::selection { background: var(--orange); color: #fff; }
+
+  /* ===== 身份选择 ===== */
+  .identity-buttons { display: flex; flex-direction: column; gap: 14px; }
+  .identity-btn {
+    display: flex; align-items: center; gap: 16px;
+    width: 100%; padding: 18px 20px;
+    border: 2px solid var(--beige); border-radius: 18px;
+    background: var(--cream); cursor: pointer;
+    transition: all 0.25s cubic-bezier(.22,1,.36,1);
+    text-align: left;
+  }
+  .identity-btn:hover {
+    border-color: var(--orange); background: #fff;
+    transform: translateX(4px);
+    box-shadow: 0 8px 20px -6px rgba(255,131,66,.3);
+  }
+  .identity-btn:active { transform: translateX(2px) scale(0.99); }
+  .identity-btn .icon-circle {
+    width: 48px; height: 48px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.25s;
+  }
+  .identity-btn:hover .icon-circle { transform: scale(1.1); }
+  .identity-btn .icon-circle.user { background: rgba(255,131,66,.15); color: var(--orange); }
+  .identity-btn .icon-circle.merchant { background: rgba(0,112,79,.12); color: var(--green); }
+  .identity-btn .icon-circle.admin { background: rgba(125,44,15,.12); color: var(--coffee); }
+  .identity-btn .btn-text { flex: 1; }
+  .identity-btn .btn-text strong { display: block; font-size: 16px; font-weight: 700; color: var(--coffee); }
+  .identity-btn .btn-text small { font-size: 12px; color: var(--brown-mid); }
+  .identity-btn .arrow { color: var(--brown-mid); transition: all 0.25s; }
+  .identity-btn:hover .arrow { color: var(--orange); transform: translateX(4px); }
+
+  /* ===== 视图切换 ===== */
+  .role-view { display: none; }
+  .role-view.active { display: block; animation: viewFadeIn 0.4s cubic-bezier(.22,1,.36,1); }
+  @keyframes viewFadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 返回身份选择 */
+  .back-identity {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: var(--brown-mid);
+    cursor: pointer; transition: color 0.2s; margin-bottom: 20px;
+    background: none; border: none; font-family: inherit;
+  }
+  .back-identity:hover { color: var(--orange); }
+
+  /* ===== 图片上传 ===== */
+  .upload-area {
+    width: 100%; border: 2px dashed var(--beige); border-radius: 14px;
+    background: var(--cream); cursor: pointer; transition: all 0.25s;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; position: relative;
+  }
+  .upload-area:hover { border-color: var(--orange); background: #fff; }
+  .upload-area img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+  .upload-area .upload-placeholder { text-align: center; padding: 16px; color: var(--brown-mid); font-size: 12px; }
+  .upload-area .upload-placeholder svg { margin: 0 auto 6px; display: block; }
+  .upload-area.logo { height: 80px; width: 80px; border-radius: 16px; flex-shrink: 0; }
+  .upload-area.cover { height: 100px; width: 100%; border-radius: 14px; }
+  .upload-row { display: flex; gap: 14px; align-items: flex-start; }
+  .upload-row .upload-info { flex: 1; }
 </style>
 </head>
 <body>
@@ -481,159 +545,392 @@
 <main class="form-section">
   <div class="form-card" id="formCard" role="main" aria-label="登录注册表单">
 
-    <!-- Logo & 标题 -->
-    <div class="text-center mb-7">
-      <h1 class="font-cn-display text-2xl mb-1" style="color: var(--coffee);">欢迎来到咔滋</h1>
-      <p class="text-sm" style="color: var(--brown-mid);">登录或注册，开启你的美味之旅 🍔</p>
+    <!-- ===== 身份选择视图 ===== -->
+    <div class="role-view active" id="identityView">
+      <div class="text-center mb-7">
+        <h1 class="font-cn-display text-2xl mb-1" style="color: var(--coffee);">选择身份</h1>
+        <p class="text-sm" style="color: var(--brown-mid);">请选择您的身份以继续</p>
+      </div>
+      <div class="identity-buttons">
+        <button class="identity-btn" data-identity="user">
+          <div class="icon-circle user">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="btn-text">
+            <strong>我是用户</strong>
+            <small>点餐、下单、享受美食</small>
+          </div>
+          <svg class="arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="identity-btn" data-identity="merchant">
+          <div class="icon-circle merchant">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v11h16V9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+          </div>
+          <div class="btn-text">
+            <strong>我是商家</strong>
+            <small>入驻平台，开启经营</small>
+          </div>
+          <svg class="arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="identity-btn" data-identity="admin">
+          <div class="icon-circle admin">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="btn-text">
+            <strong>我是管理员</strong>
+            <small>系统管理后台</small>
+          </div>
+          <svg class="arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
     </div>
 
-    <!-- Tab 切换 -->
-    <div class="tab-switcher" role="tablist">
-      <div class="tab-indicator" id="tabIndicator"></div>
-      <button class="tab-btn active" data-tab="login" role="tab" aria-selected="true">登录</button>
-      <button class="tab-btn" data-tab="register" role="tab" aria-selected="false">注册</button>
+    <!-- ===== 用户视图 ===== -->
+    <div class="role-view" id="userView">
+      <button class="back-identity" data-back>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        返回身份选择
+      </button>
+      <div class="text-center mb-7">
+        <h1 class="font-cn-display text-2xl mb-1" style="color: var(--coffee);">欢迎来到咔滋</h1>
+        <p class="text-sm" style="color: var(--brown-mid);">登录或注册，开启你的美味之旅 🍔</p>
+      </div>
+      <div class="tab-switcher" role="tablist">
+        <div class="tab-indicator" id="userTabIndicator"></div>
+        <button class="tab-btn active" data-tab="login" data-scope="user" role="tab">登录</button>
+        <button class="tab-btn" data-tab="register" data-scope="user" role="tab">注册</button>
+      </div>
+
+      <!-- 用户登录 -->
+      <form class="form-panel active" id="userLoginForm" data-form="login" novalidate>
+        <div class="input-group">
+          <label class="input-label" for="userLoginAccount">用户名 / 手机号</label>
+          <div class="input-wrap" id="userLoginAccountWrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <input type="text" id="userLoginAccount" class="input-field" placeholder="输入用户名或手机号" autocomplete="username" />
+          </div>
+          <p class="error-msg" id="userLoginAccountError"></p>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="userLoginPassword">密码</label>
+          <div class="input-wrap" id="userLoginPasswordWrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <input type="password" id="userLoginPassword" class="input-field" placeholder="输入密码" autocomplete="current-password" style="padding-right: 48px;" />
+            <button type="button" class="pwd-toggle" data-target="userLoginPassword" aria-label="显示/隐藏密码">
+              <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-close hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+          <p class="error-msg" id="userLoginPasswordError"></p>
+        </div>
+        <div class="options-row">
+          <label class="checkbox-wrap">
+            <input type="checkbox" id="rememberMe" />
+            <span class="checkbox-custom">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            记住我
+          </label>
+          <a href="#" class="link-text" id="forgotPwdLink">忘记密码？</a>
+        </div>
+        <button type="submit" class="btn-submit btn-user" id="userLoginBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          用户登录
+        </button>
+      </form>
+
+      <!-- 用户注册 -->
+      <form class="form-panel" id="userRegisterForm" data-form="register" novalidate>
+        <div class="input-group">
+          <label class="input-label" for="userRegUsername">用户名</label>
+          <div class="input-wrap" id="userRegUsernameWrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <input type="text" id="userRegUsername" class="input-field" placeholder="3-20位字符，支持字母数字下划线" autocomplete="username" />
+          </div>
+          <p class="error-msg" id="userRegUsernameError"></p>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="userRegPhone">手机号</label>
+          <div class="input-wrap" id="userRegPhoneWrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </span>
+            <input type="tel" id="userRegPhone" class="input-field" placeholder="请输入11位手机号" autocomplete="tel" maxlength="11" />
+          </div>
+          <p class="error-msg" id="userRegPhoneError"></p>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="userRegPassword">密码</label>
+          <div class="input-wrap" id="userRegPasswordWrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <input type="password" id="userRegPassword" class="input-field" placeholder="至少8位，含字母和数字" autocomplete="new-password" style="padding-right: 48px;" />
+            <button type="button" class="pwd-toggle" data-target="userRegPassword" aria-label="显示/隐藏密码">
+              <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-close hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+          <div class="pwd-strength" id="userPwdStrength" style="display:none;">
+            <div class="pwd-bar"></div>
+            <div class="pwd-bar"></div>
+            <div class="pwd-bar"></div>
+          </div>
+          <p class="error-msg" id="userRegPasswordError"></p>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="userRegConfirm">确认密码</label>
+          <div class="input-wrap" id="userRegConfirmWrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <input type="password" id="userRegConfirm" class="input-field" placeholder="再次输入密码" autocomplete="new-password" style="padding-right: 48px;" />
+            <button type="button" class="pwd-toggle" data-target="userRegConfirm" aria-label="显示/隐藏密码">
+              <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-close hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+          <p class="error-msg" id="userRegConfirmError"></p>
+        </div>
+        <button type="submit" class="btn-submit btn-register" style="margin-top: 6px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+          注册账号
+        </button>
+      </form>
+      <p class="form-footer">
+        注册即表示同意 <a href="#">《用户协议》</a> 和 <a href="#">《隐私政策》</a>
+      </p>
     </div>
 
-    <!-- 登录表单 -->
-    <form class="form-panel active" id="loginForm" data-form="login" novalidate>
-      <!-- 用户名/手机号 -->
-      <div class="input-group">
-        <label class="input-label" for="loginAccount">用户名 / 手机号</label>
-        <div class="input-wrap" id="loginAccountWrap">
-          <span class="input-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </span>
-          <input type="text" id="loginAccount" class="input-field" placeholder="输入用户名或手机号" autocomplete="username" />
-        </div>
-        <p class="error-msg" id="loginAccountError"></p>
-      </div>
-
-      <!-- 密码 -->
-      <div class="input-group">
-        <label class="input-label" for="loginPassword">密码</label>
-        <div class="input-wrap" id="loginPasswordWrap">
-          <span class="input-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </span>
-          <input type="password" id="loginPassword" class="input-field" placeholder="输入密码" autocomplete="current-password" style="padding-right: 48px;" />
-          <button type="button" class="pwd-toggle" data-target="loginPassword" aria-label="显示/隐藏密码">
-            <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            <svg class="eye-close hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-          </button>
-        </div>
-        <p class="error-msg" id="loginPasswordError"></p>
-      </div>
-
-      <!-- 记住我 & 忘记密码 -->
-      <div class="options-row">
-        <label class="checkbox-wrap">
-          <input type="checkbox" id="rememberMe" />
-          <span class="checkbox-custom">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </span>
-          记住我
-        </label>
-        <a href="#" class="link-text" id="forgotPwdLink">忘记密码？</a>
-      </div>
-
-      <!-- 登录按钮 -->
-      <button type="submit" class="btn-submit btn-user" id="userLoginBtn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-        用户登录
+    <!-- ===== 管理员视图 ===== -->
+    <div class="role-view" id="adminView">
+      <button class="back-identity" data-back>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        返回身份选择
       </button>
-      <button type="button" class="btn-submit btn-admin" id="adminLoginBtn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        管理员登录
-      </button>
-    </form>
-
-    <!-- 注册表单 -->
-    <form class="form-panel" id="registerForm" data-form="register" novalidate>
-      <!-- 用户名 -->
-      <div class="input-group">
-        <label class="input-label" for="regUsername">用户名</label>
-        <div class="input-wrap" id="regUsernameWrap">
-          <span class="input-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </span>
-          <input type="text" id="regUsername" class="input-field" placeholder="3-20位字符，支持字母数字下划线" autocomplete="username" />
-        </div>
-        <p class="error-msg" id="regUsernameError"></p>
+      <div class="text-center mb-7">
+        <h1 class="font-cn-display text-2xl mb-1" style="color: var(--coffee);">管理员登录</h1>
+        <p class="text-sm" style="color: var(--brown-mid);">请输入管理员账号密码 🔐</p>
       </div>
-
-      <!-- 手机号 -->
-      <div class="input-group">
-        <label class="input-label" for="regPhone">手机号</label>
-        <div class="input-wrap" id="regPhoneWrap">
-          <span class="input-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          </span>
-          <input type="tel" id="regPhone" class="input-field" placeholder="请输入11位手机号" autocomplete="tel" maxlength="11" />
+      <form id="adminLoginForm" novalidate>
+        <div class="input-group">
+          <label class="input-label" for="adminLoginAccount">管理员用户名</label>
+          <div class="input-wrap" id="adminLoginAccountWrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </span>
+            <input type="text" id="adminLoginAccount" class="input-field" placeholder="输入管理员用户名" autocomplete="username" />
+          </div>
+          <p class="error-msg" id="adminLoginAccountError"></p>
         </div>
-        <p class="error-msg" id="regPhoneError"></p>
-      </div>
-
-      <!-- 密码 -->
-      <div class="input-group">
-        <label class="input-label" for="regPassword">密码</label>
-        <div class="input-wrap" id="regPasswordWrap">
-          <span class="input-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </span>
-          <input type="password" id="regPassword" class="input-field" placeholder="至少8位，含字母和数字" autocomplete="new-password" style="padding-right: 48px;" />
-          <button type="button" class="pwd-toggle" data-target="regPassword" aria-label="显示/隐藏密码">
-            <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            <svg class="eye-close hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-          </button>
+        <div class="input-group">
+          <label class="input-label" for="adminLoginPassword">密码</label>
+          <div class="input-wrap" id="adminLoginPasswordWrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <input type="password" id="adminLoginPassword" class="input-field" placeholder="输入密码" autocomplete="current-password" style="padding-right: 48px;" />
+            <button type="button" class="pwd-toggle" data-target="adminLoginPassword" aria-label="显示/隐藏密码">
+              <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-close hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+          <p class="error-msg" id="adminLoginPasswordError"></p>
         </div>
-        <div class="pwd-strength" id="pwdStrength" style="display:none;">
-          <div class="pwd-bar"></div>
-          <div class="pwd-bar"></div>
-          <div class="pwd-bar"></div>
-        </div>
-        <p class="error-msg" id="regPasswordError"></p>
-      </div>
-
-      <!-- 确认密码 -->
-      <div class="input-group">
-        <label class="input-label" for="regConfirm">确认密码</label>
-        <div class="input-wrap" id="regConfirmWrap">
-          <span class="input-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </span>
-          <input type="password" id="regConfirm" class="input-field" placeholder="再次输入密码" autocomplete="new-password" style="padding-right: 48px;" />
-          <button type="button" class="pwd-toggle" data-target="regConfirm" aria-label="显示/隐藏密码">
-            <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            <svg class="eye-close hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-          </button>
-        </div>
-        <p class="error-msg" id="regConfirmError"></p>
-      </div>
-
-      <!-- 注册按钮 -->
-      <button type="submit" class="btn-submit btn-register" style="margin-top: 6px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-        注册账号
-      </button>
-    </form>
-
-    <!-- 底部 -->
-    <div class="divider">其他方式</div>
-    <div class="flex justify-center gap-4 mb-2">
-      <button class="w-11 h-11 rounded-full flex items-center justify-center transition" style="background: var(--beige); color: var(--coffee);" onmouseover="this.style.background='var(--orange)'; this.style.color='#fff'" onmouseout="this.style.background='var(--beige)'; this.style.color='var(--coffee)'" onclick="showToast('微信登录功能开发中…', 'info')" aria-label="微信登录">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 4C4.36 4 1 6.69 1 10c0 1.89 1.09 3.56 2.82 4.63L3 17l2.9-1.45c.83.2 1.71.32 2.6.32.34 0 .68-.02 1.01-.05-.21-.65-.33-1.34-.33-2.06 0-3.31 3.36-6 7.5-6 .26 0 .51.01.76.03C16.69 5.34 12.89 4 8.5 4zM6.5 8.5c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm4 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z"/><path d="M23 13.5c0-2.49-2.69-4.5-6-4.5s-6 2.01-6 4.5 2.69 4.5 6 4.5c.72 0 1.41-.1 2.06-.28L21 19l-.5-1.5c1.5-.83 2.5-2.17 2.5-3.5zm-8-.5c-.41 0-.75-.34-.75-.75s.34-.75.75-.75.75.34.75.75-.34.75-.75.75zm4 0c-.41 0-.75-.34-.75-.75s.34-.75.75-.75.75.34.75.75-.34.75-.75.75z"/></svg>
-      </button>
-      <button class="w-11 h-11 rounded-full flex items-center justify-center transition" style="background: var(--beige); color: var(--coffee);" onmouseover="this.style.background='var(--orange)'; this.style.color='#fff'" onmouseout="this.style.background='var(--beige)'; this.style.color='var(--coffee)'" onclick="showToast('支付宝登录功能开发中…', 'info')" aria-label="支付宝登录">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10-4.48 10-10 10S2 17.52 2 12zm10.5 5c3.5 0 5.5-2 5.5-2l-1.5-1s-1.5 1.5-4 1.5-4-1.5-4-1.5L7 15s2 2 5.5 2zm.5-8c0-.55.45-1 1-1s1 .45 1 1-.45 1-1 1-1-.45-1-1zm-5 0c0-.55.45-1 1-1s1 .45 1 1-.45 1-1 1-1-.45-1-1z"/></svg>
-      </button>
-      <button class="w-11 h-11 rounded-full flex items-center justify-center transition" style="background: var(--beige); color: var(--coffee);" onmouseover="this.style.background='var(--orange)'; this.style.color='#fff'" onmouseout="this.style.background='var(--beige)'; this.style.color='var(--coffee)'" onclick="showToast('手机号登录功能开发中…', 'info')" aria-label="手机号登录">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
-      </button>
+        <button type="submit" class="btn-submit btn-user" id="adminLoginSubmitBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          管理员登录
+        </button>
+      </form>
+      <p class="form-footer">管理员账号由系统后台创建，不可前端注册</p>
     </div>
 
-    <p class="form-footer">
-      注册即表示同意 <a href="#">《用户协议》</a> 和 <a href="#">《隐私政策》</a>
-    </p>
+    <!-- ===== 商家视图 ===== -->
+    <div class="role-view" id="merchantView">
+      <button class="back-identity" data-back>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        返回身份选择
+      </button>
+      <div class="text-center mb-7">
+        <h1 class="font-cn-display text-2xl mb-1" style="color: var(--coffee);">商家中心</h1>
+        <p class="text-sm" style="color: var(--brown-mid);">登录或注册，开启经营之旅 🏪</p>
+      </div>
+      <div class="tab-switcher" role="tablist">
+        <div class="tab-indicator" id="merchantTabIndicator"></div>
+        <button class="tab-btn active" data-tab="login" data-scope="merchant" role="tab">登录</button>
+        <button class="tab-btn" data-tab="register" data-scope="merchant" role="tab">注册</button>
+      </div>
+
+      <!-- 商家登录 -->
+      <form class="form-panel active" id="merchantLoginForm" data-form="login" novalidate>
+        <div class="input-group">
+          <label class="input-label" for="merchantLoginAccount">用户名 / 手机号</label>
+          <div class="input-wrap" id="merchantLoginAccountWrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <input type="text" id="merchantLoginAccount" class="input-field" placeholder="输入用户名或手机号" autocomplete="username" />
+          </div>
+          <p class="error-msg" id="merchantLoginAccountError"></p>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="merchantLoginPassword">密码</label>
+          <div class="input-wrap" id="merchantLoginPasswordWrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <input type="password" id="merchantLoginPassword" class="input-field" placeholder="输入密码" autocomplete="current-password" style="padding-right: 48px;" />
+            <button type="button" class="pwd-toggle" data-target="merchantLoginPassword" aria-label="显示/隐藏密码">
+              <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-close hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+          <p class="error-msg" id="merchantLoginPasswordError"></p>
+        </div>
+        <button type="submit" class="btn-submit btn-user" id="merchantLoginBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          商家登录
+        </button>
+      </form>
+
+      <!-- 商家注册 -->
+      <form class="form-panel" id="merchantRegisterForm" data-form="register" novalidate>
+        <div class="input-group">
+          <label class="input-label" for="mRegPhone">手机号</label>
+          <div class="input-wrap" id="mRegPhoneWrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </span>
+            <input type="tel" id="mRegPhone" class="input-field" placeholder="请输入11位手机号" autocomplete="tel" maxlength="11" />
+          </div>
+          <p class="error-msg" id="mRegPhoneError"></p>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="mRegMerchantName">商家名称</label>
+          <div class="input-wrap" id="mRegMerchantNameWrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v11h16V9"/></svg>
+            </span>
+            <input type="text" id="mRegMerchantName" class="input-field" placeholder="例如：汉堡研究所" maxlength="64" />
+          </div>
+          <p class="error-msg" id="mRegMerchantNameError"></p>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="mRegName">注册人姓名</label>
+          <div class="input-wrap" id="mRegNameWrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <input type="text" id="mRegName" class="input-field" placeholder="请输入注册人真实姓名" maxlength="32" />
+          </div>
+          <p class="error-msg" id="mRegNameError"></p>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="mRegUsername">用户名</label>
+          <div class="input-wrap" id="mRegUsernameWrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <input type="text" id="mRegUsername" class="input-field" placeholder="3-20位字符，支持字母数字下划线" autocomplete="username" />
+          </div>
+          <p class="error-msg" id="mRegUsernameError"></p>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="mRegPassword">密码</label>
+          <div class="input-wrap" id="mRegPasswordWrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <input type="password" id="mRegPassword" class="input-field" placeholder="至少8位，含字母和数字" autocomplete="new-password" style="padding-right: 48px;" />
+            <button type="button" class="pwd-toggle" data-target="mRegPassword" aria-label="显示/隐藏密码">
+              <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-close hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+          <div class="pwd-strength" id="merchantPwdStrength" style="display:none;">
+            <div class="pwd-bar"></div>
+            <div class="pwd-bar"></div>
+            <div class="pwd-bar"></div>
+          </div>
+          <p class="error-msg" id="mRegPasswordError"></p>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="mRegConfirm">确认密码</label>
+          <div class="input-wrap" id="mRegConfirmWrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <input type="password" id="mRegConfirm" class="input-field" placeholder="再次输入密码" autocomplete="new-password" style="padding-right: 48px;" />
+            <button type="button" class="pwd-toggle" data-target="mRegConfirm" aria-label="显示/隐藏密码">
+              <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-close hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+          <p class="error-msg" id="mRegConfirmError"></p>
+        </div>
+
+        <!-- Logo + 封面上传 -->
+        <div class="input-group">
+          <label class="input-label">商家Logo & 封面</label>
+          <div class="upload-row">
+            <div class="upload-area logo" id="mLogoUpload" data-type="logo">
+              <div class="upload-placeholder">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span>Logo</span>
+              </div>
+            </div>
+            <div class="upload-info flex-1">
+              <div class="upload-area cover" id="mCoverUpload" data-type="cover">
+                <div class="upload-placeholder">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <span>商家封面图</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <input type="file" id="mLogoFile" accept="image/*" style="display:none">
+          <input type="file" id="mCoverFile" accept="image/*" style="display:none">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="mRegCategory">商家分类</label>
+          <div class="input-wrap" id="mRegCategoryWrap" style="padding: 0;">
+            <select id="mRegCategory" class="input-field" style="padding: 14px 14px 14px 46px; appearance: none; -webkit-appearance: none; background: transparent;">
+              <option value="">请选择商家分类</option>
+              <option value="西式快餐">🍔 西式快餐</option>
+              <option value="中式快餐">🍜 中式快餐</option>
+              <option value="小吃系列">🍗 小吃系列</option>
+              <option value="川渝美食">🌶️ 川渝美食</option>
+              <option value="日式料理">🍣 日式料理</option>
+              <option value="饮料甜品">🧋 饮料甜品</option>
+              <option value="沙拉轻食">🥗 沙拉轻食</option>
+              <option value="火锅烧烤">🍢 火锅烧烤</option>
+              <option value="蛋糕烘焙">🍰 蛋糕烘焙</option>
+              <option value="其他">🍽️ 其他</option>
+            </select>
+            <span class="input-icon" style="pointer-events: none;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="4"/><line x1="12" y1="20" x2="12" y2="16"/><line x1="12" y1="12" x2="12" y2="4"/><line x1="20" y1="20" x2="20" y2="12"/><line x1="20" y1="8" x2="20" y2="4"/></svg>
+            </span>
+          </div>
+          <p class="error-msg" id="mRegCategoryError"></p>
+        </div>
+
+        <button type="submit" class="btn-submit btn-register" style="margin-top: 6px;" id="merchantRegisterBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+          提交注册
+        </button>
+      </form>
+      <p class="form-footer">
+        注册即表示同意 <a href="#">《商家协议》</a> 和 <a href="#">《入驻政策》</a>
+      </p>
+    </div>
+
   </div>
 </main>
 
@@ -659,13 +956,16 @@
     try {
       const u = await API.auth.currentUser();
       if (u) {
-        const redirect = API.util.getParam('redirect') || 'index.html';
-        window.location.href = redirect;
+        const redirect = API.util.getParam('redirect');
+        if (redirect) { window.location.href = redirect; return; }
+        if (u.role === 1) { window.location.href = 'admin.html'; return; }
+        if (u.role === 2) { window.location.href = 'merchant.html'; return; }
+        window.location.href = 'index.html';
       }
     } catch (e) { /* ignore */ }
   })();
 
-  // ===== 动画完成后显示表单 =====
+  // ===== 动画完成后显示表单（身份选择默认展示） =====
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const formCard = document.getElementById('formCard');
   const burgerTop = document.querySelector('.burger-top');
@@ -675,10 +975,7 @@
     formCard.classList.add('visible');
   } else {
     // 动画时间线: 0.9s(放大) + 1.3s(分裂) = 2.2s, 表单在 2.3s 出现
-    setTimeout(() => {
-      formCard.classList.add('visible');
-    }, 2300);
-    // 分裂动画完成后添加浮动效果
+    setTimeout(() => { formCard.classList.add('visible'); }, 2300);
     setTimeout(() => {
       burgerTop.style.setProperty('--split-y', '-75px');
       burgerBottom.style.setProperty('--split-y', '75px');
@@ -687,34 +984,59 @@
     }, 2300);
   }
 
-  // ===== Tab 切换 =====
-  const tabBtns = document.querySelectorAll('.tab-btn');
-  const tabIndicator = document.getElementById('tabIndicator');
-  const formPanels = document.querySelectorAll('.form-panel');
+  // ===== 身份选择切换 =====
+  const identityView = document.getElementById('identityView');
+  const userView = document.getElementById('userView');
+  const adminView = document.getElementById('adminView');
+  const merchantView = document.getElementById('merchantView');
+  const allViews = [identityView, userView, adminView, merchantView];
+  const viewMap = { user: userView, admin: adminView, merchant: merchantView };
 
-  tabBtns.forEach(btn => {
+  function showView(view) {
+    allViews.forEach(v => v.classList.remove('active'));
+    // 强制重排以重新触发进入动画
+    void view.offsetWidth;
+    view.classList.add('active');
+  }
+
+  document.querySelectorAll('[data-identity]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const tab = btn.dataset.tab;
-      tabBtns.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
-      btn.classList.add('active');
-      btn.setAttribute('aria-selected', 'true');
-      tabIndicator.classList.toggle('right', tab === 'register');
+      const target = viewMap[btn.dataset.identity];
+      if (target) showView(target);
+    });
+  });
 
-      formPanels.forEach(panel => {
-        panel.classList.remove('active');
-        if (panel.dataset.form === tab) {
-          // 延迟添加 active 以触发动画
-          requestAnimationFrame(() => panel.classList.add('active'));
-        }
+  document.querySelectorAll('[data-back]').forEach(btn => {
+    btn.addEventListener('click', () => showView(identityView));
+  });
+
+  // ===== Tab 切换（按 scope 隔离：user / merchant） =====
+  document.querySelectorAll('.tab-switcher').forEach(switcher => {
+    const btns = switcher.querySelectorAll('.tab-btn');
+    const indicator = switcher.querySelector('.tab-indicator');
+    const view = switcher.closest('.role-view');
+    const panels = view ? view.querySelectorAll('.form-panel') : [];
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        btns.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+        if (indicator) indicator.classList.toggle('right', tab === 'register');
+        panels.forEach(panel => {
+          panel.classList.remove('active');
+          if (panel.dataset.form === tab) {
+            requestAnimationFrame(() => panel.classList.add('active'));
+          }
+        });
       });
     });
   });
 
-  // ===== 密码显示/隐藏 =====
+  // ===== 密码显示/隐藏（通用） =====
   document.querySelectorAll('.pwd-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
-      const targetId = btn.dataset.target;
-      const input = document.getElementById(targetId);
+      const input = document.getElementById(btn.dataset.target);
       const eyeOpen = btn.querySelector('.eye-open');
       const eyeClose = btn.querySelector('.eye-close');
       if (input.type === 'password') {
@@ -739,7 +1061,7 @@
       return '';
     },
     account: (v) => {
-      if (!v) return '请输入用户名或邮箱';
+      if (!v) return '请输入用户名或手机号';
       if (v.length < 3) return '账号至少 3 个字符';
       return '';
     },
@@ -757,12 +1079,25 @@
     },
     loginPassword: (v) => {
       if (!v) return '请输入密码';
-      if (v.length < 1) return '请输入密码';
       return '';
     },
     confirm: (v, original) => {
       if (!v) return '请再次输入密码';
       if (v !== original) return '两次输入的密码不一致';
+      return '';
+    },
+    merchantName: (v) => {
+      if (!v || !v.trim()) return '请输入商家名称';
+      if (v.length > 64) return '商家名称最多 64 个字符';
+      return '';
+    },
+    registrantName: (v) => {
+      if (!v || !v.trim()) return '请输入注册人姓名';
+      if (v.length > 32) return '注册人姓名最多 32 个字符';
+      return '';
+    },
+    category: (v) => {
+      if (!v) return '请选择商家分类';
       return '';
     }
   };
@@ -771,6 +1106,7 @@
   function setFieldState(wrapId, errorId, errorMsg) {
     const wrap = document.getElementById(wrapId);
     const err = document.getElementById(errorId);
+    if (!wrap || !err) return;
     if (errorMsg) {
       wrap.classList.add('error');
       wrap.classList.remove('valid');
@@ -778,174 +1114,380 @@
       err.classList.add('show');
     } else {
       wrap.classList.remove('error');
-      if (wrap.querySelector('.input-field').value) wrap.classList.add('valid');
+      const field = wrap.querySelector('.input-field');
+      if (field && field.value) wrap.classList.add('valid');
       else wrap.classList.remove('valid');
       err.classList.remove('show');
     }
   }
 
-  // 实时验证 - 登录表单
-  const loginAccount = document.getElementById('loginAccount');
-  const loginPassword = document.getElementById('loginPassword');
-
-  loginAccount.addEventListener('input', () => {
-    setFieldState('loginAccountWrap', 'loginAccountError', rules.account(loginAccount.value));
-  });
-  loginPassword.addEventListener('input', () => {
-    setFieldState('loginPasswordWrap', 'loginPasswordError', rules.loginPassword(loginPassword.value));
-  });
-
-  // 实时验证 - 注册表单
-  const regUsername = document.getElementById('regUsername');
-  const regPhone = document.getElementById('regPhone');
-  const regPassword = document.getElementById('regPassword');
-  const regConfirm = document.getElementById('regConfirm');
-  const pwdStrength = document.getElementById('pwdStrength');
-
-  regUsername.addEventListener('input', () => {
-    setFieldState('regUsernameWrap', 'regUsernameError', rules.username(regUsername.value));
-  });
-  regPhone.addEventListener('input', () => {
-    // 仅允许输入数字
-    regPhone.value = regPhone.value.replace(/\D/g, '');
-    setFieldState('regPhoneWrap', 'regPhoneError', rules.phone(regPhone.value));
-  });
-
-  // 密码强度
-  regPassword.addEventListener('input', () => {
-    const v = regPassword.value;
-    setFieldState('regPasswordWrap', 'regPasswordError', rules.password(v));
-    // 强度计算
+  // ===== 密码强度指示器 =====
+  function updatePwdStrength(strengthEl, v) {
+    if (!strengthEl) return;
     if (v.length > 0) {
-      pwdStrength.style.display = 'flex';
+      strengthEl.style.display = 'flex';
       let score = 0;
       if (v.length >= 8) score++;
       if (/[a-z]/.test(v) && /[A-Z]/.test(v)) score++;
       if (/\d/.test(v)) score++;
       if (/[^a-zA-Z0-9]/.test(v)) score++;
-      const bars = pwdStrength.querySelectorAll('.pwd-bar');
+      const bars = strengthEl.querySelectorAll('.pwd-bar');
       bars.forEach(b => b.className = 'pwd-bar');
       if (score <= 1) bars[0].classList.add('weak');
       else if (score <= 2) { bars[0].classList.add('medium'); bars[1].classList.add('medium'); }
       else { bars[0].classList.add('strong'); bars[1].classList.add('strong'); bars[2].classList.add('strong'); }
     } else {
-      pwdStrength.style.display = 'none';
+      strengthEl.style.display = 'none';
     }
-    // 联动确认密码验证
-    if (regConfirm.value) {
-      setFieldState('regConfirmWrap', 'regConfirmError', rules.confirm(regConfirm.value, v));
+  }
+
+  // ===== 按钮加载状态 =====
+  function setBtnLoading(btn, loading, loadingText) {
+    if (!btn) return;
+    if (loading) {
+      btn.dataset.originalHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = loadingText || '处理中…';
+    } else {
+      btn.disabled = false;
+      if (btn.dataset.originalHtml) btn.innerHTML = btn.dataset.originalHtml;
     }
+  }
+
+  // ===== 用户登录实时验证 =====
+  const userLoginAccount = document.getElementById('userLoginAccount');
+  const userLoginPassword = document.getElementById('userLoginPassword');
+
+  userLoginAccount.addEventListener('input', () => {
+    setFieldState('userLoginAccountWrap', 'userLoginAccountError', rules.account(userLoginAccount.value));
+  });
+  userLoginPassword.addEventListener('input', () => {
+    setFieldState('userLoginPasswordWrap', 'userLoginPasswordError', rules.loginPassword(userLoginPassword.value));
   });
 
-  regConfirm.addEventListener('input', () => {
-    setFieldState('regConfirmWrap', 'regConfirmError', rules.confirm(regConfirm.value, regPassword.value));
+  // ===== 用户注册实时验证 =====
+  const userRegUsername = document.getElementById('userRegUsername');
+  const userRegPhone = document.getElementById('userRegPhone');
+  const userRegPassword = document.getElementById('userRegPassword');
+  const userRegConfirm = document.getElementById('userRegConfirm');
+  const userPwdStrength = document.getElementById('userPwdStrength');
+
+  userRegUsername.addEventListener('input', () => {
+    setFieldState('userRegUsernameWrap', 'userRegUsernameError', rules.username(userRegUsername.value));
+  });
+  userRegPhone.addEventListener('input', () => {
+    userRegPhone.value = userRegPhone.value.replace(/\D/g, '');
+    setFieldState('userRegPhoneWrap', 'userRegPhoneError', rules.phone(userRegPhone.value));
+  });
+  userRegPassword.addEventListener('input', () => {
+    const v = userRegPassword.value;
+    setFieldState('userRegPasswordWrap', 'userRegPasswordError', rules.password(v));
+    updatePwdStrength(userPwdStrength, v);
+    if (userRegConfirm.value) {
+      setFieldState('userRegConfirmWrap', 'userRegConfirmError', rules.confirm(userRegConfirm.value, v));
+    }
+  });
+  userRegConfirm.addEventListener('input', () => {
+    setFieldState('userRegConfirmWrap', 'userRegConfirmError', rules.confirm(userRegConfirm.value, userRegPassword.value));
   });
 
-  // ===== 登录表单提交 =====
-  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  // ===== 管理员登录实时验证 =====
+  const adminLoginAccount = document.getElementById('adminLoginAccount');
+  const adminLoginPassword = document.getElementById('adminLoginPassword');
+
+  adminLoginAccount.addEventListener('input', () => {
+    setFieldState('adminLoginAccountWrap', 'adminLoginAccountError', rules.account(adminLoginAccount.value));
+  });
+  adminLoginPassword.addEventListener('input', () => {
+    setFieldState('adminLoginPasswordWrap', 'adminLoginPasswordError', rules.loginPassword(adminLoginPassword.value));
+  });
+
+  // ===== 商家登录实时验证 =====
+  const merchantLoginAccount = document.getElementById('merchantLoginAccount');
+  const merchantLoginPassword = document.getElementById('merchantLoginPassword');
+
+  merchantLoginAccount.addEventListener('input', () => {
+    setFieldState('merchantLoginAccountWrap', 'merchantLoginAccountError', rules.account(merchantLoginAccount.value));
+  });
+  merchantLoginPassword.addEventListener('input', () => {
+    setFieldState('merchantLoginPasswordWrap', 'merchantLoginPasswordError', rules.loginPassword(merchantLoginPassword.value));
+  });
+
+  // ===== 商家注册实时验证 =====
+  const mRegMerchantName = document.getElementById('mRegMerchantName');
+  const mRegName = document.getElementById('mRegName');
+  const mRegPhone = document.getElementById('mRegPhone');
+  const mRegUsername = document.getElementById('mRegUsername');
+  const mRegPassword = document.getElementById('mRegPassword');
+  const mRegConfirm = document.getElementById('mRegConfirm');
+  const mRegCategory = document.getElementById('mRegCategory');
+  const merchantPwdStrength = document.getElementById('merchantPwdStrength');
+
+  mRegPhone.addEventListener('input', () => {
+    mRegPhone.value = mRegPhone.value.replace(/\D/g, '');
+    setFieldState('mRegPhoneWrap', 'mRegPhoneError', rules.phone(mRegPhone.value));
+  });
+  mRegMerchantName.addEventListener('input', () => {
+    setFieldState('mRegMerchantNameWrap', 'mRegMerchantNameError', rules.merchantName(mRegMerchantName.value));
+  });
+  mRegName.addEventListener('input', () => {
+    setFieldState('mRegNameWrap', 'mRegNameError', rules.registrantName(mRegName.value));
+  });
+  mRegUsername.addEventListener('input', () => {
+    setFieldState('mRegUsernameWrap', 'mRegUsernameError', rules.username(mRegUsername.value));
+  });
+  mRegPassword.addEventListener('input', () => {
+    const v = mRegPassword.value;
+    setFieldState('mRegPasswordWrap', 'mRegPasswordError', rules.password(v));
+    updatePwdStrength(merchantPwdStrength, v);
+    if (mRegConfirm.value) {
+      setFieldState('mRegConfirmWrap', 'mRegConfirmError', rules.confirm(mRegConfirm.value, v));
+    }
+  });
+  mRegConfirm.addEventListener('input', () => {
+    setFieldState('mRegConfirmWrap', 'mRegConfirmError', rules.confirm(mRegConfirm.value, mRegPassword.value));
+  });
+  mRegCategory.addEventListener('change', () => {
+    setFieldState('mRegCategoryWrap', 'mRegCategoryError', rules.category(mRegCategory.value));
+  });
+
+  // ===== 商家图片上传（Logo + 封面） =====
+  let logoUrl = '';
+  let coverUrl = '';
+  const mLogoUpload = document.getElementById('mLogoUpload');
+  const mCoverUpload = document.getElementById('mCoverUpload');
+  const mLogoFile = document.getElementById('mLogoFile');
+  const mCoverFile = document.getElementById('mCoverFile');
+  const logoPlaceholder = mLogoUpload.innerHTML;
+  const coverPlaceholder = mCoverUpload.innerHTML;
+
+  function renderUploadPreview(area, url, placeholderHtml) {
+    if (url) {
+      area.innerHTML = '<img src="' + url + '" alt="预览">';
+    } else {
+      area.innerHTML = placeholderHtml;
+    }
+  }
+
+  async function handleUpload(file, area, placeholder, onSuccess) {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      showToast('请上传图片文件 📷', 'error');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('图片大小不能超过 5MB 📷', 'error');
+      return;
+    }
+    const localUrl = URL.createObjectURL(file);
+    renderUploadPreview(area, localUrl, placeholder);
+    area.style.opacity = '0.6';
+    try {
+      const url = await API.util.uploadImage(file);
+      URL.revokeObjectURL(localUrl);
+      onSuccess(url);
+      renderUploadPreview(area, url, placeholder);
+      showToast('图片上传成功 ✅', 'success');
+    } catch (err) {
+      URL.revokeObjectURL(localUrl);
+      renderUploadPreview(area, '', placeholder);
+      showToast(err.message || '图片上传失败', 'error');
+    } finally {
+      area.style.opacity = '1';
+    }
+  }
+
+  mLogoUpload.addEventListener('click', () => mLogoFile.click());
+  mCoverUpload.addEventListener('click', () => mCoverFile.click());
+  mLogoFile.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    handleUpload(file, mLogoUpload, logoPlaceholder, (url) => { logoUrl = url; });
+    e.target.value = '';
+  });
+  mCoverFile.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    handleUpload(file, mCoverUpload, coverPlaceholder, (url) => { coverUrl = url; });
+    e.target.value = '';
+  });
+
+  // ===== 用户登录提交 =====
+  document.getElementById('userLoginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const accountErr = rules.account(loginAccount.value);
-    const pwdErr = rules.loginPassword(loginPassword.value);
-    setFieldState('loginAccountWrap', 'loginAccountError', accountErr);
-    setFieldState('loginPasswordWrap', 'loginPasswordError', pwdErr);
+    const accountErr = rules.account(userLoginAccount.value);
+    const pwdErr = rules.loginPassword(userLoginPassword.value);
+    setFieldState('userLoginAccountWrap', 'userLoginAccountError', accountErr);
+    setFieldState('userLoginPasswordWrap', 'userLoginPasswordError', pwdErr);
     if (accountErr || pwdErr) {
       showToast('请填写完整的登录信息 📝', 'error');
       return;
     }
     const remember = document.getElementById('rememberMe').checked;
     const btn = document.getElementById('userLoginBtn');
-    const originalHTML = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '登录中…';
+    setBtnLoading(btn, true, '登录中…');
     try {
-      await API.auth.login(loginAccount.value.trim(), loginPassword.value, remember);
+      await API.auth.login(userLoginAccount.value.trim(), userLoginPassword.value, remember);
       showToast('登录成功，欢迎回来！🎉', 'success');
       const redirect = API.util.getParam('redirect') || 'index.html';
       setTimeout(() => { window.location.href = redirect; }, 800);
     } catch (err) {
       showToast(err.message || '登录失败', 'error');
-      btn.disabled = false;
-      btn.innerHTML = originalHTML;
+      setBtnLoading(btn, false);
     }
   });
 
-  // ===== 管理员登录 =====
-  document.getElementById('adminLoginBtn').addEventListener('click', async () => {
-    const accountErr = rules.account(loginAccount.value);
-    const pwdErr = rules.loginPassword(loginPassword.value);
-    setFieldState('loginAccountWrap', 'loginAccountError', accountErr);
-    setFieldState('loginPasswordWrap', 'loginPasswordError', pwdErr);
-    if (accountErr || pwdErr) {
-      showToast('请填写管理员账号和密码 🔐', 'error');
-      return;
-    }
-    const btn = document.getElementById('adminLoginBtn');
-    const originalHTML = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '登录中…';
-    try {
-      await API.auth.adminLogin(loginAccount.value.trim(), loginPassword.value);
-      showToast('正在进入管理员后台… 🛡️', 'info');
-      setTimeout(() => { window.location.href = 'admin.html'; }, 800);
-    } catch (err) {
-      showToast(err.message || '登录失败', 'error');
-      btn.disabled = false;
-      btn.innerHTML = originalHTML;
-    }
-  });
-
-  // ===== 注册表单提交 =====
-  document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  // ===== 用户注册提交 =====
+  document.getElementById('userRegisterForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const uErr = rules.username(regUsername.value);
-    const phErr = rules.phone(regPhone.value);
-    const pErr = rules.password(regPassword.value);
-    const cErr = rules.confirm(regConfirm.value, regPassword.value);
-    setFieldState('regUsernameWrap', 'regUsernameError', uErr);
-    setFieldState('regPhoneWrap', 'regPhoneError', phErr);
-    setFieldState('regPasswordWrap', 'regPasswordError', pErr);
-    setFieldState('regConfirmWrap', 'regConfirmError', cErr);
+    const uErr = rules.username(userRegUsername.value);
+    const phErr = rules.phone(userRegPhone.value);
+    const pErr = rules.password(userRegPassword.value);
+    const cErr = rules.confirm(userRegConfirm.value, userRegPassword.value);
+    setFieldState('userRegUsernameWrap', 'userRegUsernameError', uErr);
+    setFieldState('userRegPhoneWrap', 'userRegPhoneError', phErr);
+    setFieldState('userRegPasswordWrap', 'userRegPasswordError', pErr);
+    setFieldState('userRegConfirmWrap', 'userRegConfirmError', cErr);
     if (uErr || phErr || pErr || cErr) {
       showToast('请修正表单中的错误 📝', 'error');
       return;
     }
     const btn = e.target.querySelector('.btn-register');
-    const originalHTML = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '注册中…';
+    setBtnLoading(btn, true, '注册中…');
     try {
       await API.auth.register({
-        username: regUsername.value.trim(),
-        phone: regPhone.value.trim(),
-        password: regPassword.value,
-        confirmPassword: regConfirm.value,
-        nickname: regUsername.value.trim()
+        username: userRegUsername.value.trim(),
+        phone: userRegPhone.value.trim(),
+        password: userRegPassword.value,
+        confirmPassword: userRegConfirm.value,
+        nickname: userRegUsername.value.trim()
       });
       showToast('注册成功！正在跳转登录… 🎉', 'success');
       setTimeout(() => {
-        // 切换到登录 Tab
-        document.querySelector('[data-tab="login"]').click();
-        loginAccount.value = regUsername.value;
-        btn.disabled = false;
-        btn.innerHTML = originalHTML;
+        document.querySelector('[data-tab="login"][data-scope="user"]').click();
+        userLoginAccount.value = userRegUsername.value.trim();
+        setBtnLoading(btn, false);
       }, 1200);
     } catch (err) {
       showToast(err.message || '注册失败', 'error');
-      btn.disabled = false;
-      btn.innerHTML = originalHTML;
+      setBtnLoading(btn, false);
+    }
+  });
+
+  // ===== 管理员登录提交 =====
+  document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const accountErr = rules.account(adminLoginAccount.value);
+    const pwdErr = rules.loginPassword(adminLoginPassword.value);
+    setFieldState('adminLoginAccountWrap', 'adminLoginAccountError', accountErr);
+    setFieldState('adminLoginPasswordWrap', 'adminLoginPasswordError', pwdErr);
+    if (accountErr || pwdErr) {
+      showToast('请填写管理员账号和密码 🔐', 'error');
+      return;
+    }
+    const btn = document.getElementById('adminLoginSubmitBtn');
+    setBtnLoading(btn, true, '登录中…');
+    try {
+      await API.auth.adminLogin(adminLoginAccount.value.trim(), adminLoginPassword.value);
+      showToast('正在进入管理员后台… 🛡️', 'success');
+      setTimeout(() => { window.location.href = 'admin.html'; }, 800);
+    } catch (err) {
+      showToast(err.message || '登录失败', 'error');
+      setBtnLoading(btn, false);
+    }
+  });
+
+  // ===== 商家登录提交 =====
+  document.getElementById('merchantLoginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const accountErr = rules.account(merchantLoginAccount.value);
+    const pwdErr = rules.loginPassword(merchantLoginPassword.value);
+    setFieldState('merchantLoginAccountWrap', 'merchantLoginAccountError', accountErr);
+    setFieldState('merchantLoginPasswordWrap', 'merchantLoginPasswordError', pwdErr);
+    if (accountErr || pwdErr) {
+      showToast('请填写完整的登录信息 📝', 'error');
+      return;
+    }
+    const btn = document.getElementById('merchantLoginBtn');
+    setBtnLoading(btn, true, '登录中…');
+    try {
+      await API.auth.merchantLogin(merchantLoginAccount.value.trim(), merchantLoginPassword.value);
+      showToast('登录成功，欢迎回来！🏪', 'success');
+      const redirect = API.util.getParam('redirect') || 'merchant.html';
+      setTimeout(() => { window.location.href = redirect; }, 800);
+    } catch (err) {
+      showToast(err.message || '登录失败', 'error');
+      setBtnLoading(btn, false);
+    }
+  });
+
+  // ===== 商家注册提交 =====
+  document.getElementById('merchantRegisterForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const phoneErr = rules.phone(mRegPhone.value);
+    const nameErr = rules.merchantName(mRegMerchantName.value);
+    const regNameErr = rules.registrantName(mRegName.value);
+    const uErr = rules.username(mRegUsername.value);
+    const pErr = rules.password(mRegPassword.value);
+    const cErr = rules.confirm(mRegConfirm.value, mRegPassword.value);
+    const catErr = rules.category(mRegCategory.value);
+    setFieldState('mRegPhoneWrap', 'mRegPhoneError', phoneErr);
+    setFieldState('mRegMerchantNameWrap', 'mRegMerchantNameError', nameErr);
+    setFieldState('mRegNameWrap', 'mRegNameError', regNameErr);
+    setFieldState('mRegUsernameWrap', 'mRegUsernameError', uErr);
+    setFieldState('mRegPasswordWrap', 'mRegPasswordError', pErr);
+    setFieldState('mRegConfirmWrap', 'mRegConfirmError', cErr);
+    setFieldState('mRegCategoryWrap', 'mRegCategoryError', catErr);
+    if (phoneErr || nameErr || regNameErr || uErr || pErr || cErr || catErr) {
+      showToast('请修正表单中的错误 📝', 'error');
+      return;
+    }
+    if (!logoUrl) {
+      mLogoUpload.style.borderColor = '#dc2626';
+      showToast('请上传商家Logo 📷', 'error');
+      return;
+    }
+    mLogoUpload.style.borderColor = '';
+    if (!coverUrl) {
+      mCoverUpload.style.borderColor = '#dc2626';
+      showToast('请上传商家封面图 📷', 'error');
+      return;
+    }
+    mCoverUpload.style.borderColor = '';
+    const btn = document.getElementById('merchantRegisterBtn');
+    setBtnLoading(btn, true, '注册中…');
+    try {
+      await API.auth.merchantRegister({
+        phone: mRegPhone.value.trim(),
+        merchantName: mRegMerchantName.value.trim(),
+        registrantName: mRegName.value.trim(),
+        username: mRegUsername.value.trim(),
+        password: mRegPassword.value,
+        confirmPassword: mRegConfirm.value,
+        logo: logoUrl,
+        cover: coverUrl,
+        category: mRegCategory.value
+      });
+      showToast('商家注册成功！正在跳转登录… 🎉', 'success');
+      setTimeout(() => {
+        document.querySelector('[data-tab="login"][data-scope="merchant"]').click();
+        merchantLoginAccount.value = mRegUsername.value.trim();
+        setBtnLoading(btn, false);
+      }, 1200);
+    } catch (err) {
+      showToast(err.message || '注册失败', 'error');
+      setBtnLoading(btn, false);
     }
   });
 
   // ===== 忘记密码 =====
   document.getElementById('forgotPwdLink').addEventListener('click', (e) => {
     e.preventDefault();
-    const account = loginAccount.value.trim();
+    const account = userLoginAccount.value.trim();
     if (!account) {
-      showToast('请先输入用户名或邮箱 📧', 'info');
-      loginAccount.focus();
+      showToast('请先输入用户名或手机号 📧', 'info');
+      userLoginAccount.focus();
       return;
     }
-    showToast('密码重置链接已发送至您的邮箱 📬', 'success');
+    showToast('密码重置链接已发送至您的手机 📬', 'success');
   });
 
   // ===== 键盘 Enter 提交 =====
@@ -954,10 +1496,11 @@
       if (e.key === 'Enter') {
         e.preventDefault();
         const form = input.closest('form');
-        form.dispatchEvent(new Event('submit', { cancelable: true }));
+        if (form) form.dispatchEvent(new Event('submit', { cancelable: true }));
       }
     });
   });
+
 </script>
 
 </body>

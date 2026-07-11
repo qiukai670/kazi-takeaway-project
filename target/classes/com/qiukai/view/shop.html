@@ -124,6 +124,12 @@
   .custom-add-btn:hover { transform: scale(1.05); filter: brightness(1.05); }
   .custom-add-btn:active { transform: scale(.95); }
 
+  /* 售罄菜品 */
+  .dish-item.sold-out { opacity: 0.55; filter: grayscale(0.6); }
+  .dish-item.sold-out .dish-img { filter: grayscale(1); }
+  .sold-out-tag { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; background: #9ca3af; color: #fff; letter-spacing: .02em; }
+  .sold-out-btn { padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 700; background: #d1d5db; color: #6b7280; cursor: not-allowed; border: none; flex-shrink: 0; white-space: nowrap; }
+
   /* 空状态 */
   .empty-shop { text-align: center; padding: 80px 20px; }
 
@@ -282,6 +288,14 @@ const targetDishId = API.util.getParam('dishId');
 
 // ===== 构建优惠文案 =====
 function buildPromoText(promo) {
+  if (promo.type === 'discount') {
+    let s = promo.discountRatio === 0 ? '免单' : (promo.discountRatio / 10) + '折优惠';
+    if (promo.minSpend) s += `(满¥${promo.minSpend}可用)`;
+    return s;
+  }
+  if (promo.type === 'freefee') {
+    return `满¥${promo.minSpend}免配送费`;
+  }
   if (promo.description) return promo.description;
   if (promo.type === 'fullcut' && currentPromoRules && currentPromoRules.length) {
     const sorted = [...currentPromoRules].sort((a, b) => (a.threshold || 0) - (b.threshold || 0));
@@ -439,13 +453,15 @@ function renderDishItem(d) {
   const qty = cartItem ? cartItem.qty : 0;
   const imgUrl = d.image || `https://picsum.photos/seed/dish${d.id}/200/200`;
   const customizable = d.hasOptions;
+  const soldOut = d.soldOut === 1;
 
   return `
-    <div class="dish-item" data-dish-id="${d.id}">
+    <div class="dish-item${soldOut ? ' sold-out' : ''}" data-dish-id="${d.id}">
       <img src="${imgUrl}" alt="${API.util.escapeHtml(d.name)}" class="dish-img" loading="lazy" onerror="this.src='https://picsum.photos/seed/dish${d.id}/200/200';this.onerror=null;" />
       <div class="flex-1 min-w-0 flex flex-col">
         <div class="flex items-center gap-2 mb-1">
           <h3 class="dish-name">${API.util.escapeHtml(d.name)}</h3>
+          ${soldOut ? '<span class="sold-out-tag">售罄</span>' : ''}
           ${d.isDiscount ? '<span class="discount-tag">折扣</span>' : ''}
           ${d.sales > 5000 ? '<span class="hot-tag">热销</span>' : ''}
           ${customizable ? '<span class="custom-tag">可定制</span>' : ''}
@@ -459,7 +475,9 @@ function renderDishItem(d) {
             <span class="dish-price-now">¥${API.util.money(d.price)}</span>
             ${d.oldPrice ? `<span class="dish-price-old">¥${API.util.money(d.oldPrice)}</span>` : ''}
           </div>
-          ${qty > 0 ? `
+          ${soldOut ? `
+            <button class="sold-out-btn" disabled>售罄</button>
+          ` : qty > 0 ? `
             <div class="qty-control">
               <button class="qty-btn-sm dish-qty-btn" data-id="${d.id}" data-action="dec" aria-label="减少">−</button>
               <span class="qty-num">${qty}</span>
