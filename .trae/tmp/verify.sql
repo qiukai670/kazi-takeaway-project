@@ -1,0 +1,1 @@
+DESC merchant_promo;

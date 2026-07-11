@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>商家后台 — 咔滋外卖</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Boldonse&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #fcf7ee; --coffee: #7d2c0f; --orange: #ff8342;
+    --brown-mid: #af4f28; --beige: #f9eedc; --pale: #ffefd5;
+    --coffee-dark: #664237; --green: #00704f; --mustard: #fed16a;
+  }
+  * { -webkit-font-smoothing: antialiased; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Manrope', 'Noto Sans SC', sans-serif; background: var(--cream); color: var(--coffee); letter-spacing: -0.01em; }
+  .font-display { font-family: 'Boldonse', 'Noto Sans SC', sans-serif; font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; }
+  .font-cn-display { font-family: 'Noto Sans SC', sans-serif; font-weight: 900; letter-spacing: -0.01em; line-height: 1.2; }
+
+  .btn-primary { background: var(--orange); color: #fff; border-radius: 100px; padding: 14px 28px; font-weight: 600; transition: transform .25s, filter .25s, box-shadow .25s; box-shadow: 0 6px 16px -4px rgba(255,131,66,.5); display: inline-flex; align-items: center; gap: 8px; }
+  .btn-primary:hover { transform: scale(1.03); filter: brightness(1.05); }
+  .btn-primary:active { transform: scale(0.97); }
+  .btn-dark { background: var(--coffee-dark); color: #fff; border-radius: 100px; padding: 14px 28px; font-weight: 600; transition: transform .25s, filter .25s; }
+  .btn-dark:hover { transform: scale(1.03); filter: brightness(1.1); }
+  .btn-outline { border: 1.5px solid var(--coffee); color: var(--coffee); border-radius: 100px; padding: 12px 26px; font-weight: 600; transition: all .25s; background: transparent; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-outline:hover { background: var(--coffee); color: #fff; }
+
+  .card-shadow { box-shadow: 0 1px 2px -1px rgba(0,0,0,.12), 0 4px 6px -2px rgba(0,0,0,.11), 0 16px 14px -3px rgba(0,0,0,.08); }
+  .card-shadow-lg { box-shadow: 0 1px 3px -1px rgba(0,0,0,.10), 0 6px 12px -3px rgba(0,0,0,.10), 0 24px 32px -6px rgba(0,0,0,.10); }
+  .nav-blur { background: rgba(252, 247, 238, 0.82); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(125,44,15,.08); }
+  .sidebar { background: #fff; border-right: 1px solid var(--beige); }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 14px; font-weight: 600; color: var(--brown-mid); cursor: pointer; transition: all .25s; }
+  .nav-item:hover { background: var(--beige); color: var(--coffee); }
+  .nav-item.active { background: var(--orange); color: #fff; box-shadow: 0 6px 16px -4px rgba(255,131,66,.5); }
+  .nav-item .icon { width: 22px; height: 22px; flex-shrink: 0; }
+
+  .data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .data-table thead th { text-align: left; padding: 14px 16px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--brown-mid); background: var(--beige); border-bottom: 1px solid var(--beige); }
+  .data-table thead th:first-child { border-top-left-radius: 14px; }
+  .data-table thead th:last-child { border-top-right-radius: 14px; }
+  .data-table thead th.text-center { text-align: center; }
+  .data-table thead th.text-right { text-align: right; }
+  .data-table tbody td { padding: 14px 16px; border-bottom: 1px solid var(--beige); font-size: 14px; color: var(--coffee); vertical-align: middle; }
+  .data-table tbody tr { transition: background .2s; }
+  .data-table tbody tr:hover { background: var(--beige); }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+
+  .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 100px; font-size: 12px; font-weight: 700; }
+  .status-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .status-green { background: rgba(0,112,79,.12); color: var(--green); }
+  .status-gray { background: rgba(125,44,15,.10); color: var(--brown-mid); }
+  .status-orange { background: rgba(255,131,66,.16); color: var(--orange); }
+  .status-blue { background: rgba(37,99,235,.12); color: #2563eb; }
+  .status-purple { background: rgba(147,51,234,.14); color: #9333ea; }
+
+  .action-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 10px; transition: all .2s; cursor: pointer; border: 1px solid transparent; }
+  .action-btn:hover { background: var(--beige); }
+  .action-btn.edit { color: var(--brown-mid); }
+  .action-btn.edit:hover { color: var(--orange); border-color: var(--orange); }
+  .action-btn.toggle { color: var(--brown-mid); }
+  .action-btn.toggle:hover { color: var(--green); border-color: var(--green); }
+  .action-btn.delete { color: var(--brown-mid); }
+  .action-btn.delete:hover { color: #dc2626; border-color: #dc2626; }
+  .action-btn.popular { color: var(--brown-mid); }
+  .action-btn.popular.active { color: var(--orange); border-color: var(--orange); background: rgba(237,139,0,.1); }
+  .action-btn.popular:hover { color: var(--orange); border-color: var(--orange); }
+
+  .toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle .slider { position: absolute; cursor: pointer; inset: 0; background: #d4c4b3; border-radius: 100px; transition: .3s; }
+  .toggle .slider::before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .3s; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
+  .toggle input:checked + .slider { background: var(--orange); }
+  .toggle input:checked + .slider::before { transform: translateX(20px); }
+
+  .form-input { width: 100%; padding: 12px 16px; border: 1.5px solid var(--beige); border-radius: 14px; font-size: 14px; background: #fff; color: var(--coffee); transition: border-color .2s; outline: none; }
+  .form-select, .form-textarea { width: 100%; padding: 12px 16px; border: 1.5px solid var(--beige); border-radius: 14px; font-size: 14px; background: #fff; color: var(--coffee); transition: border-color .2s; outline: none; font-family: inherit; }
+  .form-textarea { resize: vertical; min-height: 80px; }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--orange); }
+  .form-error { color: #dc2626; font-size: 12px; margin-top: 4px; font-weight: 600; }
+  .form-input.invalid, .form-select.invalid, .form-textarea.invalid { border-color: #dc2626; }
+  .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--brown-mid); margin-bottom: 6px; }
+
+  .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; visibility: hidden; transition: all .3s; padding: 16px; }
+  .modal-mask.show { opacity: 1; visibility: visible; }
+  .modal-box { background: #fff; border-radius: 24px; max-width: 560px; width: 100%; max-height: 90vh; overflow-y: auto; transform: scale(0.95); transition: transform .3s; }
+  .modal-mask.show .modal-box { transform: scale(1); }
+  .modal-box.lg { max-width: 720px; }
+
+  .option-group-card { background: #fff; border: 1px solid var(--beige); border-radius: 14px; padding: 14px; }
+  .option-group-head { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+  .option-choice-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .option-choice-row input { flex: 1; }
+
+  .status-new { background: var(--orange); color: #fff; }
+
+  .toast-wrap { position: fixed; top: 20px; right: 20px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
+  .toast { background: #fff; border-radius: 14px; padding: 12px 20px; box-shadow: 0 8px 24px -4px rgba(0,0,0,.15); display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--coffee); transform: translateX(120%); transition: transform .4s cubic-bezier(.22,1,.36,1); max-width: 360px; }
+  .toast.show { transform: translateX(0); }
+  .toast.success { border-left: 4px solid var(--green); }
+  .toast.error { border-left: 4px solid #dc2626; }
+  .toast-icon { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; color: #fff; flex-shrink: 0; }
+  .toast.success .toast-icon { background: var(--green); }
+  .toast.error .toast-icon { background: #dc2626; }
+
+  .sidebar-wrap { position: fixed; top: 0; left: 0; height: 100vh; z-index: 50; transform: translateX(-100%); transition: transform .3s; }
+  .sidebar-wrap.open { transform: translateX(0); }
+  .sidebar-mask { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 49; opacity: 0; visibility: hidden; transition: all .3s; }
+  .sidebar-mask.open { opacity: 1; visibility: visible; }
+  @media (min-width: 1024px) { .sidebar-wrap { transform: translateX(0); position: sticky; } .sidebar-mask { display: none; } }
+
+  .sold-out-tag { background: rgba(220,38,38,.12); color: #dc2626; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+  .img-preview { width: 100%; aspect-ratio: 4/3; border-radius: 14px; overflow: hidden; background: var(--beige); display: flex; align-items: center; justify-content: center; border: 2px dashed var(--beige); cursor: pointer; transition: border-color .25s; position: relative; }
+  .img-preview:hover { border-color: var(--orange); }
+  .img-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .img-preview .placeholder { color: var(--brown-mid); font-size: 13px; text-align: center; padding: 16px; }
+</style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<header class="nav-blur fixed top-0 left-0 right-0 z-40">
+  <nav class="max-w-[1400px] mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <button id="sidebarToggle" class="lg:hidden p-2 rounded-xl hover:bg-[var(--beige)]">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="flex items-center gap-2">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: var(--orange);">
+          <span class="text-white font-display text-sm">KZ</span>
+        </div>
+        <div>
+          <p class="font-cn-display text-sm leading-tight" style="color: var(--coffee);">商家后台</p>
+          <p class="text-[10px] leading-tight" style="color: var(--brown-mid);">咔滋外卖</p>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
+        <img id="merchantAvatar" src="https://picsum.photos/seed/merchant/64/64" alt="头像" class="w-8 h-8 rounded-full object-cover" />
+        <span id="merchantName" class="font-semibold text-sm hidden sm:inline" style="color: var(--coffee);">商家</span>
+      </div>
+      <button id="logoutBtn" class="btn-outline text-sm py-2 px-4">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span class="hidden sm:inline">退出</span>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<!-- 主体布局 -->
+<div class="pt-20 flex">
+  <div id="sidebarMask" class="sidebar-mask lg:hidden"></div>
+  <aside id="sidebar" class="sidebar-wrap lg:sticky lg:top-20 lg:h-[calc(100vh-5rem)] lg:w-64 lg:flex-shrink-0 w-72">
+    <div class="sidebar h-full w-72 lg:w-full flex flex-col p-4 overflow-y-auto">
+      <p class="px-3 pt-2 pb-3 text-xs font-bold uppercase tracking-wider" style="color: var(--brown-mid);">店铺运营</p>
+      <nav class="space-y-1.5">
+        <div class="nav-item active" data-module="store">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span>店铺信息</span>
+        </div>
+        <div class="nav-item" data-module="menu">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18M3 11a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h18a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2M3 11v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8M7 15h.01M11 15h2"/></svg>
+          <span>菜单管理</span>
+        </div>
+        <div class="nav-item" data-module="orders">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4M9 11V7a3 3 0 0 1 6 0v4M9 11h6"/></svg>
+          <span>订单管理</span>
+          <span id="pendingBadge" class="ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full" style="background: var(--orange); color:#fff; display:none;">0</span>
+        </div>
+        <div class="nav-item" data-module="promos">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          <span>优惠管理</span>
+        </div>
+      </nav>
+      <div class="mt-auto p-4 rounded-2xl" style="background: var(--beige);">
+        <p class="font-cn-display text-sm mb-1" style="color: var(--coffee);">需要帮助？</p>
+        <p class="text-xs leading-relaxed mb-3" style="color: var(--brown-mid);">查看商家指南或联系平台客服 400-123-4567</p>
+        <a href="#" class="text-xs font-bold" style="color: var(--orange);">查看指南 →</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="flex-1 min-w-0 px-4 lg:px-8 py-6 lg:py-8">
+
+    <!-- ===== 店铺信息模块 ===== -->
+    <section id="module-store" class="module">
+      <div class="mb-6">
+        <h1 class="font-cn-display text-2xl sm:text-3xl mb-1" style="color: var(--coffee);">店铺信息</h1>
+        <p class="text-sm" style="color: var(--brown-mid);">管理你的店铺基本信息与运营状态</p>
+      </div>
+      <div class="bg-white rounded-3xl card-shadow p-6 lg:p-8">
+        <div class="grid lg:grid-cols-2 gap-6">
+          <div>
+            <label class="form-label">商家名称</label>
+            <input type="text" id="storeName" class="form-input" placeholder="商家名称" />
+          </div>
+          <div>
+            <label class="form-label">分类</label>
+            <select id="storeCategory" class="form-input">
+              <option value="西式快餐">🍔 西式快餐</option>
+              <option value="中式快餐">🍜 中式快餐</option>
+              <option value="小吃系列">🍗 小吃系列</option>
+              <option value="川渝美食">🌶️ 川渝美食</option>
+              <option value="日式料理">🍣 日式料理</option>
+              <option value="饮料甜品">🧋 饮料甜品</option>
+              <option value="沙拉轻食">🥗 沙拉轻食</option>
+              <option value="火锅烧烤">🍢 火锅烧烤</option>
+              <option value="蛋糕烘焙">🍰 蛋糕烘焙</option>
+              <option value="其他">🍽️ 其他</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Logo</label>
+            <div class="flex items-center gap-3">
+              <div id="storeLogoPreview" class="img-preview" style="width: 80px; flex-shrink: 0;"><div class="placeholder">点击上传</div></div>
+              <input type="text" id="storeLogoUrl" class="form-input flex-1" placeholder="Logo URL" />
+              <input type="file" id="storeLogoFile" accept="image/*" class="hidden" />
+            </div>
+          </div>
+          <div>
+            <label class="form-label">封面图</label>
+            <div class="flex items-center gap-3">
+              <div id="storeCoverPreview" class="img-preview" style="width: 80px; flex-shrink: 0;"><div class="placeholder">点击上传</div></div>
+              <input type="text" id="storeCoverUrl" class="form-input flex-1" placeholder="封面 URL" />
+              <input type="file" id="storeCoverFile" accept="image/*" class="hidden" />
+            </div>
+          </div>
+          <div>
+            <label class="form-label">配送时长（分钟）</label>
+            <input type="number" id="storeDeliveryTime" class="form-input" placeholder="30" />
+          </div>
+          <div>
+            <label class="form-label">起送价（¥）</label>
+            <input type="number" id="storeMinOrder" class="form-input" placeholder="20" step="0.01" />
+          </div>
+          <div>
+            <label class="form-label">配送费（¥）</label>
+            <input type="number" id="storeDeliveryFee" class="form-input" placeholder="3" step="0.01" />
+          </div>
+          <div>
+            <label class="form-label">特色标签（逗号分隔）</label>
+            <input type="text" id="storeTags" class="form-input" placeholder="招牌,实惠,人气" />
+          </div>
+          <div>
+            <label class="form-label">营业状态</label>
+            <select id="storeStatus" class="form-input">
+              <option value="0">营业中</option>
+              <option value="1">休息中</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end">
+          <button id="saveStoreBtn" class="btn-primary text-sm py-3 px-8">保存修改</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 菜单管理模块 ===== -->
+    <section id="module-menu" class="module hidden">
+      <div class="mb-6">
+        <h1 class="font-cn-display text-2xl sm:text-3xl mb-1" style="color: var(--coffee);">菜单管理</h1>
+        <p class="text-sm" style="color: var(--brown-mid);">管理你的菜品信息、上下架与售罄状态</p>
+      </div>
+      <div class="bg-white rounded-3xl card-shadow overflow-hidden">
+        <div class="flex justify-between items-center p-6 border-b" style="border-color: var(--beige);">
+          <p class="font-semibold text-sm" style="color: var(--coffee);">菜品列表</p>
+          <button id="addDishBtn" class="btn-primary text-sm py-2.5 px-5">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            添加菜品
+          </button>
+        </div>
+        <div class="hidden md:block overflow-x-auto">
+          <table class="data-table">
+            <thead><tr><th>菜品</th><th>分类</th><th>价格</th><th>销量</th><th>状态</th><th class="text-right">操作</th></tr></thead>
+            <tbody id="dishTableBody"></tbody>
+          </table>
+        </div>
+        <div class="md:hidden p-4 space-y-3" id="dishCardList"></div>
+        <div id="dishEmpty" class="hidden p-12 text-center" style="color: var(--brown-mid);">
+          <p class="text-4xl mb-3">🍽️</p>
+          <p class="font-semibold">暂无菜品，点击「添加菜品」开始创建</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 订单管理模块 ===== -->
+    <section id="module-orders" class="module hidden">
+      <div class="mb-6">
+        <h1 class="font-cn-display text-2xl sm:text-3xl mb-1" style="color: var(--coffee);">订单管理</h1>
+        <p class="text-sm" style="color: var(--brown-mid);">处理用户订单，接单与安排派送</p>
+      </div>
+      <div class="bg-white rounded-3xl card-shadow overflow-hidden">
+        <div class="flex flex-wrap gap-2 p-6 border-b" style="border-color: var(--beige);">
+          <button class="order-filter-btn btn-primary text-sm py-2 px-4" data-filter="all">全部</button>
+          <button class="order-filter-btn btn-outline text-sm py-2 px-4" data-filter="pending">待确认</button>
+          <button class="order-filter-btn btn-outline text-sm py-2 px-4" data-filter="cooking">已确认</button>
+          <button class="order-filter-btn btn-outline text-sm py-2 px-4" data-filter="delivering">配送中</button>
+          <button class="order-filter-btn btn-outline text-sm py-2 px-4" data-filter="done">已完成</button>
+        </div>
+        <div class="hidden md:block overflow-x-auto">
+          <table class="data-table">
+            <thead><tr><th>订单号</th><th class="text-center">用户名</th><th>金额</th><th>状态</th><th>下单时间</th><th class="text-right">操作</th></tr></thead>
+            <tbody id="orderTableBody"></tbody>
+          </table>
+        </div>
+        <div class="md:hidden p-4 space-y-3" id="orderCardList"></div>
+        <div id="orderEmpty" class="hidden p-12 text-center" style="color: var(--brown-mid);">
+          <p class="text-4xl mb-3">📦</p>
+          <p class="font-semibold">暂无订单</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 优惠管理模块 ===== -->
+    <section id="module-promos" class="module hidden">
+      <div class="mb-6">
+        <h1 class="font-cn-display text-2xl sm:text-3xl mb-1" style="color: var(--coffee);">优惠管理</h1>
+        <p class="text-sm" style="color: var(--brown-mid);">管理满减、折扣、免配送费优惠活动与满减规则，吸引用户下单</p>
+      </div>
+
+      <!-- 优惠活动 -->
+      <div class="bg-white rounded-3xl card-shadow overflow-hidden mb-6">
+        <div class="flex justify-between items-center p-6 border-b" style="border-color: var(--beige);">
+          <p class="font-semibold text-sm" style="color: var(--coffee);">优惠活动</p>
+          <button id="addPromoBtn" class="btn-primary text-sm py-2.5 px-5">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            添加活动
+          </button>
+        </div>
+        <div class="hidden md:block overflow-x-auto">
+          <table class="data-table">
+            <thead><tr><th>类型</th><th>名称/描述</th><th>详情</th><th>优先级</th><th>有效期</th><th>状态</th><th class="text-right">操作</th></tr></thead>
+            <tbody id="promoTableBody"></tbody>
+          </table>
+        </div>
+        <div id="promoEmpty" class="hidden p-12 text-center" style="color: var(--brown-mid);">
+          <p class="text-4xl mb-3">🏷️</p>
+          <p class="font-semibold">暂无优惠活动</p>
+        </div>
+      </div>
+
+      <!-- 满减规则 -->
+      <div class="bg-white rounded-3xl card-shadow overflow-hidden">
+        <div class="flex justify-between items-center p-6 border-b" style="border-color: var(--beige);">
+          <div>
+            <p class="font-semibold text-sm" style="color: var(--coffee);">满减规则</p>
+            <p class="text-xs mt-1" style="color: var(--brown-mid);">用户下单时自动应用满足条件的最高档优惠</p>
+          </div>
+          <button id="addPromoRuleBtn" class="btn-primary text-sm py-2.5 px-5">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            添加规则
+          </button>
+        </div>
+        <div class="hidden md:block overflow-x-auto">
+          <table class="data-table">
+            <thead><tr><th>门槛（满）</th><th>优惠（减）</th><th>状态</th><th class="text-right">操作</th></tr></thead>
+            <tbody id="promoRuleTableBody"></tbody>
+          </table>
+        </div>
+        <div id="promoRuleEmpty" class="hidden p-12 text-center" style="color: var(--brown-mid);">
+          <p class="text-4xl mb-3">💰</p>
+          <p class="font-semibold">暂无满减规则</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===== 菜品编辑/添加模态框 ===== -->
+<div id="dishModal" class="modal-mask">
+  <div class="modal-box lg">
+    <div class="flex items-center justify-between p-6 border-b sticky top-0 bg-white z-10" style="border-color: var(--beige); border-radius: 24px 24px 0 0;">
+      <h3 id="dishModalTitle" class="font-cn-display text-xl" style="color: var(--coffee);">添加菜品</h3>
+      <button class="action-btn" data-close-modal="dishModal" aria-label="关闭">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <form id="dishForm" class="p-6 space-y-5" novalidate>
+      <input type="hidden" id="dishId">
+
+      <!-- 图片 -->
+      <div>
+        <label class="form-label">菜品图片</label>
+        <div class="grid sm:grid-cols-[200px_1fr] gap-4 items-start">
+          <div class="img-preview" id="imgPreview">
+            <div class="placeholder">点击上传或输入图片URL</div>
+          </div>
+          <div class="space-y-3">
+            <input type="file" id="dishImgFile" accept="image/*" class="hidden">
+            <button type="button" id="uploadImgBtn" class="btn-outline text-sm py-2.5 px-4 w-full justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              上传图片
+            </button>
+            <input type="text" id="dishImgUrl" class="form-input" placeholder="或输入图片URL">
+          </div>
+        </div>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">菜品名称 <span style="color:#dc2626;">*</span></label>
+          <input type="text" id="dishName" class="form-input" placeholder="例如：双层芝士堡" maxlength="30">
+          <p class="form-error hidden" id="errName">请输入菜品名称</p>
+        </div>
+        <div>
+          <label class="form-label">价格（元） <span style="color:#dc2626;">*</span></label>
+          <input type="number" id="dishPrice" class="form-input" placeholder="0.00" min="0" step="0.01">
+          <p class="form-error hidden" id="errPrice">价格必须为大于0的数字</p>
+        </div>
+      </div>
+
+      <div>
+        <label class="form-label">菜品描述</label>
+        <textarea id="dishDesc" class="form-textarea" placeholder="简要描述菜品特色、食材、口味..." maxlength="200"></textarea>
+      </div>
+
+      <div>
+        <label class="form-label">分类</label>
+        <select id="dishCategory" class="form-select">
+          <option value="汉堡炸鸡">汉堡炸鸡</option>
+          <option value="小吃系列">小食</option>
+          <option value="川渝美食">川渝美食</option>
+          <option value="面食系列">面食系列</option>
+          <option value="盖饭系列">盖饭系列</option>
+          <option value="日式料理">日式料理</option>
+          <option value="饮料甜品">饮料甜品</option>
+          <option value="冰激凌/圣代">冰激凌/圣代</option>
+          <option value="沙拉轻食">沙拉轻食</option>
+          <option value="饮料">饮料</option>
+          <option value="套餐">套餐</option>
+          <option value="其他">螺蛳粉</option>
+        </select>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="flex items-center justify-between p-4 rounded-xl" style="background: var(--beige);">
+          <div>
+            <p class="font-semibold text-sm" style="color: var(--coffee);">新品标签</p>
+            <p class="text-xs" style="color: var(--brown-mid);">在菜品上展示「新品」</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="dishIsNew">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="flex items-center justify-between p-4 rounded-xl" style="background: var(--beige);">
+          <div>
+            <p class="font-semibold text-sm" style="color: var(--coffee);">上架状态</p>
+            <p class="text-xs" style="color: var(--brown-mid);">关闭后用户不可见</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="dishOnShelf" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 支持口味定制 -->
+      <div class="p-4 rounded-xl" style="background: var(--beige);">
+        <div class="flex items-center justify-between mb-2">
+          <div>
+            <p class="font-semibold text-sm" style="color: var(--coffee);">支持口味定制</p>
+            <p class="text-xs" style="color: var(--brown-mid);">开启后可配置冰度、甜度、辣度等可选属性</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="dishCustomizable">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div id="dishOptionsBox" class="space-y-3" style="display:none;">
+          <div id="dishOptionsList" class="space-y-3"></div>
+          <button type="button" id="addOptionGroupBtn" class="btn-outline text-sm py-2 px-4 w-full justify-center">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            添加定制属性
+          </button>
+        </div>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="button" class="btn-outline flex-1 justify-center" data-close-modal="dishModal">取消</button>
+        <button type="submit" class="btn-primary flex-1 justify-center">保存菜品</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== 优惠活动编辑模态框 ===== -->
+<div id="promoModal" class="modal-mask">
+  <div class="modal-box p-6 lg:p-8">
+    <div class="flex justify-between items-center mb-6">
+      <h2 id="promoModalTitle" class="font-cn-display text-xl" style="color: var(--coffee);">添加优惠活动</h2>
+      <button data-close-modal="promoModal" class="action-btn edit"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label class="form-label">优惠类型</label>
+        <select id="promoType" class="form-input" onchange="togglePromoFields(this.value)">
+          <option value="fullcut">满减</option>
+          <option value="discount">折扣</option>
+          <option value="freefee">免配送费</option>
+        </select>
+      </div>
+      <div id="field-name" class="hidden"><label class="form-label">活动名称 <span style="color:var(--orange);">*</span></label><input type="text" id="promoName" class="form-input" placeholder="如：周末8折特惠" /></div>
+      <div id="field-description"><label class="form-label">优惠描述 <span style="color:var(--orange);">*</span></label><input type="text" id="promoDescription" class="form-input" placeholder="如：满30减5" /></div>
+      <div id="field-ratio" class="hidden">
+        <label class="form-label">折扣率（0-99，80=打8折，0=免单） <span style="color:var(--orange);">*</span></label>
+        <input type="number" id="promoDiscountRatio" class="form-input" placeholder="80" min="0" max="99" />
+      </div>
+      <div id="field-minSpend">
+        <label class="form-label" id="minSpendLabel">最低消费（¥，选填）</label>
+        <input type="number" id="promoMinSpend" class="form-input" placeholder="0.00" step="0.01" min="0" />
+      </div>
+      <div><label class="form-label">优先级（数字大优先）</label><input type="number" id="promoPriority" class="form-input" placeholder="0" min="0" value="0" /></div>
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="form-label">生效时间（选填）</label><input type="datetime-local" id="promoStartTime" class="form-input" /></div>
+        <div><label class="form-label">失效时间（选填）</label><input type="datetime-local" id="promoEndTime" class="form-input" /></div>
+      </div>
+    </div>
+    <div class="flex justify-end gap-3 mt-6">
+      <button data-close-modal="promoModal" class="btn-outline text-sm py-3 px-6">取消</button>
+      <button id="savePromoBtn" class="btn-primary text-sm py-3 px-6">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 满减规则编辑模态框 ===== -->
+<div id="promoRuleModal" class="modal-mask">
+  <div class="modal-box p-6 lg:p-8">
+    <div class="flex justify-between items-center mb-6">
+      <h2 id="promoRuleModalTitle" class="font-cn-display text-xl" style="color: var(--coffee);">添加满减规则</h2>
+      <button data-close-modal="promoRuleModal" class="action-btn edit"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="form-label">满（¥）</label><input type="number" id="ruleThreshold" class="form-input" placeholder="30" step="0.01" /></div>
+        <div><label class="form-label">减（¥）</label><input type="number" id="ruleDiscount" class="form-input" placeholder="5" step="0.01" /></div>
+      </div>
+    </div>
+    <div class="flex justify-end gap-3 mt-6">
+      <button data-close-modal="promoRuleModal" class="btn-outline text-sm py-3 px-6">取消</button>
+      <button id="savePromoRuleBtn" class="btn-primary text-sm py-3 px-6">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 订单详情模态框 ===== -->
+<div id="orderDetailModal" class="modal-mask">
+  <div class="modal-box p-6 lg:p-8">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="font-cn-display text-xl" style="color: var(--coffee);">订单详情</h2>
+      <button data-close-modal="orderDetailModal" class="action-btn edit"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div id="orderDetailContent"></div>
+  </div>
+</div>
+
+<!-- ===== 确认对话框 ===== -->
+<div id="confirmModal" class="modal-mask">
+  <div class="modal-box p-6 lg:p-8" style="max-width: 400px;">
+    <div class="text-center">
+      <div id="confirmIcon" class="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl" style="background: rgba(220,38,38,.12); color: #dc2626;">⚠️</div>
+      <h3 id="confirmTitle" class="font-cn-display text-lg mb-2" style="color: var(--coffee);">确认操作？</h3>
+      <p id="confirmMsg" class="text-sm mb-6" style="color: var(--brown-mid);"></p>
+      <div class="flex gap-3 justify-center">
+        <button data-close-modal="confirmModal" class="btn-outline text-sm py-3 px-6">取消</button>
+        <button id="confirmOk" class="btn-primary text-sm py-3 px-6">确认</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast 容器 -->
+<div id="toastWrap" class="toast-wrap"></div>
+
+<script src="api.js"></script>
+<script>
+  // ===== 全局状态 =====
+  let myMerchant = null;
+  let dishes = [];
+  let orders = [];
+  let promos = [];
+  let promoRules = [];
+  let currentOrderFilter = 'all';
+  let editingDishId = null;
+  let editingPromoId = null;
+  let editingPromoRuleId = null;
+  let confirmCallback = null;
+
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => document.querySelectorAll(s);
+  const escapeHtml = API.util.escapeHtml;
+  const money = API.util.money;
+
+  const ORDER_STATUS = {
+    PENDING_PAY:     { label: '待支付', cls: 'status-gray' },
+    PAID:            { label: '已支付', cls: 'status-blue' },
+    PENDING_CONFIRM: { label: '待确认', cls: 'status-orange' },
+    CONFIRMED:       { label: '已确认', cls: 'status-blue' },
+    DELIVERING:      { label: '配送中', cls: 'status-purple' },
+    COMPLETED:       { label: '已完成', cls: 'status-green' },
+    CANCELLED:       { label: '已取消', cls: 'status-gray' },
+  };
+
+  const FILTER_TO_STATUS = { all: null, pending: 'PENDING_CONFIRM', cooking: 'CONFIRMED', delivering: 'DELIVERING', done: 'COMPLETED' };
+
+  // ===== Toast =====
+  function showToast(msg, type = 'success') {
+    const wrap = $('#toastWrap');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    const icon = type === 'success' ? '✓' : (type === 'error' ? '✕' : 'ℹ');
+    t.innerHTML = `<span class="toast-icon">${icon}</span><span>${msg}</span>`;
+    wrap.appendChild(t);
+    requestAnimationFrame(() => t.classList.add('show'));
+    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 2600);
+  }
+
+  // ===== 模态框 =====
+  function openModal(id) { $(`#${id}`).classList.add('show'); document.body.style.overflow = 'hidden'; }
+  function closeModal(id) { $(`#${id}`).classList.remove('show'); document.body.style.overflow = ''; }
+  $$('.modal-mask').forEach(m => m.addEventListener('click', (e) => { if (e.target === m) closeModal(m.id); }));
+  $$('[data-close-modal]').forEach(b => b.addEventListener('click', () => closeModal(b.dataset.closeModal)));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $$('.modal-mask.show').forEach(m => closeModal(m.id)); });
+
+  function showConfirm({ title = '确认操作？', msg = '', okText = '确认', danger = true, onOk }) {
+    $('#confirmTitle').textContent = title;
+    $('#confirmMsg').textContent = msg;
+    $('#confirmIcon').style.background = danger ? 'rgba(220,38,38,.12)' : 'rgba(255,131,66,.16)';
+    $('#confirmIcon').style.color = danger ? '#dc2626' : 'var(--orange)';
+    $('#confirmIcon').textContent = danger ? '⚠️' : 'ℹ️';
+    $('#confirmOk').textContent = okText;
+    confirmCallback = onOk;
+    openModal('confirmModal');
+  }
+  $('#confirmOk').addEventListener('click', () => { closeModal('confirmModal'); if (confirmCallback) { confirmCallback(); confirmCallback = null; } });
+
+  // ===== 模块切换 =====
+  $$('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const mod = item.dataset.module;
+      $$('.nav-item').forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+      $$('.module').forEach(m => m.classList.add('hidden'));
+      $(`#module-${mod}`).classList.remove('hidden');
+      closeSidebar();
+    });
+  });
+
+  // ===== 侧边栏 =====
+  function openSidebar() { $('#sidebar').classList.add('open'); $('#sidebarMask').classList.add('open'); }
+  function closeSidebar() { $('#sidebar').classList.remove('open'); $('#sidebarMask').classList.remove('open'); }
+  $('#sidebarToggle').addEventListener('click', openSidebar);
+  $('#sidebarMask').addEventListener('click', closeSidebar);
+
+  // ===== 退出 =====
+  $('#logoutBtn').addEventListener('click', () => {
+    showConfirm({ title: '退出登录？', msg: '退出后需要重新登录', okText: '退出', danger: false, onOk: async () => {
+      try { await API.auth.logout(); } catch (e) {}
+      showToast('已退出登录', 'success');
+      setTimeout(() => { window.location.href = 'login.html'; }, 1200);
+    }});
+  });
+
+  // ===== 图片上传 =====
+  function setupImageUpload(previewId, urlId, fileId) {
+    const preview = $(`#${previewId}`);
+    const urlInput = $(`#${urlId}`);
+    const fileInput = $(`#${fileId}`);
+    function updatePreview(src) {
+      if (src) preview.innerHTML = `<img src="${escapeHtml(src)}" alt="">`;
+      else preview.innerHTML = `<div class="placeholder">点击上传</div>`;
+    }
+    preview.addEventListener('click', () => fileInput.click());
+    urlInput.addEventListener('input', (e) => updatePreview(e.target.value.trim()));
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) { showToast('请选择图片文件', 'error'); return; }
+      if (file.size > 5 * 1024 * 1024) { showToast('图片不能超过5MB', 'error'); return; }
+      try {
+        showToast('上传中...', '');
+        const url = await API.util.uploadImage(file);
+        urlInput.value = url;
+        updatePreview(url);
+        showToast('上传成功', 'success');
+      } catch (err) { showToast('上传失败：' + err.message, 'error'); }
+    });
+    return updatePreview;
+  }
+
+  // ===== 店铺信息 =====
+  async function loadStoreInfo() {
+    try {
+      myMerchant = await API.merchant.getInfo();
+      $('#storeName').value = myMerchant.name || '';
+      $('#storeCategory').value = myMerchant.category || '西式快餐';
+      $('#storeLogoUrl').value = myMerchant.logo || '';
+      $('#storeCoverUrl').value = myMerchant.cover || '';
+      $('#storeDeliveryTime').value = myMerchant.deliveryTime || 30;
+      $('#storeMinOrder').value = myMerchant.minOrder || 20;
+      $('#storeDeliveryFee').value = myMerchant.deliveryFee || 3;
+      $('#storeTags').value = myMerchant.tags || '';
+      $('#storeStatus').value = String(myMerchant.status ?? 0);
+      if (myMerchant.logo) $('#storeLogoPreview').innerHTML = `<img src="${escapeHtml(myMerchant.logo)}" alt="">`;
+      if (myMerchant.cover) $('#storeCoverPreview').innerHTML = `<img src="${escapeHtml(myMerchant.cover)}" alt="">`;
+      $('#merchantName').textContent = myMerchant.name || '商家';
+    } catch (e) { showToast('加载店铺信息失败：' + e.message, 'error'); }
+  }
+
+  $('#saveStoreBtn').addEventListener('click', async () => {
+    const body = {
+      name: $('#storeName').value.trim(),
+      category: $('#storeCategory').value,
+      logo: $('#storeLogoUrl').value.trim(),
+      cover: $('#storeCoverUrl').value.trim(),
+      deliveryTime: parseInt($('#storeDeliveryTime').value) || 30,
+      minOrder: parseFloat($('#storeMinOrder').value) || 20,
+      deliveryFee: parseFloat($('#storeDeliveryFee').value) || 3,
+      tags: $('#storeTags').value.trim(),
+      status: parseInt($('#storeStatus').value),
+    };
+    if (!body.name) { showToast('商家名称不能为空', 'error'); return; }
+    try {
+      await API.merchant.updateInfo(body);
+      showToast('店铺信息已保存', 'success');
+      await loadStoreInfo();
+    } catch (e) { showToast('保存失败：' + e.message, 'error'); }
+  });
+
+  // ===== 菜品管理 =====
+  async function loadDishes() {
+    $('#dishTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-8" style="color: var(--brown-mid);">加载中...</td></tr>`;
+    $('#dishEmpty').classList.add('hidden');
+    try {
+      dishes = await API.merchant.listDishes() || [];
+    } catch (e) { showToast('加载菜品失败：' + e.message, 'error'); dishes = []; }
+    renderDishes();
+  }
+
+  function renderDishes() {
+    const tbody = $('#dishTableBody');
+    const cardList = $('#dishCardList');
+    if (dishes.length === 0) {
+      tbody.innerHTML = '';
+      cardList.innerHTML = '';
+      $('#dishEmpty').classList.remove('hidden');
+      return;
+    }
+    $('#dishEmpty').classList.add('hidden');
+
+    const isOnShelf = (d) => Number(d.onShelf) === 0;
+    const isNewDish = (d) => Number(d.isNew) === 1;
+    const isPopularDish = (d) => Number(d.isPopular) === 1;
+
+    // 桌面表格
+    tbody.innerHTML = dishes.map(d => {
+      const img = d.image || `https://picsum.photos/seed/dish${d.id}/80/80`;
+      const statusPills = [];
+      if (isOnShelf(d)) statusPills.push('<span class="status-pill status-green"><span class="dot"></span>上架中</span>');
+      else statusPills.push('<span class="status-pill status-gray"><span class="dot"></span>已下架</span>');
+      if (d.soldOut === 1) statusPills.push('<span class="sold-out-tag">售罄</span>');
+      return `<tr>
+        <td>
+          <div class="flex items-center gap-3">
+            <img src="${img}" alt="" class="w-12 h-12 rounded-xl object-cover flex-shrink-0" onerror="this.src='https://picsum.photos/seed/dish${d.id}/80/80'">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-semibold truncate" style="color: var(--coffee);">${escapeHtml(d.name)}</span>
+                ${isNewDish(d) ? '<span class="status-pill status-new" style="padding:2px 8px;font-size:10px;">新品</span>' : ''}
+                ${isPopularDish(d) ? '<span class="status-pill" style="padding:2px 8px;font-size:10px;background:var(--orange);color:#fff;">人气</span>' : ''}
+              </div>
+              <p class="text-xs truncate" style="color: var(--brown-mid);">${escapeHtml(d.description) || '—'}</p>
+            </div>
+          </div>
+        </td>
+        <td><span class="text-xs font-semibold px-2.5 py-1 rounded-full" style="background: var(--beige); color: var(--brown-mid);">${escapeHtml(d.category || '-')}</span></td>
+        <td><span class="font-display text-base" style="color: var(--orange);">¥${money(d.price)}</span></td>
+        <td>${d.sales || 0}</td>
+        <td>${statusPills.join(' ')}</td>
+        <td class="text-right"><div class="flex justify-end gap-1">
+          <button class="action-btn toggle" data-action="shelf" data-id="${d.id}" title="上下架"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 11h18M3 11a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h18a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2M3 11v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8"/></svg></button>
+          <button class="action-btn toggle" data-action="soldout" data-id="${d.id}" title="售罄" ${d.soldOut === 1 ? 'style="color:var(--orange);border-color:var(--orange)"' : ''}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></button>
+          <button class="action-btn edit" data-action="edit" data-id="${d.id}" title="编辑"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="action-btn delete" data-action="delete" data-id="${d.id}" title="删除"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+        </div></td>
+      </tr>`;
+    }).join('');
+
+    // 移动端卡片
+    cardList.innerHTML = dishes.map(d => {
+      const img = d.image || `https://picsum.photos/seed/dish${d.id}/80/80`;
+      return `<div class="bg-white rounded-2xl p-4 card-shadow flex gap-3">
+        <img src="${img}" alt="" class="w-16 h-16 rounded-xl object-cover" />
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-sm">${escapeHtml(d.name)}</p>
+          <p class="text-xs" style="color:var(--brown-mid)">¥${money(d.price)} · 月售${d.sales||0}</p>
+          <div class="flex gap-1 mt-2">
+            <button class="action-btn toggle" data-action="shelf" data-id="${d.id}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 11h18M3 11a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h18a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2M3 11v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8"/></svg></button>
+            <button class="action-btn toggle" data-action="soldout" data-id="${d.id}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></button>
+            <button class="action-btn edit" data-action="edit" data-id="${d.id}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="action-btn delete" data-action="delete" data-id="${d.id}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // 菜品操作事件委托
+  $('#dishTableBody').addEventListener('click', handleDishAction);
+  $('#dishCardList').addEventListener('click', handleDishAction);
+
+  async function handleDishAction(e) {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+    try {
+      if (action === 'shelf') { await API.merchant.toggleDishShelf(id); showToast('上下架已切换', 'success'); await loadDishes(); }
+      else if (action === 'soldout') { await API.merchant.toggleDishSoldOut(id); showToast('售罄状态已切换', 'success'); await loadDishes(); }
+      else if (action === 'edit') { await openDishModal(dishes.find(d => String(d.id) === id)); }
+      else if (action === 'delete') {
+        showConfirm({ title: '删除菜品？', msg: '删除后不可恢复', okText: '删除', danger: true, onOk: async () => {
+          await API.merchant.deleteDish(id); showToast('菜品已删除', 'success'); await loadDishes();
+        }});
+      }
+    } catch (err) { showToast(err.message || '操作失败', 'error'); }
+  }
+
+  $('#addDishBtn').addEventListener('click', () => openDishModal(null));
+
+  // ===== 菜品模态框 =====
+  async function openDishModal(dish) {
+    const form = $('#dishForm');
+    form.reset();
+    $$('.form-error').forEach(e => e.classList.add('hidden'));
+    $$('.form-input, .form-select, .form-textarea').forEach(i => i.classList.remove('invalid'));
+    // 重置口味定制
+    $('#dishOptionsList').innerHTML = '';
+    $('#dishOptionsBox').style.display = 'none';
+    $('#dishCustomizable').checked = false;
+    editingDishId = dish ? dish.id : null;
+
+    if (dish) {
+      $('#dishModalTitle').textContent = '编辑菜品';
+      $('#dishName').value = dish.name || '';
+      $('#dishPrice').value = dish.price || '';
+      $('#dishDesc').value = dish.description || '';
+      $('#dishCategory').value = dish.category || '';
+      $('#dishIsNew').checked = Number(dish.isNew) === 1;
+      $('#dishOnShelf').checked = Number(dish.onShelf) === 0;
+      $('#dishImgUrl').value = dish.image || '';
+      updateImgPreview(dish.image);
+      // 加载已有规格选项
+      try {
+        const detail = await API.menu.getDishDetail(dish.id);
+        if (detail && detail.options && detail.options.length > 0) {
+          window.__loadingExistingOptions = true;
+          $('#dishCustomizable').checked = true;
+          $('#dishOptionsBox').style.display = '';
+          detail.options.forEach(g => addOptionGroup(g.name, g.optionType, g.choices));
+          delete window.__loadingExistingOptions;
+        }
+      } catch (e) {
+        console.error('加载菜品选项失败:', e);
+        showToast('加载口味选项失败: ' + (e.message || e), 'error');
+      }
+    } else {
+      $('#dishModalTitle').textContent = '添加菜品';
+      updateImgPreview('');
+    }
+    openModal('dishModal');
+  }
+
+  // ===== 口味定制：动态表单 =====
+  $('#dishCustomizable').addEventListener('change', (e) => {
+    $('#dishOptionsBox').style.display = e.target.checked ? '' : 'none';
+    if (window.__loadingExistingOptions) return;
+    if (e.target.checked && $('#dishOptionsList').children.length === 0) {
+      addOptionGroup('辣度', 'single', [{ name: '不辣', priceAdd: 0 }, { name: '微辣', priceAdd: 0 }, { name: '中辣', priceAdd: 0 }]);
+    }
+  });
+  $('#addOptionGroupBtn').addEventListener('click', () => addOptionGroup('', 'single', []));
+
+  function addOptionGroup(name, optionType, choices) {
+    const list = $('#dishOptionsList');
+    const wrap = document.createElement('div');
+    wrap.className = 'option-group-card';
+    wrap.innerHTML = `
+      <div class="option-group-head">
+        <input type="text" class="form-input opt-name" placeholder="属性名（如冰度、甜度、辣度）" value="${escapeHtml(name || '')}" style="flex:1;">
+        <select class="form-select opt-type" style="width:auto;">
+          <option value="single" ${optionType === 'single' ? 'selected' : ''}>单选</option>
+          <option value="multi" ${optionType === 'multi' ? 'selected' : ''}>多选</option>
+        </select>
+        <button type="button" class="action-btn delete" title="删除该属性">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </div>
+      <div class="opt-choices space-y-1.5"></div>
+      <button type="button" class="btn-outline text-xs py-1.5 px-3 mt-2 add-choice-btn">+ 添加选项值</button>
+    `;
+    list.appendChild(wrap);
+    const choicesBox = wrap.querySelector('.opt-choices');
+    if (choices && choices.length) {
+      choices.forEach(c => addChoiceRow(choicesBox, c.name, c.priceAdd));
+    } else {
+      addChoiceRow(choicesBox, '', 0);
+    }
+    wrap.querySelector('.action-btn.delete').addEventListener('click', () => wrap.remove());
+    wrap.querySelector('.add-choice-btn').addEventListener('click', () => addChoiceRow(choicesBox, '', 0));
+  }
+
+  function addChoiceRow(container, name, priceAdd) {
+    const row = document.createElement('div');
+    row.className = 'option-choice-row';
+    row.innerHTML = `
+      <input type="text" class="form-input opt-choice-name" placeholder="选项名（如少冰、中辣）" value="${escapeHtml(name || '')}">
+      <input type="number" class="form-input opt-choice-price" placeholder="加价" value="${priceAdd || 0}" min="0" step="0.5" style="width:90px;">
+      <span class="text-xs" style="color: var(--brown-mid);">元</span>
+      <button type="button" class="action-btn delete" title="删除">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    `;
+    container.appendChild(row);
+    row.querySelector('.action-btn.delete').addEventListener('click', () => row.remove());
+  }
+
+  function collectDishOptions() {
+    if (!$('#dishCustomizable').checked) return null;
+    const groups = [];
+    Array.from($('#dishOptionsList').children).forEach(wrap => {
+      const name = wrap.querySelector('.opt-name').value.trim();
+      if (!name) return;
+      const optionType = wrap.querySelector('.opt-type').value;
+      const choices = [];
+      Array.from(wrap.querySelectorAll('.option-choice-row')).forEach(row => {
+        const cName = row.querySelector('.opt-choice-name').value.trim();
+        if (!cName) return;
+        const cPrice = parseFloat(row.querySelector('.opt-choice-price').value) || 0;
+        choices.push({ name: cName, priceAdd: cPrice });
+      });
+      if (choices.length === 0) return;
+      groups.push({ name, optionType, choices });
+    });
+    return groups.length > 0 ? groups : null;
+  }
+
+  // 图片预览
+  function updateImgPreview(src) {
+    const preview = $('#imgPreview');
+    if (src) {
+      preview.innerHTML = `<img src="${escapeHtml(src)}" alt="预览">`;
+    } else {
+      preview.innerHTML = `<div class="placeholder">点击上传或输入图片URL</div>`;
+    }
+  }
+
+  // 上传图片
+  $('#uploadImgBtn').addEventListener('click', () => $('#dishImgFile').click());
+  $('#dishImgFile').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { showToast('请选择图片文件', 'error'); return; }
+    if (file.size > 5 * 1024 * 1024) { showToast('图片大小不能超过 5MB', 'error'); return; }
+    showToast('正在上传图片...', '');
+    try {
+      const url = await API.util.uploadImage(file);
+      $('#dishImgUrl').value = url;
+      updateImgPreview(url);
+      showToast('图片上传成功', 'success');
+    } catch (err) { showToast(err.message || '图片上传失败', 'error'); }
+  });
+  $('#dishImgUrl').addEventListener('input', (e) => updateImgPreview(e.target.value.trim()));
+  $('#imgPreview').addEventListener('click', () => $('#dishImgFile').click());
+
+  // 表单验证
+  function validateDishForm() {
+    let valid = true;
+    const name = $('#dishName').value.trim();
+    const price = parseFloat($('#dishPrice').value);
+    if (!name) {
+      $('#errName').classList.remove('hidden');
+      $('#dishName').classList.add('invalid');
+      valid = false;
+    } else {
+      $('#errName').classList.add('hidden');
+      $('#dishName').classList.remove('invalid');
+    }
+    if (!price || price <= 0 || isNaN(price)) {
+      $('#errPrice').classList.remove('hidden');
+      $('#dishPrice').classList.add('invalid');
+      valid = false;
+    } else {
+      $('#errPrice').classList.add('hidden');
+      $('#dishPrice').classList.remove('invalid');
+    }
+    return valid;
+  }
+
+  // 保存菜品
+  $('#dishForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!validateDishForm()) { showToast('请检查表单填写', 'error'); return; }
+    const img = $('#dishImgUrl').value.trim() || `https://picsum.photos/seed/dish${Date.now()}/400/300`;
+    const customizable = $('#dishCustomizable').checked;
+    const collected = customizable ? collectDishOptions() : null;
+    const options = customizable ? (collected && collected.length > 0 ? collected : []) : null;
+    const data = {
+      name: $('#dishName').value.trim(),
+      price: parseFloat($('#dishPrice').value),
+      oldPrice: null,
+      image: img,
+      description: $('#dishDesc').value.trim(),
+      category: $('#dishCategory').value,
+      isDiscount: 0,
+      isNew: $('#dishIsNew').checked ? 1 : 0,
+      onShelf: $('#dishOnShelf').checked ? 0 : 1,
+      options: options,
+    };
+    try {
+      if (editingDishId) { await API.merchant.updateDish(editingDishId, data); showToast('菜品已更新', 'success'); }
+      else { await API.merchant.addDish(data); showToast('菜品已添加', 'success'); }
+      closeModal('dishModal');
+      await loadDishes();
+    } catch (e) { showToast('保存失败：' + e.message, 'error'); }
+  });
+
+  // ===== 订单管理 =====
+  async function loadOrders() {
+    $('#orderTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-8" style="color: var(--brown-mid);">加载中...</td></tr>`;
+    $('#orderEmpty').classList.add('hidden');
+    try {
+      orders = await API.merchant.listOrders() || [];
+    } catch (e) { showToast('加载订单失败：' + e.message, 'error'); orders = []; }
+    renderOrders();
+    updatePendingBadge();
+  }
+
+  function renderOrders() {
+    const status = FILTER_TO_STATUS[currentOrderFilter];
+    const filtered = status ? orders.filter(o => o.status === status) : orders;
+    const tbody = $('#orderTableBody');
+    const cardList = $('#orderCardList');
+    if (filtered.length === 0) { tbody.innerHTML = ''; cardList.innerHTML = ''; $('#orderEmpty').classList.remove('hidden'); return; }
+    $('#orderEmpty').classList.add('hidden');
+    tbody.innerHTML = filtered.map(o => {
+      const st = ORDER_STATUS[o.status] || { label: o.status, cls: 'status-gray' };
+      let actions = `<button class="action-btn edit" data-action="detail" data-id="${o.id}" title="详情"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>`;
+      if (o.status === 'PENDING_CONFIRM') actions += ` <button class="action-btn toggle" data-action="confirm" data-id="${o.id}" title="接单"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button>`;
+      if (o.status === 'CONFIRMED') actions += ` <button class="action-btn toggle" data-action="dispatch" data-id="${o.id}" title="派送"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></button>`;
+      return `<tr>
+        <td class="font-mono text-xs">${escapeHtml(o.orderNo)}</td>
+        <td class="text-center">${escapeHtml(o.username || '-')}</td>
+        <td>¥${money(o.totalAmount)}</td>
+        <td><span class="status-pill ${st.cls}"><span class="dot"></span>${st.label}</span></td>
+        <td class="text-xs">${formatTime(o.createTime)}</td>
+        <td class="text-right"><div class="flex justify-end gap-1">${actions}</div></td>
+      </tr>`;
+    }).join('');
+    cardList.innerHTML = filtered.map(o => {
+      const st = ORDER_STATUS[o.status] || { label: o.status, cls: 'status-gray' };
+      return `<div class="bg-white rounded-2xl p-4 card-shadow">
+        <div class="flex justify-between items-start mb-2">
+          <p class="font-mono text-xs">${escapeHtml(o.orderNo)}</p>
+          <span class="status-pill ${st.cls}"><span class="dot"></span>${st.label}</span>
+        </div>
+        <p class="text-sm mb-1" style="color: var(--brown-mid);">用户：${escapeHtml(o.username || '-')}</p>
+        <p class="font-bold text-lg mb-2">¥${money(o.totalAmount)}</p>
+        <div class="flex gap-2">
+          <button class="action-btn edit" data-action="detail" data-id="${o.id}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          ${o.status === 'PENDING_CONFIRM' ? `<button class="action-btn toggle" data-action="confirm" data-id="${o.id}">接单</button>` : ''}
+          ${o.status === 'CONFIRMED' ? `<button class="action-btn toggle" data-action="dispatch" data-id="${o.id}">派送</button>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function formatTime(t) {
+    if (!t) return '-';
+    if (Array.isArray(t)) { const [y,m,d,h,mi] = t; return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')} ${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`; }
+    return String(t).replace('T', ' ').substring(0, 16);
+  }
+
+  function updatePendingBadge() {
+    const count = orders.filter(o => o.status === 'PENDING_CONFIRM').length;
+    const badge = $('#pendingBadge');
+    if (count > 0) { badge.textContent = count; badge.style.display = ''; }
+    else badge.style.display = 'none';
+  }
+
+  $$('.order-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      $$('.order-filter-btn').forEach(b => { b.classList.remove('btn-primary'); b.classList.add('btn-outline'); });
+      btn.classList.remove('btn-outline'); btn.classList.add('btn-primary');
+      currentOrderFilter = btn.dataset.filter;
+      renderOrders();
+    });
+  });
+
+  $('#orderTableBody').addEventListener('click', handleOrderAction);
+  $('#orderCardList').addEventListener('click', handleOrderAction);
+
+  async function handleOrderAction(e) {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+    try {
+      if (action === 'detail') {
+        const detail = await API.merchant.getOrderDetail(id);
+        showOrderDetail(detail);
+      } else if (action === 'confirm') {
+        showConfirm({ title: '确认接单？', msg: '接单后开始制作', okText: '接单', danger: false, onOk: async () => {
+          await API.merchant.confirmOrder(id); showToast('已接单', 'success'); await loadOrders();
+        }});
+      } else if (action === 'dispatch') {
+        showConfirm({ title: '开始派送？', msg: '确认菜品已制作完成', okText: '派送', danger: false, onOk: async () => {
+          await API.merchant.dispatchOrder(id); showToast('已开始派送', 'success'); await loadOrders();
+        }});
+      }
+    } catch (err) { showToast(err.message || '操作失败', 'error'); }
+  }
+
+  function showOrderDetail(detail) {
+    const o = detail.order;
+    const st = ORDER_STATUS[o.status] || { label: o.status, cls: 'status-gray' };
+    const itemsHtml = (detail.items || []).map(it => `<div class="flex justify-between py-2 border-b" style="border-color:var(--beige)"><div class="flex items-center gap-2"><img src="${it.dishImage || 'https://picsum.photos/seed/d'+it.dishId+'/40/40'}" alt="" class="w-10 h-10 rounded-lg object-cover" /><div><p class="text-sm font-semibold">${escapeHtml(it.dishName)}</p>${it.optionsText ? `<p class="text-xs" style="color:var(--brown-mid)">${escapeHtml(it.optionsText)}</p>` : ''}</div></div><div class="text-right"><p class="text-sm">¥${money(it.unitPrice)} × ${it.qty}</p><p class="text-xs font-bold">¥${money(it.subtotal)}</p></div></div>`).join('');
+    $('#orderDetailContent').innerHTML = `
+      <div class="mb-4 flex justify-between items-center">
+        <span class="status-pill ${st.cls}"><span class="dot"></span>${st.label}</span>
+        <span class="font-mono text-xs" style="color:var(--brown-mid)">${escapeHtml(o.orderNo)}</span>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-4 text-sm">
+        <div><p class="text-xs" style="color:var(--brown-mid)">下单时间</p><p>${formatTime(o.createTime)}</p></div>
+        <div><p class="text-xs" style="color:var(--brown-mid)">支付方式</p><p>${escapeHtml(o.payMethod || '-')}</p></div>
+        <div class="col-span-2"><p class="text-xs" style="color:var(--brown-mid)">收货地址</p><p>${escapeHtml(o.addressSnapshot || '-')}</p></div>
+        ${o.note ? `<div class="col-span-2"><p class="text-xs" style="color:var(--brown-mid)">订单留言</p><p>${escapeHtml(o.note)}</p></div>` : ''}
+      </div>
+      <div class="mb-4">
+        <p class="text-xs font-bold uppercase tracking-wider mb-2" style="color:var(--brown-mid)">菜品明细</p>
+        ${itemsHtml}
+      </div>
+      <div class="space-y-1 text-sm">
+        <div class="flex justify-between"><span style="color:var(--brown-mid)">小计</span><span>¥${money(o.subtotal)}</span></div>
+        ${o.discount > 0 ? `<div class="flex justify-between" style="color:var(--green)"><span>优惠</span><span>-¥${money(o.discount)}</span></div>` : ''}
+        <div class="flex justify-between"><span style="color:var(--brown-mid)">配送费</span><span>¥${money(o.deliveryFee)}</span></div>
+        <div class="flex justify-between font-bold text-base pt-2 border-t" style="border-color:var(--beige)"><span>合计</span><span>¥${money(o.totalAmount)}</span></div>
+      </div>`;
+    openModal('orderDetailModal');
+  }
+
+  // ===== 优惠管理 =====
+  async function loadPromos() {
+    try {
+      promos = await API.merchant.listPromos() || [];
+    } catch (e) { showToast('加载优惠失败：' + e.message, 'error'); promos = []; }
+    renderPromos();
+  }
+
+  function renderPromos() {
+    const tbody = $('#promoTableBody');
+    if (promos.length === 0) { tbody.innerHTML = ''; $('#promoEmpty').classList.remove('hidden'); return; }
+    $('#promoEmpty').classList.add('hidden');
+    const typeMap = { fullcut: '满减', discount: '折扣', freefee: '免配送费', newuser: '新客立减' };
+    const fmtDetail = p => {
+      if (p.type === 'discount') {
+        let s = p.discountRatio === 0 ? '免单' : (p.discountRatio / 10) + '折';
+        if (p.minSpend) s += ' 最低¥' + money(p.minSpend);
+        return s;
+      }
+      if (p.type === 'freefee') return '满¥' + money(p.minSpend) + '免配送费';
+      return '-';
+    };
+    const fmtPeriod = (s, e) => {
+      if (!s && !e) return '长期';
+      const f = t => t ? t.substring(0, 16).replace('T', ' ') : '?';
+      return f(s) + ' ~ ' + f(e);
+    };
+    tbody.innerHTML = promos.map(p => `<tr>
+      <td><span class="status-pill status-orange">${typeMap[p.type] || p.type}</span></td>
+      <td>${escapeHtml(p.type === 'fullcut' ? (p.description || '-') : (p.name || '-'))}</td>
+      <td>${escapeHtml(fmtDetail(p))}</td>
+      <td>${p.priority ?? 0}</td>
+      <td class="text-xs">${escapeHtml(fmtPeriod(p.startTime, p.endTime))}</td>
+      <td>${p.status === 0 ? '<span class="status-pill status-green"><span class="dot"></span>启用</span>' : '<span class="status-pill status-gray"><span class="dot"></span>停用</span>'}</td>
+      <td class="text-right"><div class="flex justify-end gap-1">
+        <button class="action-btn toggle" data-action="promo-status" data-id="${p.id}" title="启用/停用"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg></button>
+        <button class="action-btn edit" data-action="promo-edit" data-id="${p.id}" title="编辑"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="action-btn delete" data-action="promo-delete" data-id="${p.id}" title="删除"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+      </div></td>
+    </tr>`).join('');
+  }
+
+  $('#promoTableBody').addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+    try {
+      if (action === 'promo-status') { await API.merchant.togglePromoStatus(id); showToast('状态已切换', 'success'); await loadPromos(); }
+      else if (action === 'promo-edit') { openPromoModal(promos.find(p => String(p.id) === id)); }
+      else if (action === 'promo-delete') { showConfirm({ title: '删除优惠？', msg: '删除后不可恢复', okText: '删除', onOk: async () => { await API.merchant.deletePromo(id); showToast('已删除', 'success'); await loadPromos(); }}); }
+    } catch (err) { showToast(err.message || '操作失败', 'error'); }
+  });
+
+  $('#addPromoBtn').addEventListener('click', () => openPromoModal(null));
+
+  function togglePromoFields(type) {
+    const showName = type === 'discount' || type === 'freefee';
+    const showDesc = type === 'fullcut';
+    const showRatio = type === 'discount';
+    $('#field-name').classList.toggle('hidden', !showName);
+    $('#field-description').classList.toggle('hidden', !showDesc);
+    $('#field-ratio').classList.toggle('hidden', !showRatio);
+    $('#minSpendLabel').innerHTML = type === 'freefee'
+      ? '免配送费门槛（¥）<span style="color:var(--orange);">*</span>'
+      : '最低消费（¥，选填）';
+  }
+
+  function openPromoModal(promo) {
+    editingPromoId = promo ? promo.id : null;
+    $('#promoModalTitle').textContent = promo ? '编辑优惠活动' : '添加优惠活动';
+    const type = promo?.type || 'fullcut';
+    $('#promoType').value = type;
+    $('#promoType').disabled = !!promo;
+    $('#promoName').value = promo?.name || '';
+    $('#promoDescription').value = promo?.description || '';
+    $('#promoDiscountRatio').value = promo?.discountRatio ?? '';
+    $('#promoMinSpend').value = promo?.minSpend ?? '';
+    $('#promoPriority').value = promo?.priority ?? 0;
+    $('#promoStartTime').value = promo?.startTime ? promo.startTime.substring(0, 16) : '';
+    $('#promoEndTime').value = promo?.endTime ? promo.endTime.substring(0, 16) : '';
+    togglePromoFields(type);
+    openModal('promoModal');
+  }
+
+  $('#savePromoBtn').addEventListener('click', async () => {
+    const type = $('#promoType').value;
+    const body = { type };
+    const priority = parseInt($('#promoPriority').value);
+    if (!isNaN(priority)) body.priority = priority;
+    const startVal = $('#promoStartTime').value;
+    if (startVal) body.startTime = startVal + ':00';
+    const endVal = $('#promoEndTime').value;
+    if (endVal) body.endTime = endVal + ':00';
+    if (type === 'fullcut') {
+      body.description = $('#promoDescription').value.trim();
+      if (!body.description) { showToast('请输入优惠描述', 'error'); return; }
+    } else if (type === 'discount') {
+      body.name = $('#promoName').value.trim();
+      if (!body.name) { showToast('请输入活动名称', 'error'); return; }
+      const ratio = parseInt($('#promoDiscountRatio').value);
+      if (isNaN(ratio)) { showToast('请输入折扣率', 'error'); return; }
+      if (ratio < 0 || ratio > 99) { showToast('折扣率需在0-99之间', 'error'); return; }
+      body.discountRatio = ratio;
+      const minSpend = parseFloat($('#promoMinSpend').value);
+      if (!isNaN(minSpend) && minSpend >= 0) body.minSpend = minSpend;
+    } else if (type === 'freefee') {
+      body.name = $('#promoName').value.trim();
+      if (!body.name) { showToast('请输入活动名称', 'error'); return; }
+      const minSpend = parseFloat($('#promoMinSpend').value);
+      if (isNaN(minSpend) || minSpend <= 0) { showToast('请输入大于0的门槛金额', 'error'); return; }
+      body.minSpend = minSpend;
+    }
+    try {
+      if (editingPromoId) { await API.merchant.updatePromo(editingPromoId, body); showToast('优惠已更新', 'success'); }
+      else { await API.merchant.addPromo(body); showToast('优惠已添加', 'success'); }
+      closeModal('promoModal');
+      await loadPromos();
+    } catch (e) { showToast('保存失败：' + e.message, 'error'); }
+  });
+
+  // ===== 满减规则 =====
+  async function loadPromoRules() {
+    try {
+      promoRules = await API.merchant.listPromoRules() || [];
+    } catch (e) { showToast('加载满减规则失败：' + e.message, 'error'); promoRules = []; }
+    renderPromoRules();
+  }
+
+  function renderPromoRules() {
+    const tbody = $('#promoRuleTableBody');
+    if (promoRules.length === 0) { tbody.innerHTML = ''; $('#promoRuleEmpty').classList.remove('hidden'); return; }
+    $('#promoRuleEmpty').classList.add('hidden');
+    tbody.innerHTML = promoRules.map(r => `<tr>
+      <td class="font-bold">满 ¥${money(r.threshold)}</td>
+      <td class="font-bold" style="color:var(--orange)">减 ¥${money(r.discount)}</td>
+      <td>${r.status === 0 ? '<span class="status-pill status-green"><span class="dot"></span>启用</span>' : '<span class="status-pill status-gray"><span class="dot"></span>停用</span>'}</td>
+      <td class="text-right"><div class="flex justify-end gap-1">
+        <button class="action-btn toggle" data-action="rule-status" data-id="${r.id}" title="启用/停用"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg></button>
+        <button class="action-btn edit" data-action="rule-edit" data-id="${r.id}" title="编辑"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="action-btn delete" data-action="rule-delete" data-id="${r.id}" title="删除"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+      </div></td>
+    </tr>`).join('');
+  }
+
+  $('#promoRuleTableBody').addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+    try {
+      if (action === 'rule-status') { await API.merchant.togglePromoRuleStatus(id); showToast('状态已切换', 'success'); await loadPromoRules(); }
+      else if (action === 'rule-edit') { openPromoRuleModal(promoRules.find(r => String(r.id) === id)); }
+      else if (action === 'rule-delete') { showConfirm({ title: '删除规则？', msg: '删除后不可恢复', okText: '删除', onOk: async () => { await API.merchant.deletePromoRule(id); showToast('已删除', 'success'); await loadPromoRules(); }}); }
+    } catch (err) { showToast(err.message || '操作失败', 'error'); }
+  });
+
+  $('#addPromoRuleBtn').addEventListener('click', () => openPromoRuleModal(null));
+
+  function openPromoRuleModal(rule) {
+    editingPromoRuleId = rule ? rule.id : null;
+    $('#promoRuleModalTitle').textContent = rule ? '编辑满减规则' : '添加满减规则';
+    $('#ruleThreshold').value = rule?.threshold || '';
+    $('#ruleDiscount').value = rule?.discount || '';
+    openModal('promoRuleModal');
+  }
+
+  $('#savePromoRuleBtn').addEventListener('click', async () => {
+    const threshold = parseFloat($('#ruleThreshold').value);
+    const discount = parseFloat($('#ruleDiscount').value);
+    if (!threshold || threshold <= 0) { showToast('门槛必须大于0', 'error'); return; }
+    if (!discount || discount <= 0) { showToast('优惠金额必须大于0', 'error'); return; }
+    if (discount >= threshold) { showToast('优惠金额不能大于等于门槛', 'error'); return; }
+    const body = { threshold, discount };
+    try {
+      if (editingPromoRuleId) { await API.merchant.updatePromoRule(editingPromoRuleId, body); showToast('规则已更新', 'success'); }
+      else { await API.merchant.addPromoRule(body); showToast('规则已添加', 'success'); }
+      closeModal('promoRuleModal');
+      await loadPromoRules();
+    } catch (e) { showToast('保存失败：' + e.message, 'error'); }
+  });
+
+  // ===== 初始化 =====
+  async function init() {
+    const user = await API.auth.currentUser();
+    if (!user || user.role !== 2) {
+      window.location.href = 'login.html?redirect=merchant.html';
+      return;
+    }
+    $('#merchantName').textContent = user.nickname || user.username || '商家';
+    if (user.avatar) $('#merchantAvatar').src = user.avatar;
+    setupImageUpload('storeLogoPreview', 'storeLogoUrl', 'storeLogoFile');
+    setupImageUpload('storeCoverPreview', 'storeCoverUrl', 'storeCoverFile');
+    await loadStoreInfo();
+    await Promise.all([loadDishes(), loadOrders(), loadPromos(), loadPromoRules()]);
+  }
+  init();
+</script>
+</body>
+</html>
